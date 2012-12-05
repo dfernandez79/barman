@@ -25,7 +25,7 @@ module.exports = function (grunt) {
             },
             globals: {define: true},
             specs: {
-                globals: {describe: true, it: true, expect: true, define: true}
+                globals: {describe: true, it: true, expect: true, define: true, beforeEach: true}
             }
         },
         watch: {

@@ -32,40 +32,6 @@ define(function (require) {
 
     var recipe = _.compose(basicRecipe, mix);
 
-    function parseEvents(events) {
-        return events.split(/\s+/);
-    }
-
-    function invokeAll(callbacks) {
-        if (callbacks) {
-            var copy = callbacks.slice(0);
-            for (var i = 0; i < copy.length; i++) {
-                copy[i]();
-            }
-        }
-    }
-
-    var EventListeners = recipe({
-        constructor: function () {
-            this.listenersForAllEvents = [];
-            this.listeners = {};
-        },
-        append: function (event, callback) {
-            this.callbackListFor(event).push(callback);
-        },
-        callbackListFor: function (event) {
-            if (event === 'all') {
-                return this.listenersForAllEvents;
-            } else {
-                return this.listeners[event] || (this.listeners[event] = []);
-            }
-        },
-        invokeAllListenersFor: function (event) {
-            invokeAll(this.listeners[event]);
-            invokeAll(this.listenersForAllEvents);
-        }
-    });
-
     function before(funcToWrap, func) {
         if (funcToWrap) {
             return _.wrap(funcToWrap, function () {
@@ -77,6 +43,77 @@ define(function (require) {
             return func;
         }
     }
+
+    var lang = {
+        mix: mix,
+        recipe: recipe,
+        before: before
+    };
+
+    function underscoreWithBaristaExtensions() {
+        _.mixin(lang);
+        return _;
+    }
+
+    // Mixins
+    // ======
+
+    function parseEvents(events) {
+        return events.split(/\s+/);
+    }
+
+    var EventListener = recipe({
+        constructor: function (callback, context) {
+            this.callback = callback;
+            this.context = context;
+        },
+        invoke: function () {
+            this.callback.call(this.context);
+        },
+        matches: function (callback, context) {
+            return  !callback || (callback === this.callback && (!context || context === this.context));
+        }
+    });
+
+    var EventListeners = recipe({
+        constructor: function () {
+            this.listenersForAllEvents = [];
+            this.listeners = {};
+        },
+        append: function (event, callback, context) {
+            this.callbackListFor(event).push(new EventListener(callback, context));
+        },
+        callbackListFor: function (event) {
+            if (event === 'all') {
+                return this.listenersForAllEvents;
+            } else {
+                return this.listeners[event] || (this.listeners[event] = []);
+            }
+        },
+        invokeAllFor: function (event) {
+            this._invokeAll(this.listeners[event]);
+            this._invokeAll(this.listenersForAllEvents);
+        },
+        _invokeAll: function (callbacks) {
+            if (callbacks) {
+                var copy = callbacks.slice(0);
+                for (var i = 0; i < copy.length; i++) {
+                    copy[i].invoke();
+                }
+            }
+        },
+        remove: function (event, callback, context) {
+            var listeners = this.listeners[event];
+            if (listeners) {
+                this.listeners[event] = _.reject(listeners, function (listener) {
+                    return listener.matches(callback, context);
+                });
+                if (this.listeners[event].length === 0) {
+                    delete this.listeners[event];
+                }
+            }
+        }
+    });
 
     function Observable(proto) {
         proto.initializeEventListeners = function () {
@@ -92,11 +129,21 @@ define(function (require) {
 
             var listeners = this._eventListeners;
             _.each(parseEvents(eventsString), function (event) {
-                listeners.append(event, _.bind(callback, context));
+                listeners.append(event, callback, context);
             });
+
+            return this;
         };
 
-        proto.off = function () {
+        proto.off = function (eventsString, callback) {
+            var listeners = this._eventListeners;
+
+            if (listeners) {
+                _.each(parseEvents(eventsString), function (event) {
+                    listeners.remove(event, callback);
+                });
+            }
+            return this;
         };
 
         proto.trigger = function (eventsString) {
@@ -104,21 +151,11 @@ define(function (require) {
 
             if (listeners) {
                 _.each(parseEvents(eventsString), function (event) {
-                    listeners.invokeAllListenersFor(event);
+                    listeners.invokeAllFor(event);
                 });
             }
         };
         return proto;
-    }
-
-    var lang = {
-        mix: mix,
-        recipe: recipe
-    };
-
-    function underscoreWithBaristaExtensions() {
-        _.mixin(lang);
-        return _;
     }
 
     var mixins = {
