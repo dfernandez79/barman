@@ -1,0 +1,15 @@
+{
+    "name": "barista",
+    "description": "Brew your own JavaScript MVC style application.",
+    "version": "0.0.1",
+    "scripts": {
+        "test": "grunt test"
+    },
+    "devDependencies": {
+        "grunt": "~0.3.15"
+    },
+    "dependencies": {
+        "amdefine": ">=0.0.2",
+        "underscore": ">=1.4.3"
+    }
+}
