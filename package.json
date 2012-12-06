@@ -1,6 +1,6 @@
 {
     "name": "barista",
-    "description": "Brew your own JavaScript MVC style application.",
+    "description": "A micro framework to brew JavaScript objects.",
     "version": "0.0.1",
     "scripts": {
         "test": "grunt test"
