@@ -5,8 +5,12 @@
     "scripts": {
         "test": "grunt test"
     },
+    "main": "src/barista.js",
     "devDependencies": {
-        "grunt": "~0.3.15"
+        "grunt": "~0.3.15",
+        "grunt-simple-mocha": "~0.2.0",
+        "chai": "*",
+        "mocha": "*"
     },
     "dependencies": {
         "amdefine": ">=0.0.2",

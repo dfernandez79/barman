@@ -2,10 +2,14 @@ module.exports = function (grunt) {
     'use strict';
 
     grunt.initConfig({
-        lint: {
-            grunt: 'grunt.js',
+        meta: {
             src: 'src/**/*.js',
             specs: 'specs/**/*Spec.js'
+        },
+        lint: {
+            grunt: 'grunt.js',
+            src: '<config:meta.src>',
+            specs: '<config:meta.specs>'
         },
         jshint: {
             options: {
@@ -29,35 +33,25 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            files: ['<config:lint.src>', '<config:lint.specs>'],
+            files: ['<config:meta.src>', '<config:meta.specs>'],
             tasks: 'lint test'
         },
-        jasmine: {
-            src: 'src/**/*.js',
-            specs: 'specs/**/*Spec.js',
-            helpers: ['specs/helpers/require.js', 'specs/helpers/requireConfig.js'],
-            template: {
-                src: 'specs/helpers/requirejs-runner.tmpl',
-                opts: {
-                    requireConfig: {
-                        paths: {
-                            'domReady': 'specs/helpers/domReady',
-                            'barista': 'src/barista',
-                            'underscore': 'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min'
-                        },
-
-                        shim: {
-                            underscore: { exports: '_'}
-                        }
-                    }
+        simplemocha: {
+            all: {
+                src: '<config:meta.specs>',
+                options: {
+                    globals: ['should'],
+                    timeout: 3000,
+                    ignoreLeaks: false,
+                    ui: 'bdd',
+                    reporter: 'spec'
                 }
-            },
-            amd: true
+            }
         }
     });
 
-    grunt.loadNpmTasks('grunt-jasmine-runner');
+    grunt.loadNpmTasks('grunt-simple-mocha');
 
-    grunt.registerTask('test', 'jasmine');
+    grunt.registerTask('test', 'simplemocha');
     grunt.registerTask('default', 'lint test');
 };

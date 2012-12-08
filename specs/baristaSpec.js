@@ -1,71 +1,69 @@
-define(function (require) {
+var barista = require('../src/barista'),
+    should = require('chai').should();
+
+describe('Barista', function () {
     'use strict';
 
-    var barista = require('barista'),
-        _ = require('underscore');
-
-    describe('Barista', function () {
-        var Coffee = function (proto) {
-                proto.hasCoffee = function () {
-                    return true;
-                };
-                return proto;
-            },
-            Milk = function (proto) {
-                proto.hasMilk = function () {
-                    return  true;
-                };
-                return proto;
+    var Coffee = function (proto) {
+            proto.hasCoffee = function () {
+                return true;
             };
+            return proto;
+        },
+        Milk = function (proto) {
+            proto.hasMilk = function () {
+                return  true;
+            };
+            return proto;
+        };
 
-        describe('mix method', function () {
-            it('extends an object by evaluating a function', function () {
-                var myCoffee = {};
-                expect(barista.mix(Milk, myCoffee)).toBe(myCoffee);
-                expect(myCoffee.hasMilk()).toBe(true);
-            });
-
-            it('returns the given object if no mixin function is specified', function () {
-                var input = {simple: true},
-                    myObj = barista.mix(input);
-                expect(myObj).toEqual(input);
-            });
+    describe('mix method', function () {
+        it('extends an object by evaluating a function', function () {
+            var myCoffee = {};
+            barista.mix(Milk, myCoffee).should.equal(myCoffee);
+            myCoffee.hasMilk().should.equal(true);
         });
 
-        describe('recipe method', function () {
-            it('can define a constructor and prototype', function () {
-                var Cup = barista.recipe({
-                        constructor: function (color) {
-                            this.color = color;
-                        },
-                        fill: function () {
-                        }
-                    }),
-                    myCup = new Cup('white');
+        it('returns the given object if no mixin function is specified', function () {
+            var input = {simple: true},
+                myObj = barista.mix(input);
+            myObj.should.equal(input);
+        });
+    });
 
-                expect(Object.getPrototypeOf(myCup)).toBe(Cup.prototype);
-                expect(myCup.color).toBe('white');
-                expect(_.isFunction(myCup.fill)).toBe(true);
-            });
+    describe('recipe method', function () {
+        it('can define a constructor and prototype', function () {
+            var Cup = barista.recipe({
+                    constructor: function (color) {
+                        this.color = color;
+                    },
+                    fill: function () {
+                    }
+                }),
+                myCup = new Cup('white');
 
-            it('can extend the object definition using mixins', function () {
-                var Latte = barista.recipe(Coffee, Milk, {
-                        isLatte: function () {
-                            return this.hasCoffee() && this.hasMilk();
-                        }
-                    }),
-                    aLatte = new Latte();
+            myCup.should.be.an.instanceOf(Cup);
+            myCup.color.should.equal('white');
+            myCup.fill.should.be.a('function');
+        });
 
-                expect(aLatte.isLatte()).toBe(true);
-            });
+        it('can extend the object definition using mixins', function () {
+            var Latte = barista.recipe(Coffee, Milk, {
+                    isLatte: function () {
+                        return this.hasCoffee() && this.hasMilk();
+                    }
+                }),
+                aLatte = new Latte();
 
-            it('allows to define objects with mixins functions only', function () {
-                var Latte = barista.recipe(Coffee, Milk),
-                    aLatte = new Latte();
+            aLatte.isLatte().should.equal(true);
+        });
 
-                expect(aLatte.hasMilk()).toBe(true);
-                expect(aLatte.hasCoffee()).toBe(true);
-            });
+        it('allows to define objects with mixins functions only', function () {
+            var Latte = barista.recipe(Coffee, Milk),
+                aLatte = new Latte();
+
+            aLatte.hasMilk().should.equal(true);
+            aLatte.hasCoffee().should.equal(true);
         });
     });
 });
