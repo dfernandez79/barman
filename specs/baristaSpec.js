@@ -66,4 +66,50 @@ describe('Barista', function () {
             aLatte.hasCoffee().should.equal(true);
         });
     });
+
+    describe('mixins', function () {
+        var recipe = barista.recipe,
+            mixins = barista.mixins;
+
+        describe('development functions', function () {
+            it('it provides a before method', function () {
+                var trace = [],
+                    world = function () {
+                        trace.push('World');
+                    },
+                    hello = function () {
+                        trace.push('Hello');
+                    };
+
+                mixins.dev.before(world, hello)();
+
+                trace.join(' ').should.equal('Hello World');
+            });
+        });
+
+        describe('mixins factory methods', function () {
+            describe('wrapMethods', function () {
+                it('uses before/after prefix by default', function () {
+                    var trace = [],
+                        MyObject = recipe(mixins.wrapMethods('greet'), {
+                            beforeGreet: function () {
+                                trace.push('Hello', 'Mr.');
+                            },
+                            greet: function () {
+                                trace.push('Thompson');
+                            },
+                            afterGreet: function () {
+                                trace.push('!');
+                            }
+                        }),
+                        instance = new MyObject();
+
+                    instance.greet();
+
+                    trace.join(' ').should.equal('Hello Mr. Thompson !');
+                });
+            });
+        });
+    });
+
 });

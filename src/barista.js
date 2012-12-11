@@ -44,13 +44,35 @@ define(function (require) {
         }
     }
 
+    function capitaliseFirstLetter(string)
+    {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function wrapMethods(methodsString) {
+        var methods = methodsString.split(' ');
+
+        return function (proto) {
+            _.each(methods, function (method) {
+                proto[method] = _.wrap(proto[method], function() {
+                    var args = _.initial(arguments);
+                    proto['before' + capitaliseFirstLetter(method)].apply(this, args);
+                    _.last(arguments).apply(this, args);
+                    proto['after' + capitaliseFirstLetter(method)].apply(this, args);
+                });
+            });
+            return proto;
+        };
+    }
+
     return {
         mix: mix,
         recipe: recipe,
         mixins: {
             dev: {
                 before: before
-            }
+            },
+            wrapMethods: wrapMethods
         }
     };
 });
