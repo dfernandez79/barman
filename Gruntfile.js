@@ -47,11 +47,17 @@ module.exports = function (grunt) {
                 }
             }
         },
+        mocha: {
+            integration: {
+                src: ['integration-tests/runner.html'],
+                options: {run: true}
+            }
+        },
         requirejs: {
             std: {
                 options: {
                     name: '<%=pkg.main.slice(0, -3)%>',
-                    out: 'dist/<%=pkg.name%>.js',
+                    out: 'dist/<%=pkg.name%>.min.js',
                     cjsTranslate: true,
                     optimize: 'uglify2',
                     paths: {
@@ -62,7 +68,7 @@ module.exports = function (grunt) {
             noamd: {
                 options: {
                     name: '<%=pkg.main.slice(0, -3)%>',
-                    out: 'dist/<%=pkg.name%>-noamd.js',
+                    out: 'dist/<%=pkg.name%>-noamd.min.js',
                     cjsTranslate: true,
                     optimize: 'uglify2',
                     paths: {
@@ -80,9 +86,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-requirejs');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
+    grunt.loadNpmTasks('grunt-mocha');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('test', 'simplemocha');
+    grunt.registerTask('integration-test', 'mocha');
     grunt.registerTask('lint', 'jshint');
-    grunt.registerTask('default', 'lint test');
+    grunt.registerTask('dist', ['default', 'requirejs', 'integration-test']);
+    grunt.registerTask('default', ['lint', 'test']);
 };

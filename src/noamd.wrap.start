@@ -12,5 +12,6 @@
             },
             module = {};
         factory(req, null, module, _);
-        _.extend(root, module.exports);
+        debugger;
+        root.Barista = module.exports;
     };
