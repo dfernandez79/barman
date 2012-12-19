@@ -1,0 +1,1 @@
+define("src/barista",["require","exports","module","underscore"],function(e,r,s){e("underscore"),s.exports={Class:{}}});
