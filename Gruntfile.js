@@ -24,7 +24,7 @@ module.exports = function (grunt) {
                 strict: true
             },
             self: 'Gruntfile.js',
-            src: {files: {src: '<%=meta.src%>'}},
+            src: {files: {src: '<%=meta.src%>'}, options: {globals: {define: true}}},
             specs: {
                 files: {src: '<%=meta.specs%>'},
                 options: {
@@ -58,7 +58,6 @@ module.exports = function (grunt) {
                 options: {
                     name: '<%=pkg.main.slice(0, -3)%>',
                     out: 'dist/<%=pkg.name%>.min.js',
-                    cjsTranslate: true,
                     optimize: 'uglify2',
                     paths: {
                         underscore: 'empty:'
@@ -69,7 +68,6 @@ module.exports = function (grunt) {
                 options: {
                     name: '<%=pkg.main.slice(0, -3)%>',
                     out: 'dist/<%=pkg.name%>-noamd.min.js',
-                    cjsTranslate: true,
                     optimize: 'uglify2',
                     paths: {
                         underscore: 'empty:'

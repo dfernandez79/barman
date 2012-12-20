@@ -9,9 +9,7 @@
                     throw new Error('Unexpected require call: ' + name);
                 }
                 return _;
-            },
-            module = {};
-        factory(req, null, module, _);
-        debugger;
-        root.Barista = module.exports;
+            };
+
+        root.Barista = factory(req);
     };

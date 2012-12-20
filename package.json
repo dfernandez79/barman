@@ -1,22 +1,23 @@
 {
-  "name": "barista",
-  "description": "A micro framework to brew JavaScript objects.",
-  "version": "0.0.1",
-  "scripts": {
-    "test": "grunt test"
-  },
-  "main": "src/barista.js",
-  "devDependencies": {
-    "grunt": "~0.4.0rc4",
-    "grunt-simple-mocha": "~0.3.1",
-    "chai": "~1.4.0",
-    "mocha": "~1.7.4",
-    "grunt-contrib-watch": "~0.1.4",
-    "grunt-requirejs": "~0.3.1",
-    "grunt-contrib-jshint": "~0.1.0",
-    "grunt-mocha": "~0.2.0"
-  },
-  "dependencies": {
-    "underscore": "~1.4.3"
-  }
+    "name": "barista",
+    "description": "A micro framework to brew JavaScript objects.",
+    "version": "0.0.1",
+    "scripts": {
+        "test": "grunt test"
+    },
+    "main": "src/barista.js",
+    "devDependencies": {
+        "grunt": "~0.4.0rc4",
+        "grunt-simple-mocha": "~0.3.1",
+        "chai": "~1.4.0",
+        "mocha": "~1.7.4",
+        "grunt-contrib-watch": "~0.1.4",
+        "grunt-requirejs": "~0.3.1",
+        "grunt-contrib-jshint": "~0.1.0",
+        "grunt-mocha": "~0.2.0"
+    },
+    "dependencies": {
+        "amdefine": "0.0.4",
+        "underscore": "~1.4.3"
+    }
 }
