@@ -73,8 +73,8 @@ module.exports = function (grunt) {
                         underscore: 'empty:'
                     },
                     wrap: {
-                        startFile: 'src/noamd.wrap.start',
-                        endFile: 'src/noamd.wrap.end'
+                        startFile: 'src/noamdWrap.start',
+                        endFile: 'src/noamdWrap.end'
                     }
                 }
             }
