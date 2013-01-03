@@ -6,14 +6,17 @@ define(function (require) {
     'use strict';
 
     var _ = require('underscore'),
-
-        unshift = Array.prototype.unshift,
+        has = _.has,
+        clone = _.clone,
+        result = _.result,
+        bind = _.bind,
+        push = Array.prototype.push,
         nullFunction = function () {
         };
 
 
     function constructorFrom(spec) {
-        if (spec && _.has(spec, 'constructor') && typeof spec.constructor === 'function') {
+        if (spec && has(spec, 'constructor') && typeof spec.constructor === 'function') {
             return spec.constructor;
         } else {
             return function () {
@@ -21,49 +24,36 @@ define(function (require) {
         }
     }
 
-    function applyWithSuperDelegate(func, ctx, callArgs, superFunc) {
-        var args = callArgs;
-        if (superFunc !== nullFunction) {
-            args = [_.bind(superFunc, ctx)];
-            unshift.apply(args, callArgs);
-        }
-        return func.apply(ctx, args);
+    function isMethodDescriptor(spec, prop) {
+        return typeof spec[prop] === 'object' && result(spec[prop], 'isMethodDescriptor');
     }
 
-    function wrapWithSuper(func, superFunc) {
-        return function () {
-            return applyWithSuperDelegate(func, this, arguments, superFunc);
-        };
-    }
+    function extend(Parent, spec) {
+        var proto = Object.create(Parent.prototype);
 
-    function wrapAllFunctionsWithSuper(spec, parentProto) {
-        var wrappedSpec = {};
-
-        if (spec) {
-            _.each(spec, function (value, key) {
-                var superFunc = _.isFunction(parentProto[key]) ? parentProto[key] : nullFunction;
-                if (key !== 'constructor') {
-                    wrappedSpec[key] = _.isFunction(value) ? wrapWithSuper(value, superFunc) : value;
+        for (var prop in spec) {
+            if (has(spec, prop)) {
+                if (isMethodDescriptor(spec, prop)) {
+                    spec[prop].create(prop, proto, Parent.prototype);
+                } else {
+                    proto[prop] = spec[prop];
                 }
-            });
+            }
         }
 
-        return wrappedSpec;
-    }
-
-    function extend(parent, spec) {
-        var subClassConstructor = constructorFrom(spec),
-            SubClass = function () {
-                applyWithSuperDelegate(subClassConstructor, this, arguments, parent);
+        if (!has(proto, 'constructor') || typeof proto.constructor !== 'function') {
+            proto.constructor = function () {
             };
+        }
 
-        SubClass.prototype = _.extend({}, parent.prototype, _.omit(spec, 'constructor'), {__super__: parent.prototype});
-        SubClass.extend = function (subSpec) {
-            return extend(SubClass, subSpec);
+        var ctor = proto.constructor;
+        ctor.__super__ = Parent.prototype;
+        ctor.prototype = proto;
+        ctor.extend = function (subSpec) {
+            return extend(ctor, subSpec);
         };
-        SubClass.__super__ = parent;
 
-        return SubClass;
+        return ctor;
     }
 
     var Class = {
@@ -72,7 +62,30 @@ define(function (require) {
         }
     };
 
+    var InjectSuper = Class.create({
+        constructor: function (func) {
+            this.func = func;
+        },
+
+        isMethodDescriptor: true,
+
+        create: function (name, proto, parentProto) {
+            var func = this.func;
+
+            proto[name] = function () {
+                var args = [bind(parentProto[name], this)];
+                push.apply(args, arguments);
+                return func.apply(this, args);
+            };
+        }
+    });
+
+    function injectSuper(func) {
+        return new InjectSuper(func);
+    }
+
     return {
-        Class: Class
+        Class: Class,
+        injectSuper: injectSuper
     };
 });

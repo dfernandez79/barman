@@ -4,13 +4,9 @@ var should = require('chai').should(),
 describe('Barista', function () {
     'use strict';
 
-    it('provides a Class object', function () {
-        should.exist(Barista.Class);
-    });
+    var Class = Barista.Class;
 
     describe('Class', function () {
-        var Class = Barista.Class;
-
         it('provides a "create" method', function () {
             should.exist(Class.create);
             Class.create.should.be.a('function');
@@ -22,6 +18,12 @@ describe('Barista', function () {
 
                 Empty.should.be.a('function');
                 (new Empty()).should.be.a('object');
+            });
+
+            it('assigns a proper constructor property', function () {
+                var Empty = Class.create();
+
+                Empty.prototype.constructor.should.be.equal(Empty);
             });
 
             it('can describe object methods', function () {
@@ -64,22 +66,140 @@ describe('Barista', function () {
                 aWidget.render().should.be.equal('Widget.render');
             });
 
-            it('provides a __super__ property to allow parent class delegation', function () {
+            it('overrides super class methods with subclass methods', function () {
                 var Widget = Class.create({
                         render: function () {
-                            return 'Parent render';
+                            return 'Super RENDER';
                         }
                     }),
-                    MyWidget = Widget.extend({
+                    CustomWidget = Widget.extend({
                         render: function () {
-                            return 'Child render / ' + this.__super__.render.apply(this);
+                            return 'Custom RENDER';
                         }
                     }),
-                    aWidget = new MyWidget();
+                    aWidget = new CustomWidget();
 
-                should.exist(aWidget.render);
-                aWidget.render().should.be.equal('Child render / Parent render');
+                aWidget.render().should.be.equal('Custom RENDER');
             });
+
+            it('supports getPrototypeOf to do super delegation', function () {
+                var Widget = Class.create({
+                        render: function () {
+                            return 'SUPER';
+                        }
+                    }),
+                    CustomWidget = Widget.extend({
+                        render: function () {
+                            return 'Custom SUPER';
+                        }
+                    });
+
+                var w = new CustomWidget();
+                console.log(w);
+                (new CustomWidget()).render().should.be.equal('Custom SUPER');
+            });
+        });
+
+        describe('__super__ property', function () {
+            var Widget = Class.create(),
+                CustomWidget = Widget.extend();
+
+            it('points to the parent prototype', function () {
+                CustomWidget.__super__.should.be.equal(Widget.prototype);
+            });
+
+            it('can be used to get the parent constructor', function () {
+                CustomWidget.__super__.constructor.should.be.equal(Widget);
+            });
+
+            it('is defined in the constructor but not in the prototype', function () {
+                should.exist(CustomWidget.__super__);
+                should.not.exist(CustomWidget.prototype.__super__);
+            });
+        });
+    });
+
+    describe('Method Descriptors', function () {
+        describe('injectSuper', function () {
+            var injectSuper = Barista.injectSuper;
+
+            it('adds a first argument to allow super method delegation', function () {
+                var Widget = Class.create({
+                        render: function () {
+                            return 'SUPER';
+                        }
+                    }),
+                    CustomWidget = Widget.extend({
+                        render: injectSuper(function (_super) {
+                            return 'Custom ' + _super();
+                        })
+                    });
+
+                (new CustomWidget()).render().should.be.equal('Custom SUPER');
+            });
+
+            it('the super function is bound to this', function () {
+                var Point = Class.create({
+                        toString: function () {
+                            return '(' + this.x + ',' + this.y + ')';
+                        }
+                    }),
+                    XPoint = Point.extend({
+                        constructor: function (x, y) {
+                            this.x = x;
+                            this.y = y;
+                        },
+                        toString: injectSuper(function (_super) {
+                            return '---' + _super() + '---';
+                        })
+                    }),
+                    aPoint = new XPoint(7, 9);
+
+                aPoint.toString().should.be.equal('---(7,9)---');
+            });
+
+            it('hides the super argument from the public function arguments', function () {
+                var Collection = Class.create({
+                        add: function (val) {
+                            this.values.push(val);
+                        }
+                    }),
+                    MyCollection = Collection.extend({
+                        constructor: function () {
+                            this.values = [];
+                        },
+                        add: injectSuper(function (_super, val) {
+                            _super(val);
+                        })
+                    }),
+                    col = new MyCollection();
+
+                col.add(4);
+                col.values.length.should.be.equal(1);
+                col.values[0].should.be.equal(4);
+            });
+
+            it('can be used with constructors', function () {
+                var Point = Class.create({
+                        constructor: function (x, y) {
+                            this.x = x;
+                            this.y = y;
+                        },
+                        toString: function () {
+                            return '(' + this.x + ',' + this.y + ')';
+                        }
+                    }),
+                    XPoint = Point.extend({
+                        constructor: injectSuper(function (_super, x, y) {
+                            _super(x, y);
+                        })
+                    }),
+                    aPoint = new XPoint(7, 9);
+
+                aPoint.toString().should.be.equal('(7,9)');
+            });
+
+            it('delegates a super call in constructor to the parent constructor');
         });
     });
 
