@@ -7,22 +7,15 @@ describe('Barista', function () {
     var Class = Barista.Class;
 
     describe('Class', function () {
-        it('provides a "create" method', function () {
-            should.exist(Class.create);
-            Class.create.should.be.a('function');
-        });
-
         describe('"create" method', function () {
-            it('creates object factories', function () {
-                var Empty = Class.create();
+            var Empty = Class.create();
 
+            it('returns a constructor function', function () {
                 Empty.should.be.a('function');
                 (new Empty()).should.be.a('object');
             });
 
-            it('assigns a proper constructor property', function () {
-                var Empty = Class.create();
-
+            it('returns a function with prototype.constructor referencing to itself', function () {
                 Empty.prototype.constructor.should.be.equal(Empty);
             });
 
@@ -90,12 +83,11 @@ describe('Barista', function () {
                     }),
                     CustomWidget = Widget.extend({
                         render: function () {
-                            return 'Custom SUPER';
+                            var parent = Object.getPrototypeOf(Object.getPrototypeOf(this));
+                            return 'Custom ' + parent.render.call(this);
                         }
                     });
 
-                var w = new CustomWidget();
-                console.log(w);
                 (new CustomWidget()).render().should.be.equal('Custom SUPER');
             });
         });
@@ -117,89 +109,44 @@ describe('Barista', function () {
                 should.not.exist(CustomWidget.prototype.__super__);
             });
         });
-    });
 
-    describe('Method Descriptors', function () {
-        describe('injectSuper', function () {
-            var injectSuper = Barista.injectSuper;
+        describe('_super method', function () {
+            var Widget = Class.create({
+                    value: 'testValue',
+                    render: function () {
+                        return 'SUPER ' + this.x;
+                    }
+                }),
+                CustomWidget = Widget.extend({
+                    constructor: function (x) {
+                        this.x = x;
+                    },
+                    render: function () {
+                        var superRender = this._super('render');
+                        return 'Custom ' + superRender();
+                    }
+                }),
+                aWidget = new CustomWidget(123);
 
-            it('adds a first argument to allow super method delegation', function () {
-                var Widget = Class.create({
-                        render: function () {
-                            return 'SUPER';
-                        }
-                    }),
-                    CustomWidget = Widget.extend({
-                        render: injectSuper(function (_super) {
-                            return 'Custom ' + _super();
-                        })
-                    });
-
-                (new CustomWidget()).render().should.be.equal('Custom SUPER');
+            it('returns __super__ when no argument is given', function () {
+                aWidget._super().should.be.equal(CustomWidget.__super__);
             });
 
-            it('the super function is bound to this', function () {
-                var Point = Class.create({
-                        toString: function () {
-                            return '(' + this.x + ',' + this.y + ')';
-                        }
-                    }),
-                    XPoint = Point.extend({
-                        constructor: function (x, y) {
-                            this.x = x;
-                            this.y = y;
-                        },
-                        toString: injectSuper(function (_super) {
-                            return '---' + _super() + '---';
-                        })
-                    }),
-                    aPoint = new XPoint(7, 9);
-
-                aPoint.toString().should.be.equal('---(7,9)---');
+            it('returns a function bound to this when the method name is given', function () {
+                aWidget.render().should.be.equal('Custom SUPER 123');
             });
 
-            it('hides the super argument from the public function arguments', function () {
-                var Collection = Class.create({
-                        add: function (val) {
-                            this.values.push(val);
-                        }
-                    }),
-                    MyCollection = Collection.extend({
-                        constructor: function () {
-                            this.values = [];
-                        },
-                        add: injectSuper(function (_super, val) {
-                            _super(val);
-                        })
-                    }),
-                    col = new MyCollection();
-
-                col.add(4);
-                col.values.length.should.be.equal(1);
-                col.values[0].should.be.equal(4);
+            it('throws ReferenceError when a invalid method name is given', function () {
+                (function () {
+                    aWidget._super('bla');
+                }).should.throw(ReferenceError);
             });
 
-            it('can be used with constructors', function () {
-                var Point = Class.create({
-                        constructor: function (x, y) {
-                            this.x = x;
-                            this.y = y;
-                        },
-                        toString: function () {
-                            return '(' + this.x + ',' + this.y + ')';
-                        }
-                    }),
-                    XPoint = Point.extend({
-                        constructor: injectSuper(function (_super, x, y) {
-                            _super(x, y);
-                        })
-                    }),
-                    aPoint = new XPoint(7, 9);
-
-                aPoint.toString().should.be.equal('(7,9)');
+            it('throws TypeError if a name of a non-function is given', function () {
+                (function () {
+                    aWidget._super('value');
+                }).should.throw(TypeError);
             });
-
-            it('delegates a super call in constructor to the parent constructor');
         });
     });
 

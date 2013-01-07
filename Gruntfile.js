@@ -17,17 +17,19 @@ module.exports = function (grunt) {
                 noarg: true,
                 sub: true,
                 undef: true,
-                boss: true,
+                boss: false,
                 eqnull: true,
                 node: true,
                 es5: true,
-                strict: true
+                strict: true,
+                unused: true
             },
             self: 'Gruntfile.js',
             src: {files: {src: '<%=meta.src%>'}, options: {globals: {define: true}}},
             specs: {
                 files: {src: '<%=meta.specs%>'},
                 options: {
+                    immed: false,
                     globals: {describe: true, it: true, expect: true, define: true, beforeEach: true}
                 }
             }

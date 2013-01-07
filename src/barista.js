@@ -7,39 +7,15 @@ define(function (require) {
 
     var _ = require('underscore'),
         has = _.has,
-        clone = _.clone,
-        result = _.result,
         bind = _.bind,
-        push = Array.prototype.push,
-        nullFunction = function () {
+        Nil = function () {
         };
 
 
-    function constructorFrom(spec) {
-        if (spec && has(spec, 'constructor') && typeof spec.constructor === 'function') {
-            return spec.constructor;
-        } else {
-            return function () {
-            };
-        }
-    }
-
-    function isMethodDescriptor(spec, prop) {
-        return typeof spec[prop] === 'object' && result(spec[prop], 'isMethodDescriptor');
-    }
-
-    function extend(Parent, spec) {
+    function createClass(Parent, spec) {
         var proto = Object.create(Parent.prototype);
 
-        for (var prop in spec) {
-            if (has(spec, prop)) {
-                if (isMethodDescriptor(spec, prop)) {
-                    spec[prop].create(prop, proto, Parent.prototype);
-                } else {
-                    proto[prop] = spec[prop];
-                }
-            }
-        }
+        _.extend(proto, spec);
 
         if (!has(proto, 'constructor') || typeof proto.constructor !== 'function') {
             proto.constructor = function () {
@@ -48,9 +24,20 @@ define(function (require) {
 
         var ctor = proto.constructor;
         ctor.__super__ = Parent.prototype;
+        proto._super = function (methodName) {
+            if (!methodName) {
+                return ctor.__super__;
+            } else {
+                var superMethod = ctor.__super__[methodName];
+                if (!superMethod) {
+                    throw new ReferenceError();
+                }
+                return bind(superMethod, this);
+            }
+        };
         ctor.prototype = proto;
         ctor.extend = function (subSpec) {
-            return extend(ctor, subSpec);
+            return createClass(this, subSpec);
         };
 
         return ctor;
@@ -58,34 +45,11 @@ define(function (require) {
 
     var Class = {
         create: function (spec) {
-            return extend(nullFunction, spec);
+            return createClass(Nil, spec);
         }
     };
 
-    var InjectSuper = Class.create({
-        constructor: function (func) {
-            this.func = func;
-        },
-
-        isMethodDescriptor: true,
-
-        create: function (name, proto, parentProto) {
-            var func = this.func;
-
-            proto[name] = function () {
-                var args = [bind(parentProto[name], this)];
-                push.apply(args, arguments);
-                return func.apply(this, args);
-            };
-        }
-    });
-
-    function injectSuper(func) {
-        return new InjectSuper(func);
-    }
-
     return {
-        Class: Class,
-        injectSuper: injectSuper
+        Class: Class
     };
 });
