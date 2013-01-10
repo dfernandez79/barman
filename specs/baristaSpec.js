@@ -86,6 +86,15 @@ describe('Barista', function () {
 
                 expect((new CustomWidget()).render()).to.equal('Custom SUPER');
             });
+
+            it('accepts the specification of "static" methods as an argument', function () {
+                var MyClass = Class.create({}, {method: function () {
+                    return 'hello';
+                }});
+
+                expect(MyClass.method).to.exist;
+                expect(MyClass.method()).to.equal('hello');
+            });
         });
 
         describe('__super__ property', function () {

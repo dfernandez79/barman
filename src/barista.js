@@ -44,11 +44,28 @@ define(function (require) {
         }
     };
 
-    function createClass(Parent, classFactoryArg, specArg) {
-        var spec = specArg ? specArg : classFactoryArg,
-            classFactory = specArg ? classFactoryArg : defaultClassFactory;
+    function object(obj) {
+        return obj ? obj : {}
+    }
 
-        return classFactory.createClass(Parent, spec);
+    function optionsFrom(args) {
+        var options = {classFactory: defaultClassFactory, parent: args[0]};
+
+        if (isClassFactory(args[0])) {
+            options.classFactory = args[0]
+            options.instanceMethods = args[1] ? args[1] : {};
+            options.staticMethods = args[2] ? args[2] : {};
+        } else {
+            options.instanceMethods = args[0]
+        }
+
+        return options;
+    }
+
+    function createClass() {
+        var options = optionsFrom(arguments);
+
+        return options.classFactory.createClass(options.parent, options.instanceMethods, options.staticMethods);
     }
 
     return {
