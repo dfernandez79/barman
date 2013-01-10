@@ -29,6 +29,7 @@ module.exports = function (grunt) {
             specs: {
                 files: {src: '<%=meta.specs%>'},
                 options: {
+                    expr: true,
                     immed: false,
                     globals: {describe: true, it: true, expect: true, define: true, beforeEach: true}
                 }
