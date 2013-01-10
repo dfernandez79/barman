@@ -1,4 +1,4 @@
-var should = require('chai').should(),
+var expect = require('chai').expect,
     Barista = require('../src/barista');
 
 describe('Barista', function () {
@@ -11,12 +11,12 @@ describe('Barista', function () {
             var Empty = Class.create();
 
             it('returns a constructor function', function () {
-                Empty.should.be.a('function');
-                (new Empty()).should.be.a('object');
+                expect(Empty).to.be.a('function');
+                expect(new Empty()).to.be.a('object');
             });
 
             it('returns a function with prototype.constructor referencing to itself', function () {
-                Empty.prototype.constructor.should.be.equal(Empty);
+                expect(Empty.prototype.constructor).to.equal(Empty);
             });
 
             it('can describe object methods', function () {
@@ -27,9 +27,8 @@ describe('Barista', function () {
                     }),
                     aPoint = new Point();
 
-                should.exist(aPoint.move);
-                aPoint.move.should.be.a('function');
-                aPoint.move().should.be.equal('moved');
+                expect(aPoint.move).to.be.a('function');
+                expect(aPoint.move()).to.equal('moved');
             });
 
             it('can specify an object constructor', function () {
@@ -40,10 +39,8 @@ describe('Barista', function () {
                         }}),
                     aPoint = new Point(10, 20);
 
-                should.exist(aPoint.x);
-                should.exist(aPoint.y);
-                aPoint.x.should.be.equal(10);
-                aPoint.y.should.be.equal(20);
+                expect(aPoint.x).to.equal(10);
+                expect(aPoint.y).to.equal(20);
             });
 
             it('returns classes that can be extended', function () {
@@ -55,8 +52,7 @@ describe('Barista', function () {
                     MyWidget = Widget.extend(),
                     aWidget = new MyWidget();
 
-                should.exist(aWidget.render);
-                aWidget.render().should.be.equal('Widget.render');
+                expect(aWidget.render()).to.equal('Widget.render');
             });
 
             it('overrides super class methods with subclass methods', function () {
@@ -72,7 +68,7 @@ describe('Barista', function () {
                     }),
                     aWidget = new CustomWidget();
 
-                aWidget.render().should.be.equal('Custom RENDER');
+                expect(aWidget.render()).to.equal('Custom RENDER');
             });
 
             it('supports getPrototypeOf to do super delegation', function () {
@@ -88,7 +84,7 @@ describe('Barista', function () {
                         }
                     });
 
-                (new CustomWidget()).render().should.be.equal('Custom SUPER');
+                expect((new CustomWidget()).render()).to.equal('Custom SUPER');
             });
         });
 
@@ -97,16 +93,16 @@ describe('Barista', function () {
                 CustomWidget = Widget.extend();
 
             it('points to the parent prototype', function () {
-                CustomWidget.__super__.should.be.equal(Widget.prototype);
+                expect(CustomWidget.__super__).to.equal(Widget.prototype);
             });
 
             it('can be used to get the parent constructor', function () {
-                CustomWidget.__super__.constructor.should.be.equal(Widget);
+                expect(CustomWidget.__super__.constructor).to.equal(Widget);
             });
 
             it('is defined in the constructor but not in the prototype', function () {
-                should.exist(CustomWidget.__super__);
-                should.not.exist(CustomWidget.prototype.__super__);
+                expect(CustomWidget.__super__).to.a('object');
+                expect(CustomWidget.prototype.__super__).to.be.undefined;
             });
         });
 
@@ -129,23 +125,23 @@ describe('Barista', function () {
                 aWidget = new CustomWidget(123);
 
             it('returns __super__ when no argument is given', function () {
-                aWidget._super().should.be.equal(CustomWidget.__super__);
+                expect(aWidget._super()).to.equal(CustomWidget.__super__);
             });
 
             it('returns a function bound to this when the method name is given', function () {
-                aWidget.render().should.be.equal('Custom SUPER 123');
+                expect(aWidget.render()).to.equal('Custom SUPER 123');
             });
 
             it('throws ReferenceError when a invalid method name is given', function () {
-                (function () {
+                expect(function () {
                     aWidget._super('bla');
-                }).should.throw(ReferenceError);
+                }).to.throw(ReferenceError);
             });
 
             it('throws TypeError if a name of a non-function is given', function () {
-                (function () {
+                expect(function () {
                     aWidget._super('value');
-                }).should.throw(TypeError);
+                }).to.throw(TypeError);
             });
         });
     });
