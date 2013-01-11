@@ -1,10 +1,12 @@
 var expect = require('chai').expect,
-    Barista = require('../src/barista');
+    barista = require('../src/barista');
 
 describe('Barista', function () {
     'use strict';
 
-    var Class = Barista.Class;
+    var Class = barista.Class,
+        defaultClassFactory = barista.defaultClassFactory,
+        markAsClassFactory = barista.markAsClassFactory;
 
     describe('Class', function () {
         describe('"create" method', function () {
@@ -95,6 +97,35 @@ describe('Barista', function () {
                 expect(MyClass.method).to.exist;
                 expect(MyClass.method()).to.equal('hello');
             });
+
+            it('accepts a "ClassFactory" as an argument', function () {
+                var testFactory = markAsClassFactory({
+                        createClass: function (Parent, instanceMethods, staticMethods) {
+                            return {parent: Parent, instanceMethods: instanceMethods, staticMethods: staticMethods};
+                        }
+                    }),
+                    createdClass = Class.create(testFactory, {hello: 'world'}, {foo: 'bar'});
+
+                expect(createdClass.staticMethods).to.deep.equal({foo: 'bar'});
+                expect(createdClass.instanceMethods).to.deep.equal({hello: 'world'});
+                expect(createdClass.parent).to.be.a('function');
+            });
+
+            it('accepts a "ClassFactory" in the extend method', function () {
+                var Base = Class.create({
+                        foo: 'bar'
+                    }),
+                    myFactory = markAsClassFactory({
+                        createClass: function (Parent, instanceMethods, staticMethods) {
+                            var newClass = defaultClassFactory.createClass(Parent, instanceMethods, staticMethods);
+                            newClass.addedByFactory = true;
+                            return newClass;
+                        }
+                    }),
+                    SubClass = Base.extend(myFactory, {});
+
+                expect(SubClass.addedByFactory).to.be.true;
+            });
         });
 
         describe('__super__ property', function () {
@@ -152,6 +183,107 @@ describe('Barista', function () {
                     aWidget._super('value');
                 }).to.throw(TypeError);
             });
+        });
+    });
+
+    describe('MixinClassFactory', function () {
+        var withMixins = barista.withMixins;
+
+        it('can be called with a function to do the mixin', function () {
+            var useTemplate = function (proto) {
+                    proto.render = function () {
+                        return 'from template';
+                    };
+                },
+                View = Class.create(withMixins(useTemplate)),
+                aView = new View();
+
+            expect(aView.render()).to.equal('from template');
+        });
+
+        it('can be called with an object to mixin', function () {
+            var useTemplate = {
+                    render: function () {
+                        return 'from template';
+                    }
+                },
+                View = Class.create(withMixins(useTemplate)),
+                aView = new View();
+
+            expect(aView.render()).to.equal('from template');
+        });
+
+        it('gives precedence to class methods over mixin methods', function () {
+            var useTemplate = {
+                    added: 'by mixin',
+                    render: function () {
+                        return 'from template';
+                    }
+                },
+                View = Class.create(withMixins(useTemplate), {render: function () {
+                    return 'from subclass';
+                }}),
+                aView = new View();
+
+            expect(aView.render()).to.equal('from subclass');
+            expect(aView.added).to.equal('by mixin');
+        });
+
+        it('gives precedence to mixin methods over super class methods', function () {
+            var BaseView = Class.create({
+                    render: 'base',
+                    added: 'by base view'
+                }),
+                useTemplate = {
+                    render: 'template'
+                },
+                View = BaseView.extend(withMixins(useTemplate)),
+                aView = new View();
+
+            expect(aView.render).to.equal('template');
+            expect(aView.added).to.equal('by base view');
+        });
+
+        it('applies multiple mixin objects from left to right', function () {
+            var one = {num: 'one'}, two = {num: 'two'}, three = {num: 'three'},
+                View = Class.create(withMixins(one, two, three)),
+                aView = new View();
+
+            expect(aView.num).to.equal('three');
+        });
+
+        it('applies multiple mixin functions from left to right', function () {
+            var one = function (obj) {
+                    obj.num = 'one';
+                },
+                two = function (obj) {
+                    obj.num = 'two';
+                },
+                three = function (obj) {
+                    obj.num = 'three';
+                },
+                View = Class.create(withMixins(one, two, three)),
+                aView = new View();
+
+            expect(aView.num).to.equal('three');
+        });
+
+        it('only accepts functions or objects as an argument', function () {
+            expect(function () {
+                withMixins(1);
+            }).to.throw(TypeError);
+        });
+
+        it('preserves the prototype chain', function () {
+            var BaseView = Class.create({
+                    render: 'base',
+                }),
+                useTemplate = {
+                    render: 'template'
+                },
+                View = BaseView.extend(withMixins(useTemplate));
+
+            expect(Object.getPrototypeOf(View.prototype)).to.equal(BaseView.prototype);
         });
     });
 

@@ -22,7 +22,8 @@ module.exports = function (grunt) {
                 node: true,
                 es5: true,
                 strict: true,
-                unused: true
+                unused: true,
+                trailing: false
             },
             self: 'Gruntfile.js',
             src: {files: {src: '<%=meta.src%>'}, options: {globals: {define: true}}},
@@ -31,7 +32,7 @@ module.exports = function (grunt) {
                 options: {
                     expr: true,
                     immed: false,
-                    globals: {describe: true, it: true, expect: true, define: true, beforeEach: true}
+                    globals: {describe: true, it: true, expect: true, define: true, beforeEach: true, afterEach: true}
                 }
             }
         },
