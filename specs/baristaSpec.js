@@ -288,15 +288,45 @@ describe('Barista', function () {
     });
 
     describe('Trait', function () {
-        it('provides a set of methods that implement behavior');
-        it('requires a set of methods that parametrize the provide behavior');
+        var Trait = barista.Trait,
+            required = barista.required,
+
+            templateBasedViewTrait = Trait.create({
+                render: 'template'
+            }),
+            compositeViewTrait = Trait.create({
+                appendView: required,
+                render: 'composite'
+            });
+
+        it('provides a set of methods that implement behavior', function () {
+            expect(templateBasedViewTrait.provides()).to.equal(['render']);
+        });
+
+        it('requires a set of methods that parametrize the provide behavior', function () {
+            expect(compositeViewTrait.requires()).to.equal(['appendView']);
+        });
+
+        it('can be nested with other traits');
+
         describe('composition', function () {
-            it('is symmetric');
-            it('excludes conflicting methods');
+            it('is symmetric', function () {
+                var compositionA = templateBasedViewTrait.composeWith(compositeViewTrait);
+                var compositionB = compositeViewTrait.composeWith(templateBasedViewTrait);
+
+                expect(compositionA).to.equal(compositionB);
+            });
+
+            it('excludes conflicting methods', function () {
+                var composition = templateBasedViewTrait.composeWith(compositeViewTrait);
+                expect(composition.provides()).to.equal([]);
+                expect(composition.requires()).to.equal(['appendView']);
+            });
+
             it('allows methods from the same trait given in different composition paths');
             it('conflicts when the same method names comes from different traits');
         });
-        it('can be nested with other traits');
+
         it('creates sealed objects if the underlying JS engine allows it');
     });
 
