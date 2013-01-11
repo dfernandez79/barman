@@ -6,7 +6,8 @@ describe('Barista', function () {
 
     var Class = barista.Class,
         defaultClassFactory = barista.defaultClassFactory,
-        markAsClassFactory = barista.markAsClassFactory;
+        markAsClassFactory = barista.classFactoryMixin,
+        aliasOfSuper = barista.aliasOfSuper;
 
     describe('Class', function () {
         describe('"create" method', function () {
@@ -184,6 +185,42 @@ describe('Barista', function () {
                 }).to.throw(TypeError);
             });
         });
+
+        describe('aliasOfSuper', function () {
+            it('can be used to define a method that calls to super', function () {
+                var Base = Class.create({
+                        message: function () {
+                            return 'base';
+                        }
+                    }),
+                    Sub = Base.extend({
+                        other: aliasOfSuper('message'),
+                        message: function () {
+                            return 'sub and ' + this.other();
+                        }
+                    }),
+                    anInstance = new Sub();
+
+                expect(anInstance.message()).to.equal('sub and base');
+            });
+
+            it('throws an exception if the super method is not defined', function () {
+                var Base = Class.create({
+                    bla: function () {
+                        return 'base';
+                    }
+                });
+
+                expect(function () {
+                    Base.extend({
+                        other: aliasOfSuper('message'),
+                        message: function () {
+                            return 'sub and ' + this.other();
+                        }
+                    });
+                }).to.throw(ReferenceError);
+            });
+        });
     });
 
     describe('MixinClassFactory', function () {
@@ -288,40 +325,16 @@ describe('Barista', function () {
     });
 
     describe('Trait', function () {
-        var Trait = barista.Trait,
-            required = barista.required,
+        it('provides a set of methods that implement behavior');
 
-            templateBasedViewTrait = Trait.create({
-                render: 'template'
-            }),
-            compositeViewTrait = Trait.create({
-                appendView: required,
-                render: 'composite'
-            });
-
-        it('provides a set of methods that implement behavior', function () {
-            expect(templateBasedViewTrait.provides()).to.equal(['render']);
-        });
-
-        it('requires a set of methods that parametrize the provide behavior', function () {
-            expect(compositeViewTrait.requires()).to.equal(['appendView']);
-        });
+        it('requires a set of methods that parametrize the provide behavior');
 
         it('can be nested with other traits');
 
         describe('composition', function () {
-            it('is symmetric', function () {
-                var compositionA = templateBasedViewTrait.composeWith(compositeViewTrait);
-                var compositionB = compositeViewTrait.composeWith(templateBasedViewTrait);
+            it('is symmetric');
 
-                expect(compositionA).to.equal(compositionB);
-            });
-
-            it('excludes conflicting methods', function () {
-                var composition = templateBasedViewTrait.composeWith(compositeViewTrait);
-                expect(composition.provides()).to.equal([]);
-                expect(composition.requires()).to.equal(['appendView']);
-            });
+            it('excludes conflicting methods');
 
             it('allows methods from the same trait given in different composition paths');
             it('conflicts when the same method names comes from different traits');

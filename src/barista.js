@@ -16,11 +16,20 @@ define(function (require) {
         isObject = _.isObject,
         Nil = function () {
         },
-        CLASS_FACTORY_ATTRIBUTE = 'Barista *classFactory*';
+        CLASS_FACTORY_ATTRIBUTE = 'Barista *classFactory*',
+        METHOD_DESCRIPTOR_ATTRIBUTE = 'Barista *method descriptor*';
+
+    function markSpecial(attribute, obj) {
+        obj[attribute] = true;
+        return obj;
+    }
 
     function markAsClassFactory(obj) {
-        obj[CLASS_FACTORY_ATTRIBUTE] = true;
-        return obj;
+        return markSpecial(CLASS_FACTORY_ATTRIBUTE, obj);
+    }
+
+    function methodDescriptorMixin(obj) {
+        return markSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, obj);
     }
 
     function optional(arg, defaultValue) {
@@ -30,8 +39,12 @@ define(function (require) {
         return isUndefined(arg) ? defaultValue : arg;
     }
 
+    function hasSpecial(attribute, obj) {
+        return isObject(obj) && obj[attribute] === true;
+    }
+
     function isClassFactory(obj) {
-        return isObject(obj) && obj[CLASS_FACTORY_ATTRIBUTE] === true;
+        return hasSpecial(CLASS_FACTORY_ATTRIBUTE, obj);
     }
 
     function createClassOptionsFrom(args) {
@@ -57,10 +70,20 @@ define(function (require) {
         return createClass(this, classFactory, instanceMethods, staticMethods);
     }
 
+    function isMethodDescriptor(method) {
+        return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method);
+    }
+
+    function assertValidSuperMethod(superMethod, methodName) {
+        if (!superMethod) {
+            throw new ReferenceError('The method ' + methodName + ' is not defined in the super class');
+        }
+    }
+
     var defaultClassFactory = markAsClassFactory({
         createClass: function (Parent, instanceMethods, staticMethods) {
             var proto = Object.create(Parent.prototype);
-            extend(proto, instanceMethods);
+            extend(proto, this.processMethods(Parent, instanceMethods));
 
             if (!has(proto, 'constructor') || typeof proto.constructor !== 'function') {
                 proto.constructor = function () {
@@ -75,9 +98,7 @@ define(function (require) {
                     return ctor.__super__;
                 } else {
                     var superMethod = ctor.__super__[methodName];
-                    if (!superMethod) {
-                        throw new ReferenceError('The method ' + methodName + ' is not defined in the super class');
-                    }
+                    assertValidSuperMethod(superMethod, methodName);
                     return bind(superMethod, this);
                 }
             };
@@ -85,6 +106,15 @@ define(function (require) {
             ctor.extend = extendClass;
 
             return ctor;
+        },
+
+        processMethods: function (Parent, methods) {
+            each(methods, function (method, name) {
+                if (isMethodDescriptor(method)) {
+                    methods[name] = method.createMethod(Parent, name);
+                }
+            });
+            return methods;
         }
     });
 
@@ -97,6 +127,7 @@ define(function (require) {
     function classFactoryMixin(proto) {
         markAsClassFactory(proto);
         proto.defaultCreateClass = bind(defaultClassFactory.createClass, defaultClassFactory);
+        return proto;
     }
 
     var MixinClassFactory = Class.create({
@@ -125,18 +156,35 @@ define(function (require) {
         }
     });
     classFactoryMixin(MixinClassFactory.prototype);
+    function withMixins() {
+        return new MixinClassFactory(arguments);
+    }
+
+    var AliasOfSuper = Class.create(
+        withMixins(methodDescriptorMixin),
+        {
+            constructor: function (name) {
+                this.name = name;
+            },
+
+            createMethod: function (Parent) {
+                var superMethod = Parent.prototype[this.name];
+                assertValidSuperMethod(superMethod, this.name);
+                return superMethod;
+            }
+        });
 
     return {
         defaultClassFactory: defaultClassFactory,
 
-        markAsClassFactory: markAsClassFactory,
+        classFactoryMixin: markAsClassFactory,
 
         Class: Class,
 
-        classFactoryMixin: classFactoryMixin,
+        aliasOfSuper: function (name) {
+            return new AliasOfSuper(name);
+        },
 
-        withMixins: function () {
-            return new MixinClassFactory(arguments);
-        }
+        withMixins: withMixins
     };
 });
