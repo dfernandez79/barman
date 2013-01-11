@@ -6,7 +6,7 @@ describe('Barista', function () {
 
     var Class = barista.Class,
         defaultClassFactory = barista.defaultClassFactory,
-        markAsClassFactory = barista.classFactoryMixin,
+        classFactoryMixin = barista.classFactoryMixin,
         aliasOfSuper = barista.aliasOfSuper;
 
     describe('Class', function () {
@@ -100,7 +100,7 @@ describe('Barista', function () {
             });
 
             it('accepts a "ClassFactory" as an argument', function () {
-                var testFactory = markAsClassFactory({
+                var testFactory = classFactoryMixin({
                         createClass: function (Parent, instanceMethods, staticMethods) {
                             return {parent: Parent, instanceMethods: instanceMethods, staticMethods: staticMethods};
                         }
@@ -116,7 +116,7 @@ describe('Barista', function () {
                 var Base = Class.create({
                         foo: 'bar'
                     }),
-                    myFactory = markAsClassFactory({
+                    myFactory = classFactoryMixin({
                         createClass: function (Parent, instanceMethods, staticMethods) {
                             var newClass = defaultClassFactory.createClass(Parent, instanceMethods, staticMethods);
                             newClass.addedByFactory = true;
