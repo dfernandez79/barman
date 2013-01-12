@@ -28,9 +28,7 @@ define(function (require) {
     function methodDescriptorMixin(obj) { return markSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, obj); }
 
     function optional(arg, defaultValue) {
-        if (isUndefined(defaultValue)) {
-            defaultValue = {};
-        }
+        if (isUndefined(defaultValue)) { defaultValue = {}; }
         return isUndefined(arg) ? defaultValue : arg;
     }
 
@@ -38,13 +36,13 @@ define(function (require) {
 
     function isClassFactory(obj) { return hasSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
 
+    function isMethodDescriptor(method) { return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method); }
+
     function createClassOptionsFrom(args) {
         var options = {classFactory: defaultClassFactory, parent: args[0]},
             i = 1;
 
-        if (isClassFactory(args[i])) {
-            options.classFactory = args[i++];
-        }
+        if (isClassFactory(args[i])) { options.classFactory = args[i++]; }
         options.instanceMethods = optional(args[i++]);
         options.staticMethods = optional(args[i]);
 
@@ -60,8 +58,6 @@ define(function (require) {
         /*jshint validthis:true */
         return createClass(this, classFactory, instanceMethods, staticMethods);
     }
-
-    function isMethodDescriptor(method) { return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method); }
 
     function assertDefinedProperty(property, name, whereMsg) {
         if (isUndefined(property)) {
@@ -142,32 +138,40 @@ define(function (require) {
         }
     });
     classFactoryMixin(MixinClassFactory.prototype);
+
     function withMixins() {
         return new MixinClassFactory(arguments);
     }
 
-    var AliasOfSuper = Class.create(
+    var AbstractSimpleMethodAlias = Class.create(
         withMixins(methodDescriptorMixin),
         {
             constructor: function (name) { this.name = name; },
 
             createMethod: function (name, ctx) {
-                var superMethod = ctx.Parent.prototype[this.name];
-                assertDefinedProperty(superMethod, this.name, ' by the superclass');
-                return superMethod;
+                var method = this.methodFrom(name, ctx);
+                assertDefinedProperty(method, this.name, this.notDefinedMessageSuffix);
+                return method;
             }
+        }
+    );
+
+    var AliasOfSuper = AbstractSimpleMethodAlias.extend({
+            constructor: function (name) { this._super('constructor')(name); },
+            methodFrom: function (name, ctx) { return ctx.Parent.prototype[this.name]; },
+            notDefinedMessageSuffix: ' by the superclass'
+        },
+        {
+            create: function (name) { return new AliasOfSuper(name); }
         });
 
-    var AliasOfMixin = Class.create(
-        withMixins(methodDescriptorMixin),
+    var AliasOfMixin = AbstractSimpleMethodAlias.extend({
+            constructor: function (name) { this._super('constructor')(name); },
+            methodFrom: function (name, ctx) { return ctx.mixinMethods[this.name]; },
+            notDefinedMessageSuffix: ' by the mixins'
+        },
         {
-            constructor: function (name) { this.name = name; },
-
-            createMethod: function (name, ctx) {
-                var mixinMethod = ctx.mixinMethods[this.name];
-                assertDefinedProperty(mixinMethod, this.name, ' by mixins');
-                return mixinMethod;
-            }
+            create: function (name) { return new AliasOfMixin(name); }
         });
 
     return {
@@ -177,14 +181,9 @@ define(function (require) {
 
         Class: Class,
 
-        aliasOfSuper: function (name) {
-            return new AliasOfSuper(name);
-        },
-
         withMixins: withMixins,
 
-        aliasOfMixin: function (name) {
-            return new AliasOfMixin(name);
-        }
+        aliasOfSuper: AliasOfSuper.create,
+        aliasOfMixin: AliasOfMixin.create
     };
 });
