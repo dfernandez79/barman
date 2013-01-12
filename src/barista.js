@@ -15,8 +15,8 @@ define(function (require) {
         isFunction = _.isFunction,
         isObject = _.isObject,
         Nil = function () { },
-        CLASS_FACTORY_ATTRIBUTE = 'Barista *classFactory*',
-        METHOD_DESCRIPTOR_ATTRIBUTE = 'Barista *method descriptor*';
+        CLASS_FACTORY_ATTRIBUTE = '*classFactory*',
+        METHOD_DESCRIPTOR_ATTRIBUTE = '*methodDescriptor*';
 
     function markSpecial(attribute, obj) {
         obj[attribute] = true;
@@ -156,22 +156,23 @@ define(function (require) {
         }
     );
 
-    var AliasOfSuper = AbstractSimpleMethodAlias.extend({
-            constructor: function (name) { this._super('constructor')(name); },
+    function callSuperConstructorMixin(proto) {
+        proto.constructor = function () { this._super().constructor.apply(this, arguments); };
+        return proto;
+    }
+
+    var AliasOfSuper = AbstractSimpleMethodAlias.extend(
+        withMixins(callSuperConstructorMixin),
+        {
             methodFrom: function (name, ctx) { return ctx.Parent.prototype[this.name]; },
             notDefinedMessageSuffix: ' by the superclass'
-        },
-        {
-            create: function (name) { return new AliasOfSuper(name); }
         });
 
-    var AliasOfMixin = AbstractSimpleMethodAlias.extend({
-            constructor: function (name) { this._super('constructor')(name); },
+    var AliasOfMixin = AbstractSimpleMethodAlias.extend(
+        withMixins(callSuperConstructorMixin),
+        {
             methodFrom: function (name, ctx) { return ctx.mixinMethods[this.name]; },
             notDefinedMessageSuffix: ' by the mixins'
-        },
-        {
-            create: function (name) { return new AliasOfMixin(name); }
         });
 
     return {
@@ -183,7 +184,7 @@ define(function (require) {
 
         withMixins: withMixins,
 
-        aliasOfSuper: AliasOfSuper.create,
-        aliasOfMixin: AliasOfMixin.create
+        aliasOfSuper: function (name) { return new AliasOfSuper(name); },
+        aliasOfMixin: function (name) { return new AliasOfMixin(name); }
     };
 });
