@@ -7,7 +7,8 @@ describe('Barista', function () {
     var Class = barista.Class,
         defaultClassFactory = barista.defaultClassFactory,
         classFactoryMixin = barista.classFactoryMixin,
-        aliasOfSuper = barista.aliasOfSuper;
+        aliasOfSuper = barista.aliasOfSuper,
+        aliasOfMixin = barista.aliasOfMixin;
 
     describe('Class', function () {
         describe('"create" method', function () {
@@ -312,15 +313,52 @@ describe('Barista', function () {
         });
 
         it('preserves the prototype chain', function () {
-            var BaseView = Class.create({
-                    render: 'base',
-                }),
-                useTemplate = {
-                    render: 'template'
-                },
+            var BaseView = Class.create({render: 'base'}),
+                useTemplate = {render: 'template'},
                 View = BaseView.extend(withMixins(useTemplate));
 
             expect(Object.getPrototypeOf(View.prototype)).to.equal(BaseView.prototype);
+        });
+
+        describe('aliasOfMixin', function () {
+            it('can be used to reference a method created from object mixins', function () {
+                var renderMixin = {render: function () { return 'mixin'; }},
+                    View = Class.create(withMixins(renderMixin), {
+                        mrender: aliasOfMixin('render'),
+                        render: function () { return 'me and ' + this.mrender(); }
+                    }),
+                    aView = new View();
+
+                expect(aView.render()).to.equal('me and mixin');
+            });
+
+            it('can be used with aliasOfSuper', function () {
+                var BaseView = Class.create({render: function () { return 'base'; }}),
+                    renderMixin = {render: function () { return 'mixin'; }},
+                    View = BaseView.extend(withMixins(renderMixin), {
+                        baseRender: aliasOfSuper('render'),
+                        mixinRender: aliasOfMixin('render'),
+                        render: function () {
+                            return ['me', this.baseRender(), this.mixinRender()].join(' ');
+                        }
+                    }),
+                    aView = new View();
+
+                expect(aView.render()).to.equal('me base mixin');
+            });
+
+            it('uses the method resulted from the application of all mixins', function () {
+                var one = {num: function () {return 1;}}, two = {num: function () {return 2;}},
+                    Count = Class.create(withMixins(one, two), {
+                        mnum: aliasOfMixin('num'),
+                        num: function () {
+                            return 'is ' + this.mnum();
+                        }
+                    }),
+                    aCount = new Count();
+
+                expect(aCount.num()).to.equal('is 2');
+            });
         });
     });
 

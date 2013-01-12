@@ -14,8 +14,7 @@ define(function (require) {
         isUndefined = _.isUndefined,
         isFunction = _.isFunction,
         isObject = _.isObject,
-        Nil = function () {
-        },
+        Nil = function () { },
         CLASS_FACTORY_ATTRIBUTE = 'Barista *classFactory*',
         METHOD_DESCRIPTOR_ATTRIBUTE = 'Barista *method descriptor*';
 
@@ -24,13 +23,9 @@ define(function (require) {
         return obj;
     }
 
-    function markAsClassFactory(obj) {
-        return markSpecial(CLASS_FACTORY_ATTRIBUTE, obj);
-    }
+    function markAsClassFactory(obj) { return markSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
 
-    function methodDescriptorMixin(obj) {
-        return markSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, obj);
-    }
+    function methodDescriptorMixin(obj) { return markSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, obj); }
 
     function optional(arg, defaultValue) {
         if (isUndefined(defaultValue)) {
@@ -39,13 +34,9 @@ define(function (require) {
         return isUndefined(arg) ? defaultValue : arg;
     }
 
-    function hasSpecial(attribute, obj) {
-        return isObject(obj) && obj[attribute] === true;
-    }
+    function hasSpecial(attribute, obj) { return isObject(obj) && obj[attribute] === true; }
 
-    function isClassFactory(obj) {
-        return hasSpecial(CLASS_FACTORY_ATTRIBUTE, obj);
-    }
+    function isClassFactory(obj) { return hasSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
 
     function createClassOptionsFrom(args) {
         var options = {classFactory: defaultClassFactory, parent: args[0]},
@@ -70,24 +61,28 @@ define(function (require) {
         return createClass(this, classFactory, instanceMethods, staticMethods);
     }
 
-    function isMethodDescriptor(method) {
-        return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method);
+    function isMethodDescriptor(method) { return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method); }
+
+    function assertDefinedProperty(property, name, whereMsg) {
+        if (isUndefined(property)) {
+            throw new ReferenceError('The property ' + name + ' is not defined' + optional(whereMsg, ''));
+        }
     }
 
-    function assertValidSuperMethod(superMethod, methodName) {
-        if (!superMethod) {
-            throw new ReferenceError('The method ' + methodName + ' is not defined in the super class');
-        }
+    function processMethods(methods, ctx) {
+        each(methods, function (method, name) {
+            if (isMethodDescriptor(method)) { methods[name] = method.createMethod(name, ctx); }
+        });
+        return methods;
     }
 
     var defaultClassFactory = markAsClassFactory({
         createClass: function (Parent, instanceMethods, staticMethods) {
             var proto = Object.create(Parent.prototype);
-            extend(proto, this.processMethods(Parent, instanceMethods));
+            extend(proto, processMethods(instanceMethods, {Parent: Parent}));
 
             if (!has(proto, 'constructor') || typeof proto.constructor !== 'function') {
-                proto.constructor = function () {
-                };
+                proto.constructor = function () { };
             }
 
             var ctor = proto.constructor;
@@ -98,7 +93,7 @@ define(function (require) {
                     return ctor.__super__;
                 } else {
                     var superMethod = ctor.__super__[methodName];
-                    assertValidSuperMethod(superMethod, methodName);
+                    assertDefinedProperty(superMethod, methodName);
                     return bind(superMethod, this);
                 }
             };
@@ -106,15 +101,6 @@ define(function (require) {
             ctor.extend = extendClass;
 
             return ctor;
-        },
-
-        processMethods: function (Parent, methods) {
-            each(methods, function (method, name) {
-                if (isMethodDescriptor(method)) {
-                    methods[name] = method.createMethod(Parent, name);
-                }
-            });
-            return methods;
         }
     });
 
@@ -127,30 +113,30 @@ define(function (require) {
     function classFactoryMixin(proto) {
         markAsClassFactory(proto);
         proto.defaultCreateClass = bind(defaultClassFactory.createClass, defaultClassFactory);
+        proto.processMethods = processMethods;
         return proto;
     }
 
     var MixinClassFactory = Class.create({
-        constructor: function (mixins) {
-            this.mixins = map(mixins, function (mixin) {
-                if (isFunction(mixin)) {
-                    return mixin;
-                } else if (isObject(mixin)) {
-                    return function (obj) {
-                        extend(obj, mixin);
-                    };
-                }
-                throw new TypeError('Only objects or functions can be used as mixins');
-            });
+        constructor: function (mixins) { this.mixins = map(mixins, this.asMixinFunction); },
+
+        asMixinFunction: function (mixin) {
+            if (isFunction(mixin)) {
+                return mixin;
+            } else if (isObject(mixin)) {
+                return function (obj) { extend(obj, mixin); };
+            }
+            throw new TypeError('Only objects or functions can be used as mixins');
         },
 
         createClass: function (Parent, instanceMethods, staticMethods) {
             var instanceMethodsWithMixins = {};
 
-            each(this.mixins, function (fn) {
-                fn(instanceMethodsWithMixins);
-            });
-            extend(instanceMethodsWithMixins, instanceMethods);
+            each(this.mixins, function (fn) { fn(instanceMethodsWithMixins); });
+
+            extend(instanceMethodsWithMixins,
+                this.processMethods(instanceMethods,
+                    {Parent: Parent, mixinMethods: instanceMethodsWithMixins}));
 
             return this.defaultCreateClass(Parent, instanceMethodsWithMixins, staticMethods);
         }
@@ -163,14 +149,24 @@ define(function (require) {
     var AliasOfSuper = Class.create(
         withMixins(methodDescriptorMixin),
         {
-            constructor: function (name) {
-                this.name = name;
-            },
+            constructor: function (name) { this.name = name; },
 
-            createMethod: function (Parent) {
-                var superMethod = Parent.prototype[this.name];
-                assertValidSuperMethod(superMethod, this.name);
+            createMethod: function (name, ctx) {
+                var superMethod = ctx.Parent.prototype[this.name];
+                assertDefinedProperty(superMethod, this.name, ' by the superclass');
                 return superMethod;
+            }
+        });
+
+    var AliasOfMixin = Class.create(
+        withMixins(methodDescriptorMixin),
+        {
+            constructor: function (name) { this.name = name; },
+
+            createMethod: function (name, ctx) {
+                var mixinMethod = ctx.mixinMethods[this.name];
+                assertDefinedProperty(mixinMethod, this.name, ' by mixins');
+                return mixinMethod;
             }
         });
 
@@ -185,6 +181,10 @@ define(function (require) {
             return new AliasOfSuper(name);
         },
 
-        withMixins: withMixins
+        withMixins: withMixins,
+
+        aliasOfMixin: function (name) {
+            return new AliasOfMixin(name);
+        }
     };
 });
