@@ -125,23 +125,22 @@ define(function (require) {
             throw new TypeError('Only objects or functions can be used as mixins');
         },
 
-        createClass: function (Parent, instanceMethods, staticMethods) {
-            var instanceMethodsWithMixins = {};
+        applyMixins: function (Parent, instanceMethods) {
+            var instanceMethodsWithMixins = {},
+                processMethodsContext = {Parent: Parent, mixinMethods: instanceMethodsWithMixins};
 
             each(this.mixins, function (fn) { fn(instanceMethodsWithMixins); });
 
-            extend(instanceMethodsWithMixins,
-                this.processMethods(instanceMethods,
-                    {Parent: Parent, mixinMethods: instanceMethodsWithMixins}));
+            return extend(instanceMethodsWithMixins, this.processMethods(instanceMethods, processMethodsContext));
+        },
 
-            return this.defaultCreateClass(Parent, instanceMethodsWithMixins, staticMethods);
+        createClass: function (Parent, instanceMethods, staticMethods) {
+            return this.defaultCreateClass(Parent, this.applyMixins(Parent, instanceMethods), staticMethods);
         }
     });
     classFactoryMixin(MixinClassFactory.prototype);
 
-    function withMixins() {
-        return new MixinClassFactory(arguments);
-    }
+    function withMixins() { return new MixinClassFactory(arguments); }
 
     var AbstractSimpleMethodAlias = Class.create(
         withMixins(methodDescriptorMixin),
@@ -175,6 +174,80 @@ define(function (require) {
             notDefinedMessageSuffix: ' by the mixins'
         });
 
+    var Trait = Class.create({
+            constructor: function (methods) { this.methods = methods; },
+            _: function (name) {
+                return this.methods[name];
+            },
+            flatten: function () {
+                // TODO rename and implement
+                return [this];
+            }
+        },
+        {
+            create: function (methods) { return new Trait(methods); }
+        });
+
+    var TraitSet = Class.create({
+        constructor: function () { this.traits = []; },
+
+        hasMoreThanOneTrait: function () { return this.traits.length > 1; },
+
+        trait: function () { return this.traits[0]; },
+
+        add: function (trait) {
+            if (this.traits.indexOf(trait) !== -1) {
+                this.traits.push(trait);
+            }
+            return this;
+        }
+    });
+
+    var TraitsClassFactory = Class.create(
+        withMixins(classFactoryMixin),
+        {
+            constructor: function (traits) { this.traits = traits; },
+
+            composeTraits: function (instanceMethods) {
+                var methodMap = {}, composed = {};
+
+                each(this.flattenTraits(), function (trait) {
+                    each(trait.methods, function (method, name) {
+                        if (!has(methodMap, name)) {
+                            methodMap[name] = new TraitSet();
+                        }
+                        methodMap[name].add(trait);
+                    });
+                });
+
+                each(methodMap, function (traitSet, name) {
+                    composed[name] = traitSet.hasMoreThanOneTrait() ? this.conflict(name, traitSet) : traitSet.trait();
+                });
+
+                extend(composed, instanceMethods);
+
+                console.log(composed);
+                return composed;
+            },
+
+            flattenTraits: function () {
+                return _.flatten(_.invoke(this.traits, 'flatten'));
+            },
+
+            conflict: function (name, traitSet) {
+                console.log('conflict ' + name);
+                // TODO finish
+                return function () { return 'conflict'; };
+            },
+
+            createClass: function (Parent, instanceMethods, staticMethods) {
+                console.log('create class');
+                return this.defaultCreateClass(Parent, this.composeTraits(instanceMethods), staticMethods);
+            }
+        });
+
+    function withTraits() { return new TraitsClassFactory(arguments); }
+
     return {
         defaultClassFactory: defaultClassFactory,
 
@@ -185,6 +258,10 @@ define(function (require) {
         withMixins: withMixins,
 
         aliasOfSuper: function (name) { return new AliasOfSuper(name); },
-        aliasOfMixin: function (name) { return new AliasOfMixin(name); }
+        aliasOfMixin: function (name) { return new AliasOfMixin(name); },
+
+        Trait: Trait,
+
+        withTraits: withTraits
     };
 });

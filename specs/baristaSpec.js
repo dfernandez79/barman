@@ -361,32 +361,58 @@ describe('Barista', function () {
             });
         });
     });
+    // TODO throw error if aliasOfMixin is used without mixins
+    // TODO test for callSuperConstructorMixin
+    describe('Traits', function () {
+        var Trait = barista.Trait,
+            aliasOf = barista.aliasOf,
+            withTraits = barista.withTraits;
 
-    describe('Trait', function () {
-        it('provides a set of methods that implement behavior');
+        it('can specify aliases to trait methods', function () {
+            var compositeViewTrait = Trait.create({
+                    render: function () { return 'composite'; }
+                }),
+                templateBasedViewTrait = Trait.create({
+                    render: function () { return 'template'; }
+                }),
+                MyView = Class.create(withTraits(compositeViewTrait, templateBasedViewTrait), {
+                    renderSubViews: compositeViewTrait._('render'),
+                    applyTemplate: templateBasedViewTrait._('render'),
+                    render: function () {
+                        return this.applyTemplate() + ' ' + this.renderSubViews();
+                    }
+                }),
+                aView = new MyView();
 
-        it('requires a set of methods that parametrize the provide behavior');
-
-        it('can be nested with other traits');
-
-        describe('composition', function () {
-            it('is symmetric');
-
-            it('excludes conflicting methods');
-
-            it('allows methods from the same trait given in different composition paths');
-            it('conflicts when the same method names comes from different traits');
+            expect(aView.render()).to.equal('template composite');
         });
-
-        it('creates sealed objects if the underlying JS engine allows it');
     });
 
-    describe('Class and Trait composition', function () {
-        describe('precedence rules', function () {
-            it('gives precedence to Class methods over trait methods');
-            it('gives precedence to Trait methods over super class methods');
+    /*    describe('Trait', function () {
+            it('provides a set of methods that implement behavior');
+
+            it('requires a set of methods that parametrize the provide behavior');
+
+            it('can be nested with other traits');
+
+            describe('composition', function () {
+                it('is symmetric');
+
+                it('excludes conflicting methods');
+
+                it('allows methods from the same trait given in different composition paths');
+                it('conflicts when the same method names comes from different traits');
+            });
+
+            it('creates sealed objects if the underlying JS engine allows it');
         });
-        it('can specify aliases to trait methods');
-        it('can exclude trait methods');
-    });
+
+        describe('Class and Trait composition', function () {
+            describe('precedence rules', function () {
+                it('gives precedence to Class methods over trait methods');
+                it('gives precedence to Trait methods over super class methods');
+            });
+            it('can specify aliases to trait methods');
+            it('can exclude trait methods');
+        }); */
 });
