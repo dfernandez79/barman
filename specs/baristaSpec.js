@@ -4,7 +4,8 @@ var expect = require('chai').expect,
 describe('Barista', function () {
     'use strict';
 
-    var Class = barista.Class,
+    var Nil = barista.Nil,
+        Class = barista.Class,
         defaultClassFactory = barista.defaultClassFactory,
         classFactoryMixin = barista.classFactoryMixin,
         aliasOfSuper = barista.aliasOfSuper,
@@ -128,6 +129,17 @@ describe('Barista', function () {
 
                 expect(SubClass.addedByFactory).to.be.true;
             });
+
+            it('adds the _super method even if the parent does not have it', function () {
+                var Parent = function () {};
+
+                Parent.extend = Nil.extend;
+
+                var SubClass = Parent.extend(),
+                    anInstance = new SubClass();
+
+                expect(anInstance._super()).to.equal(Parent.prototype);
+            });
         });
 
         describe('__super__ property', function () {
@@ -221,6 +233,26 @@ describe('Barista', function () {
                     });
                 }).to.throw(ReferenceError);
             });
+        });
+    });
+
+    describe('Nil', function () {
+        it('is the parent of a class created with Class.create', function () {
+            var MyClass = Class.create();
+            expect(MyClass.__super__).to.equal(Nil.prototype);
+        });
+
+        it('has a __super__ property that returns itself', function () {
+            expect(Nil.__super__).to.equal(Nil.prototype);
+        });
+
+        it('provides a _super function', function () {
+            var SubNil = function () {};
+
+            SubNil.prototype = new Nil();
+            var anInstance = new SubNil();
+
+            expect(anInstance._super()).to.equal(Nil.prototype);
         });
     });
 
@@ -389,30 +421,30 @@ describe('Barista', function () {
     });
 
     /*    describe('Trait', function () {
-            it('provides a set of methods that implement behavior');
+     it('provides a set of methods that implement behavior');
 
-            it('requires a set of methods that parametrize the provide behavior');
+     it('requires a set of methods that parametrize the provide behavior');
 
-            it('can be nested with other traits');
+     it('can be nested with other traits');
 
-            describe('composition', function () {
-                it('is symmetric');
+     describe('composition', function () {
+     it('is symmetric');
 
-                it('excludes conflicting methods');
+     it('excludes conflicting methods');
 
-                it('allows methods from the same trait given in different composition paths');
-                it('conflicts when the same method names comes from different traits');
-            });
+     it('allows methods from the same trait given in different composition paths');
+     it('conflicts when the same method names comes from different traits');
+     });
 
-            it('creates sealed objects if the underlying JS engine allows it');
-        });
+     it('creates sealed objects if the underlying JS engine allows it');
+     });
 
-        describe('Class and Trait composition', function () {
-            describe('precedence rules', function () {
-                it('gives precedence to Class methods over trait methods');
-                it('gives precedence to Trait methods over super class methods');
-            });
-            it('can specify aliases to trait methods');
-            it('can exclude trait methods');
-        }); */
+     describe('Class and Trait composition', function () {
+     describe('precedence rules', function () {
+     it('gives precedence to Class methods over trait methods');
+     it('gives precedence to Trait methods over super class methods');
+     });
+     it('can specify aliases to trait methods');
+     it('can exclude trait methods');
+     }); */
 });

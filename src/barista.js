@@ -14,6 +14,7 @@ define(function (require) {
         isUndefined = _.isUndefined,
         isFunction = _.isFunction,
         isObject = _.isObject,
+        getPrototypeOf = Object.getPrototypeOf,
         Nil = function () { },
         CLASS_FACTORY_ATTRIBUTE = '*classFactory*',
         METHOD_DESCRIPTOR_ATTRIBUTE = '*methodDescriptor*';
@@ -54,16 +55,28 @@ define(function (require) {
         return options.classFactory.createClass(options.parent, options.instanceMethods, options.staticMethods);
     }
 
-    function extendClass(classFactory, instanceMethods, staticMethods) {
-        /*jshint validthis:true */
-        return createClass(this, classFactory, instanceMethods, staticMethods);
-    }
-
     function assertDefinedProperty(property, name, whereMsg) {
         if (isUndefined(property)) {
             throw new ReferenceError('The property ' + name + ' is not defined' + optional(whereMsg, ''));
         }
     }
+
+    Nil.extend = function (classFactory, instanceMethods, staticMethods) {
+        return createClass(this, classFactory, instanceMethods, staticMethods);
+    };
+    Nil.__super__ = Nil.prototype;
+    Nil.prototype._super = function (methodName) {
+        var thisPrototype = getPrototypeOf(this),
+            superPrototype = getPrototypeOf(thisPrototype);
+
+        if (!methodName) {
+            return superPrototype;
+        } else {
+            var superMethod = superPrototype[methodName];
+            assertDefinedProperty(superMethod, methodName);
+            return bind(superMethod, this);
+        }
+    };
 
     function processMethods(methods, ctx) {
         each(methods, function (method, name) {
@@ -84,17 +97,10 @@ define(function (require) {
             var ctor = proto.constructor;
             extend(ctor, staticMethods);
             ctor.__super__ = Parent.prototype;
-            proto._super = function (methodName) {
-                if (!methodName) {
-                    return ctor.__super__;
-                } else {
-                    var superMethod = ctor.__super__[methodName];
-                    assertDefinedProperty(superMethod, methodName);
-                    return bind(superMethod, this);
-                }
-            };
+            if (!has(proto, '_super')) { proto._super = Nil.prototype._super; }
+
             ctor.prototype = proto;
-            ctor.extend = extendClass;
+            ctor.extend = Nil.extend;
 
             return ctor;
         }
@@ -226,7 +232,6 @@ define(function (require) {
 
                 extend(composed, instanceMethods);
 
-                console.log(composed);
                 return composed;
             },
 
@@ -235,13 +240,11 @@ define(function (require) {
             },
 
             conflict: function (name, traitSet) {
-                console.log('conflict ' + name);
                 // TODO finish
                 return function () { return 'conflict'; };
             },
 
             createClass: function (Parent, instanceMethods, staticMethods) {
-                console.log('create class');
                 return this.defaultCreateClass(Parent, this.composeTraits(instanceMethods), staticMethods);
             }
         });
@@ -249,6 +252,8 @@ define(function (require) {
     function withTraits() { return new TraitsClassFactory(arguments); }
 
     return {
+        Nil: Nil,
+
         defaultClassFactory: defaultClassFactory,
 
         classFactoryMixin: markAsClassFactory,
