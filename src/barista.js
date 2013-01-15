@@ -212,7 +212,9 @@ define(function (require) {
     var TraitsClassFactory = Class.create(
         withMixins(classFactoryMixin),
         {
-            constructor: function (traits) { this.traits = traits; },
+            constructor: function (traits) {
+                this.traits = traits;
+            },
 
             composeTraits: function (instanceMethods) {
                 var methodMap = {}, composed = {};

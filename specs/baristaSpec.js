@@ -396,55 +396,86 @@ describe('Barista', function () {
     // TODO throw error if aliasOfMixin is used without mixins
     // TODO test for callSuperConstructorMixin
     describe('Traits', function () {
-        var Trait = barista.Trait,
-            aliasOf = barista.aliasOf,
-            withTraits = barista.withTraits;
+        var withTraits = barista.withTraits;
+
+        it('can be used to add methods', function () {
+            var viewTrait = {render: function () { return 'hello'; }},
+                MyView = Class.create(withTraits(viewTrait)),
+                aView = new MyView();
+
+            expect(aView.render()).to.equal('hello');
+        });
+
+        it('gives precedence to class methods over trait methods', function () {
+            var viewTrait = {render: function () { return 'hello'; }},
+                MyView = Class.create(withTraits(viewTrait), {render: function () { return 'override'; }}),
+                aView = new MyView();
+
+            expect(aView.render()).to.equal('override');
+        });
+
+        it('gives precedence to trait methods over super class methods', function () {
+            var viewTrait = {render: function () { return 'hello'; }},
+                Base = Class.create({render: function () { return 'base'; }}),
+                MyView = Base.extend(withTraits(viewTrait)),
+                aView = new MyView();
+
+            expect(aView.render()).to.equal('hello');
+        });
+
+        it('marks conflicting trait methods', function () {
+            var templateTrait = {render: function () { return 'template'; }},
+                compositeTrait = {render: function () { return 'composite';}},
+                MyView = Base.extend(withTraits(templateTrait, compositeTrait)),
+                aView = new MyView();
+
+            expect(function () {
+                aView.render();
+            }).to.throw('The "render" method is defined by multiple traits, you need to specify an implementation');
+        });
+
+        it('allows a trait to include another trait', function () {
+            var helloTrait = {hello: function () { return 'hello world'; }},
+                otherTrait = {other: 'hi'},
+                viewTrait = {__includes__: [helloTrait, otherTrait], render: function () {return 'view';}},
+                MyView = Class.create(withTraits(viewTrait)),
+                aView = new MyView();
+
+            expect(aView.hello()).to.equal('hello world');
+            expect(aView.other).to.equal('hi');
+            expect(aView.render()).to.equal('view');
+        });
+
+        it('allows methods from the same trait given in different composition paths', function () {
+            var helloTrait = {hello: function () { return 'hello world'; }},
+                otherTrait = {__includes__: [helloTrait], other: 'hi'},
+                viewTrait = {__includes__: [helloTrait, otherTrait], render: function () {return 'view';}},
+                MyView = Class.create(withTraits(viewTrait)),
+                aView = new MyView();
+
+            expect(aView.hello()).to.equal('hello world');
+            expect(aView.other).to.equal('hi');
+            expect(aView.render()).to.equal('view');
+        });
+
+        it('allows to use a single trait object in the __includes__ special property', function () {
+            var messageTrait = {message: 'it worked'},
+                valueTrait = {__includes__: messageTrait, value: 1},
+                MyValue = Class.create(withTraits(valueTrait)),
+                aValue = new MyValue();
+
+            expect(aValue.message).to.equal('it worked');
+        });
 
         it('can specify aliases to trait methods', function () {
-            var compositeViewTrait = Trait.create({
-                    render: function () { return 'composite'; }
-                }),
-                templateBasedViewTrait = Trait.create({
-                    render: function () { return 'template'; }
-                }),
-                MyView = Class.create(withTraits(compositeViewTrait, templateBasedViewTrait), {
-                    renderSubViews: compositeViewTrait._('render'),
-                    applyTemplate: templateBasedViewTrait._('render'),
-                    render: function () {
-                        return this.applyTemplate() + ' ' + this.renderSubViews();
-                    }
+            var templateTrait = {render: function () { return 'template'; }},
+                compositeTrait = {render: function () { return 'composite'; }},
+                MyView = Class.create(withTraits(templateTrait, compositeTrait), {
+                    render: templateTrait.render
                 }),
                 aView = new MyView();
 
-            expect(aView.render()).to.equal('template composite');
+            expect(aView.render()).to.equal('template');
         });
     });
-
-    /*    describe('Trait', function () {
-     it('provides a set of methods that implement behavior');
-
-     it('requires a set of methods that parametrize the provide behavior');
-
-     it('can be nested with other traits');
-
-     describe('composition', function () {
-     it('is symmetric');
-
-     it('excludes conflicting methods');
-
-     it('allows methods from the same trait given in different composition paths');
-     it('conflicts when the same method names comes from different traits');
-     });
-
-     it('creates sealed objects if the underlying JS engine allows it');
-     });
-
-     describe('Class and Trait composition', function () {
-     describe('precedence rules', function () {
-     it('gives precedence to Class methods over trait methods');
-     it('gives precedence to Trait methods over super class methods');
-     });
-     it('can specify aliases to trait methods');
-     it('can exclude trait methods');
-     }); */
 });
