@@ -1,0 +1,17 @@
+#!/bin/bash
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+ln -sf "$script_dir/hooks/pre-commit" "$script_dir/../.git/hooks/pre-commit"
+
+white='\033[1;37m'
+hc='\033[0;36m'
+ec='\033[0m'
+dot="\033[0;31m-${ec}"
+
+echo -e "\nGit pre-commit hook installed:"
+echo -e "  ${dot} Scripts named ${hc}scripts/hooks/pre-commit-*${ec} will be executed as additional"
+echo -e "    pre-commit scripts"
+echo -e "  ${dot} Pre-commit hooks can be disabled using ${hc}git commit --no-verify${ec}"
+echo -e "  ${dot} In case of problems you can uninstall the hooks by removing"
+echo -e "    ${hc}.git/hooks/pre-commit${ec}\n"
