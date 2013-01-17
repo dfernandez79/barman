@@ -26,6 +26,6 @@ done < <(git diff --cached --name-only --diff-filter=AM -z $against)
 if [ $run_jshint -eq 1 ]; then
 	# assumes that the script is located on PROJECT_BASE/scripts/hooks
 	cd "$script_dir/../.."
-	grunt jshint
+	grunt --no-color jshint
 fi
 exit $?

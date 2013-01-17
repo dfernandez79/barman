@@ -426,7 +426,7 @@ describe('Barista', function () {
         it('marks conflicting trait methods', function () {
             var templateTrait = {render: function () { return 'template'; }},
                 compositeTrait = {render: function () { return 'composite';}},
-                MyView = Base.extend(withTraits(templateTrait, compositeTrait)),
+                MyView = Class.create(withTraits(templateTrait, compositeTrait)),
                 aView = new MyView();
 
             expect(function () {

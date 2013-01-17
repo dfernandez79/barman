@@ -241,7 +241,7 @@ define(function (require) {
                 return _.flatten(_.invoke(this.traits, 'flatten'));
             },
 
-            conflict: function (name, traitSet) {
+            conflict: function () {
                 // TODO finish
                 return function () { return 'conflict'; };
             },
