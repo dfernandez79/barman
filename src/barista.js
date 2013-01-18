@@ -1,8 +1,8 @@
-if (typeof define !== 'function') {
+if ( typeof define !== 'function' ) {
     var define = require('amdefine')(module);
 }
 
-define(function (require) {
+define(function ( require ) {
     'use strict';
 
     var _ = require('underscore'),
@@ -19,31 +19,31 @@ define(function (require) {
         CLASS_FACTORY_ATTRIBUTE = '*classFactory*',
         METHOD_DESCRIPTOR_ATTRIBUTE = '*methodDescriptor*';
 
-    function markSpecial(attribute, obj) {
+    function markSpecial( attribute, obj ) {
         obj[attribute] = true;
         return obj;
     }
 
-    function markAsClassFactory(obj) { return markSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
+    function markAsClassFactory( obj ) { return markSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
 
-    function methodDescriptorMixin(obj) { return markSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, obj); }
+    function methodDescriptorMixin( obj ) { return markSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, obj); }
 
-    function optional(arg, defaultValue) {
-        if (isUndefined(defaultValue)) { defaultValue = {}; }
+    function optional( arg, defaultValue ) {
+        if ( isUndefined(defaultValue) ) { defaultValue = {}; }
         return isUndefined(arg) ? defaultValue : arg;
     }
 
-    function hasSpecial(attribute, obj) { return isObject(obj) && obj[attribute] === true; }
+    function hasSpecial( attribute, obj ) { return isObject(obj) && obj[attribute] === true; }
 
-    function isClassFactory(obj) { return hasSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
+    function isClassFactory( obj ) { return hasSpecial(CLASS_FACTORY_ATTRIBUTE, obj); }
 
-    function isMethodDescriptor(method) { return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method); }
+    function isMethodDescriptor( method ) { return hasSpecial(METHOD_DESCRIPTOR_ATTRIBUTE, method); }
 
-    function createClassOptionsFrom(args) {
+    function createClassOptionsFrom( args ) {
         var options = {classFactory: defaultClassFactory, parent: args[0]},
             i = 1;
 
-        if (isClassFactory(args[i])) { options.classFactory = args[i++]; }
+        if ( isClassFactory(args[i]) ) { options.classFactory = args[i++]; }
         options.instanceMethods = optional(args[i++]);
         options.staticMethods = optional(args[i]);
 
@@ -55,21 +55,21 @@ define(function (require) {
         return options.classFactory.createClass(options.parent, options.instanceMethods, options.staticMethods);
     }
 
-    function assertDefinedProperty(property, name, whereMsg) {
-        if (isUndefined(property)) {
+    function assertDefinedProperty( property, name, whereMsg ) {
+        if ( isUndefined(property) ) {
             throw new ReferenceError('The property ' + name + ' is not defined' + optional(whereMsg, ''));
         }
     }
 
-    Nil.extend = function (classFactory, instanceMethods, staticMethods) {
+    Nil.extend = function ( classFactory, instanceMethods, staticMethods ) {
         return createClass(this, classFactory, instanceMethods, staticMethods);
     };
     Nil.__super__ = Nil.prototype;
-    Nil.prototype._super = function (methodName) {
+    Nil.prototype._super = function ( methodName ) {
         var thisPrototype = getPrototypeOf(this),
             superPrototype = getPrototypeOf(thisPrototype);
 
-        if (!methodName) {
+        if ( !methodName ) {
             return superPrototype;
         } else {
             var superMethod = superPrototype[methodName];
@@ -78,26 +78,26 @@ define(function (require) {
         }
     };
 
-    function processMethods(methods, ctx) {
-        each(methods, function (method, name) {
-            if (isMethodDescriptor(method)) { methods[name] = method.createMethod(name, ctx); }
+    function processMethods( methods, ctx ) {
+        each(methods, function ( method, name ) {
+            if ( isMethodDescriptor(method) ) { methods[name] = method.createMethod(name, ctx); }
         });
         return methods;
     }
 
     var defaultClassFactory = markAsClassFactory({
-        createClass: function (Parent, instanceMethods, staticMethods) {
+        createClass: function ( Parent, instanceMethods, staticMethods ) {
             var proto = Object.create(Parent.prototype);
             extend(proto, processMethods(instanceMethods, {Parent: Parent}));
 
-            if (!has(proto, 'constructor') || typeof proto.constructor !== 'function') {
+            if ( !has(proto, 'constructor') || typeof proto.constructor !== 'function' ) {
                 proto.constructor = function () { };
             }
 
             var ctor = proto.constructor;
             extend(ctor, staticMethods);
             ctor.__super__ = Parent.prototype;
-            if (!has(proto, '_super')) { proto._super = Nil.prototype._super; }
+            if ( !has(proto, '_super') ) { proto._super = Nil.prototype._super; }
 
             ctor.prototype = proto;
             ctor.extend = Nil.extend;
@@ -107,12 +107,12 @@ define(function (require) {
     });
 
     var Class = {
-        create: function (classFactory, instanceMethods, staticMethods) {
+        create: function ( classFactory, instanceMethods, staticMethods ) {
             return createClass(Nil, classFactory, instanceMethods, staticMethods);
         }
     };
 
-    function classFactoryMixin(proto) {
+    function classFactoryMixin( proto ) {
         markAsClassFactory(proto);
         proto.defaultCreateClass = bind(defaultClassFactory.createClass, defaultClassFactory);
         proto.processMethods = processMethods;
@@ -120,27 +120,27 @@ define(function (require) {
     }
 
     var MixinClassFactory = Class.create({
-        constructor: function (mixins) { this.mixins = map(mixins, this.asMixinFunction); },
+        constructor: function ( mixins ) { this.mixins = map(mixins, this.asMixinFunction); },
 
-        asMixinFunction: function (mixin) {
-            if (isFunction(mixin)) {
+        asMixinFunction: function ( mixin ) {
+            if ( isFunction(mixin) ) {
                 return mixin;
-            } else if (isObject(mixin)) {
-                return function (obj) { extend(obj, mixin); };
+            } else if ( isObject(mixin) ) {
+                return function ( obj ) { extend(obj, mixin); };
             }
             throw new TypeError('Only objects or functions can be used as mixins');
         },
 
-        applyMixins: function (Parent, instanceMethods) {
+        applyMixins: function ( Parent, instanceMethods ) {
             var instanceMethodsWithMixins = {},
                 processMethodsContext = {Parent: Parent, mixinMethods: instanceMethodsWithMixins};
 
-            each(this.mixins, function (fn) { fn(instanceMethodsWithMixins); });
+            each(this.mixins, function ( fn ) { fn(instanceMethodsWithMixins); });
 
             return extend(instanceMethodsWithMixins, this.processMethods(instanceMethods, processMethodsContext));
         },
 
-        createClass: function (Parent, instanceMethods, staticMethods) {
+        createClass: function ( Parent, instanceMethods, staticMethods ) {
             return this.defaultCreateClass(Parent, this.applyMixins(Parent, instanceMethods), staticMethods);
         }
     });
@@ -151,9 +151,9 @@ define(function (require) {
     var AbstractSimpleMethodAlias = Class.create(
         withMixins(methodDescriptorMixin),
         {
-            constructor: function (name) { this.name = name; },
+            constructor: function ( name ) { this.name = name; },
 
-            createMethod: function (name, ctx) {
+            createMethod: function ( name, ctx ) {
                 var method = this.methodFrom(name, ctx);
                 assertDefinedProperty(method, this.name, this.notDefinedMessageSuffix);
                 return method;
@@ -161,7 +161,7 @@ define(function (require) {
         }
     );
 
-    function callSuperConstructorMixin(proto) {
+    function callSuperConstructorMixin( proto ) {
         proto.constructor = function () { this._super().constructor.apply(this, arguments); };
         return proto;
     }
@@ -169,20 +169,20 @@ define(function (require) {
     var AliasOfSuper = AbstractSimpleMethodAlias.extend(
         withMixins(callSuperConstructorMixin),
         {
-            methodFrom: function (name, ctx) { return ctx.Parent.prototype[this.name]; },
+            methodFrom: function ( name, ctx ) { return ctx.Parent.prototype[this.name]; },
             notDefinedMessageSuffix: ' by the superclass'
         });
 
     var AliasOfMixin = AbstractSimpleMethodAlias.extend(
         withMixins(callSuperConstructorMixin),
         {
-            methodFrom: function (name, ctx) { return ctx.mixinMethods[this.name]; },
+            methodFrom: function ( name, ctx ) { return ctx.mixinMethods[this.name]; },
             notDefinedMessageSuffix: ' by the mixins'
         });
 
     var Trait = Class.create({
-            constructor: function (methods) { this.methods = methods; },
-            _: function (name) {
+            constructor: function ( methods ) { this.methods = methods; },
+            _: function ( name ) {
                 return this.methods[name];
             },
             flatten: function () {
@@ -191,7 +191,7 @@ define(function (require) {
             }
         },
         {
-            create: function (methods) { return new Trait(methods); }
+            create: function ( methods ) { return new Trait(methods); }
         });
 
     var TraitSet = Class.create({
@@ -201,8 +201,8 @@ define(function (require) {
 
         trait: function () { return this.traits[0]; },
 
-        add: function (trait) {
-            if (this.traits.indexOf(trait) !== -1) {
+        add: function ( trait ) {
+            if ( this.traits.indexOf(trait) !== -1 ) {
                 this.traits.push(trait);
             }
             return this;
@@ -212,23 +212,23 @@ define(function (require) {
     var TraitsClassFactory = Class.create(
         withMixins(classFactoryMixin),
         {
-            constructor: function (traits) {
+            constructor: function ( traits ) {
                 this.traits = traits;
             },
 
-            composeTraits: function (instanceMethods) {
+            composeTraits: function ( instanceMethods ) {
                 var methodMap = {}, composed = {};
 
-                each(this.flattenTraits(), function (trait) {
-                    each(trait.methods, function (method, name) {
-                        if (!has(methodMap, name)) {
+                each(this.flattenTraits(), function ( trait ) {
+                    each(trait.methods, function ( method, name ) {
+                        if ( !has(methodMap, name) ) {
                             methodMap[name] = new TraitSet();
                         }
                         methodMap[name].add(trait);
                     });
                 });
 
-                each(methodMap, function (traitSet, name) {
+                each(methodMap, function ( traitSet, name ) {
                     composed[name] = traitSet.hasMoreThanOneTrait() ? this.conflict(name, traitSet) : traitSet.trait();
                 });
 
@@ -246,14 +246,42 @@ define(function (require) {
                 return function () { return 'conflict'; };
             },
 
-            createClass: function (Parent, instanceMethods, staticMethods) {
+            createClass: function ( Parent, instanceMethods, staticMethods ) {
                 return this.defaultCreateClass(Parent, this.composeTraits(instanceMethods), staticMethods);
             }
         });
 
     function withTraits() { return new TraitsClassFactory(arguments); }
 
+    function compositionConflict() {
+
+    }
+
+    function compose() {
+
+        var lastIndex = arguments.length - 1,
+            result = {},
+
+            markConflicts = function ( value, prop ) {
+                result[prop] = has(result, prop) ? compositionConflict : value;
+            },
+
+            overwrite = function ( value, prop ) { result[prop] = value; };
+
+        each(arguments, function ( obj, index ) {
+            if ( obj ) {
+                each(obj, (index !== lastIndex) ? markConflicts : overwrite);
+            }
+        });
+
+        return result;
+
+    }
+
     return {
+        compose: compose,
+        compositionConflict: compositionConflict,
+
         Nil: Nil,
 
         defaultClassFactory: defaultClassFactory,
@@ -264,8 +292,8 @@ define(function (require) {
 
         withMixins: withMixins,
 
-        aliasOfSuper: function (name) { return new AliasOfSuper(name); },
-        aliasOfMixin: function (name) { return new AliasOfMixin(name); },
+        aliasOfSuper: function ( name ) { return new AliasOfSuper(name); },
+        aliasOfMixin: function ( name ) { return new AliasOfMixin(name); },
 
         Trait: Trait,
 

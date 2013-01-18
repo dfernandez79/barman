@@ -2,43 +2,118 @@ var expect = require('chai').expect,
     barista = require('../src/barista');
 
 describe('Barista', function () {
+
     'use strict';
 
+    describe('compose', function () {
+
+        var compose = barista.compose,
+            compositionConflict = barista.compositionConflict;
+
+        it('merges given properties into a new object', function () {
+
+            var one = { one: 'prop from one' },
+                two = { two: 'prop from two' },
+                result = compose(one, two);
+
+            expect(result).to.not.equal(one);
+            expect(result).to.not.equal(two);
+            expect(result.one).to.equal(one.one);
+            expect(result.two).to.equal(two.two);
+
+        });
+
+        it('marks conflicting properties', function () {
+
+            var result = compose({ prop: 'prop from one' }, { prop: 'prop from two' }, {});
+
+            expect(result.prop).to.equal(compositionConflict);
+
+        });
+
+        it('gives precedence to the last object', function () {
+
+            var result = compose({ prop: 'prop from one' }, { prop: 'prop from two' }, {prop: 'last'});
+
+            expect(result.prop).to.equal('last');
+
+        });
+
+    });
+
+
+    describe('Nil', function () {
+
+        var Nil = barista.Nil,
+            Class = barista.Class;
+
+        it('is the parent of a class created with Class.create', function () {
+
+            expect(Class.create().__super__).to.equal(Nil.prototype);
+
+        });
+
+        it('has a __super__ property that returns itself', function () {
+
+            expect(Nil.__super__).to.equal(Nil.prototype);
+
+        });
+
+        it('provides a _super function', function () {
+
+            var SubNil = function () {};
+            SubNil.prototype = new Nil();
+
+            var anInstance = new SubNil();
+
+            expect(anInstance._super()).to.equal(Nil.prototype);
+
+        });
+
+    });
+
+
     var Nil = barista.Nil,
-        Class = barista.Class,
         defaultClassFactory = barista.defaultClassFactory,
         classFactoryMixin = barista.classFactoryMixin,
-        aliasOfSuper = barista.aliasOfSuper,
-        aliasOfMixin = barista.aliasOfMixin;
+        aliasOfSuper = barista.aliasOfSuper;
+
 
     describe('Class', function () {
+
+        var Class = barista.Class;
+
         describe('"create" method', function () {
+
             var Empty = Class.create();
 
             it('returns a constructor function', function () {
+
                 expect(Empty).to.be.a('function');
                 expect(new Empty()).to.be.a('object');
+
             });
 
             it('returns a function with prototype.constructor referencing to itself', function () {
+
                 expect(Empty.prototype.constructor).to.equal(Empty);
+
             });
 
             it('can describe object methods', function () {
-                var Point = Class.create({
-                        move: function () {
-                            return 'moved';
-                        }
-                    }),
+
+                var Point = Class.create({ move: function () { return 'moved'; } }),
                     aPoint = new Point();
 
                 expect(aPoint.move).to.be.a('function');
                 expect(aPoint.move()).to.equal('moved');
+
             });
 
             it('can specify an object constructor', function () {
+
                 var Point = Class.create({
-                        constructor: function (x, y) {
+                        constructor: function ( x, y ) {
                             this.x = x;
                             this.y = y;
                         }}),
@@ -46,42 +121,33 @@ describe('Barista', function () {
 
                 expect(aPoint.x).to.equal(10);
                 expect(aPoint.y).to.equal(20);
+
             });
 
             it('returns classes that can be extended', function () {
-                var Widget = Class.create({
-                        render: function () {
-                            return 'Widget.render';
-                        }
-                    }),
+
+                var Widget = Class.create({ render: function () { return 'Widget.render'; } }),
                     MyWidget = Widget.extend(),
                     aWidget = new MyWidget();
 
                 expect(aWidget.render()).to.equal('Widget.render');
+
             });
 
             it('overrides super class methods with subclass methods', function () {
-                var Widget = Class.create({
-                        render: function () {
-                            return 'Super RENDER';
-                        }
-                    }),
-                    CustomWidget = Widget.extend({
-                        render: function () {
-                            return 'Custom RENDER';
-                        }
-                    }),
+
+                var Widget = Class.create({ render: function () { return 'Super RENDER'; } }),
+                    CustomWidget = Widget.extend({ render: function () { return 'Custom RENDER'; } }),
                     aWidget = new CustomWidget();
 
                 expect(aWidget.render()).to.equal('Custom RENDER');
+
             });
 
             it('supports getPrototypeOf to do super delegation', function () {
-                var Widget = Class.create({
-                        render: function () {
-                            return 'SUPER';
-                        }
-                    }),
+
+                var Widget = Class.create({ render: function () { return 'SUPER'; } }),
+
                     CustomWidget = Widget.extend({
                         render: function () {
                             var parent = Object.getPrototypeOf(Object.getPrototypeOf(this));
@@ -103,7 +169,7 @@ describe('Barista', function () {
 
             it('accepts a "ClassFactory" as an argument', function () {
                 var testFactory = classFactoryMixin({
-                        createClass: function (Parent, instanceMethods, staticMethods) {
+                        createClass: function ( Parent, instanceMethods, staticMethods ) {
                             return {parent: Parent, instanceMethods: instanceMethods, staticMethods: staticMethods};
                         }
                     }),
@@ -119,7 +185,7 @@ describe('Barista', function () {
                         foo: 'bar'
                     }),
                     myFactory = classFactoryMixin({
-                        createClass: function (Parent, instanceMethods, staticMethods) {
+                        createClass: function ( Parent, instanceMethods, staticMethods ) {
                             var newClass = defaultClassFactory.createClass(Parent, instanceMethods, staticMethods);
                             newClass.addedByFactory = true;
                             return newClass;
@@ -168,7 +234,7 @@ describe('Barista', function () {
                     }
                 }),
                 CustomWidget = Widget.extend({
-                    constructor: function (x) {
+                    constructor: function ( x ) {
                         this.x = x;
                     },
                     render: function () {
@@ -236,246 +302,228 @@ describe('Barista', function () {
         });
     });
 
-    describe('Nil', function () {
-        it('is the parent of a class created with Class.create', function () {
-            var MyClass = Class.create();
-            expect(MyClass.__super__).to.equal(Nil.prototype);
-        });
+    /*
 
-        it('has a __super__ property that returns itself', function () {
-            expect(Nil.__super__).to.equal(Nil.prototype);
-        });
+     describe('MixinClassFactory', function () {
+     var withMixins = barista.withMixins;
 
-        it('provides a _super function', function () {
-            var SubNil = function () {};
+     it('can be called with a function to do the mixin', function () {
+     var useTemplate = function ( proto ) {
+     proto.render = function () {
+     return 'from template';
+     };
+     },
+     View = Class.create(withMixins(useTemplate)),
+     aView = new View();
 
-            SubNil.prototype = new Nil();
-            var anInstance = new SubNil();
+     expect(aView.render()).to.equal('from template');
+     });
 
-            expect(anInstance._super()).to.equal(Nil.prototype);
-        });
-    });
+     it('can be called with an object to mixin', function () {
+     var useTemplate = {
+     render: function () {
+     return 'from template';
+     }
+     },
+     View = Class.create(withMixins(useTemplate)),
+     aView = new View();
 
-    describe('MixinClassFactory', function () {
-        var withMixins = barista.withMixins;
+     expect(aView.render()).to.equal('from template');
+     });
 
-        it('can be called with a function to do the mixin', function () {
-            var useTemplate = function (proto) {
-                    proto.render = function () {
-                        return 'from template';
-                    };
-                },
-                View = Class.create(withMixins(useTemplate)),
-                aView = new View();
+     it('gives precedence to class methods over mixin methods', function () {
+     var useTemplate = {
+     added: 'by mixin',
+     render: function () {
+     return 'from template';
+     }
+     },
+     View = Class.create(withMixins(useTemplate), {render: function () {
+     return 'from subclass';
+     }}),
+     aView = new View();
 
-            expect(aView.render()).to.equal('from template');
-        });
+     expect(aView.render()).to.equal('from subclass');
+     expect(aView.added).to.equal('by mixin');
+     });
 
-        it('can be called with an object to mixin', function () {
-            var useTemplate = {
-                    render: function () {
-                        return 'from template';
-                    }
-                },
-                View = Class.create(withMixins(useTemplate)),
-                aView = new View();
+     it('gives precedence to mixin methods over super class methods', function () {
+     var BaseView = Class.create({
+     render: 'base',
+     added: 'by base view'
+     }),
+     useTemplate = {
+     render: 'template'
+     },
+     View = BaseView.extend(withMixins(useTemplate)),
+     aView = new View();
 
-            expect(aView.render()).to.equal('from template');
-        });
+     expect(aView.render).to.equal('template');
+     expect(aView.added).to.equal('by base view');
+     });
 
-        it('gives precedence to class methods over mixin methods', function () {
-            var useTemplate = {
-                    added: 'by mixin',
-                    render: function () {
-                        return 'from template';
-                    }
-                },
-                View = Class.create(withMixins(useTemplate), {render: function () {
-                    return 'from subclass';
-                }}),
-                aView = new View();
+     it('applies multiple mixin objects from left to right', function () {
+     var one = {num: 'one'}, two = {num: 'two'}, three = {num: 'three'},
+     View = Class.create(withMixins(one, two, three)),
+     aView = new View();
 
-            expect(aView.render()).to.equal('from subclass');
-            expect(aView.added).to.equal('by mixin');
-        });
+     expect(aView.num).to.equal('three');
+     });
 
-        it('gives precedence to mixin methods over super class methods', function () {
-            var BaseView = Class.create({
-                    render: 'base',
-                    added: 'by base view'
-                }),
-                useTemplate = {
-                    render: 'template'
-                },
-                View = BaseView.extend(withMixins(useTemplate)),
-                aView = new View();
+     it('applies multiple mixin functions from left to right', function () {
+     var one = function ( obj ) {
+     obj.num = 'one';
+     },
+     two = function ( obj ) {
+     obj.num = 'two';
+     },
+     three = function ( obj ) {
+     obj.num = 'three';
+     },
+     View = Class.create(withMixins(one, two, three)),
+     aView = new View();
 
-            expect(aView.render).to.equal('template');
-            expect(aView.added).to.equal('by base view');
-        });
+     expect(aView.num).to.equal('three');
+     });
 
-        it('applies multiple mixin objects from left to right', function () {
-            var one = {num: 'one'}, two = {num: 'two'}, three = {num: 'three'},
-                View = Class.create(withMixins(one, two, three)),
-                aView = new View();
+     it('only accepts functions or objects as an argument', function () {
+     expect(function () {
+     withMixins(1);
+     }).to.throw(TypeError);
+     });
 
-            expect(aView.num).to.equal('three');
-        });
+     it('preserves the prototype chain', function () {
+     var BaseView = Class.create({render: 'base'}),
+     useTemplate = {render: 'template'},
+     View = BaseView.extend(withMixins(useTemplate));
 
-        it('applies multiple mixin functions from left to right', function () {
-            var one = function (obj) {
-                    obj.num = 'one';
-                },
-                two = function (obj) {
-                    obj.num = 'two';
-                },
-                three = function (obj) {
-                    obj.num = 'three';
-                },
-                View = Class.create(withMixins(one, two, three)),
-                aView = new View();
+     expect(Object.getPrototypeOf(View.prototype)).to.equal(BaseView.prototype);
+     });
 
-            expect(aView.num).to.equal('three');
-        });
+     describe('aliasOfMixin', function () {
+     it('can be used to reference a method created from object mixins', function () {
+     var renderMixin = {render: function () { return 'mixin'; }},
+     View = Class.create(withMixins(renderMixin), {
+     mrender: aliasOfMixin('render'),
+     render: function () { return 'me and ' + this.mrender(); }
+     }),
+     aView = new View();
 
-        it('only accepts functions or objects as an argument', function () {
-            expect(function () {
-                withMixins(1);
-            }).to.throw(TypeError);
-        });
+     expect(aView.render()).to.equal('me and mixin');
+     });
 
-        it('preserves the prototype chain', function () {
-            var BaseView = Class.create({render: 'base'}),
-                useTemplate = {render: 'template'},
-                View = BaseView.extend(withMixins(useTemplate));
+     it('can be used with aliasOfSuper', function () {
+     var BaseView = Class.create({render: function () { return 'base'; }}),
+     renderMixin = {render: function () { return 'mixin'; }},
+     View = BaseView.extend(withMixins(renderMixin), {
+     baseRender: aliasOfSuper('render'),
+     mixinRender: aliasOfMixin('render'),
+     render: function () {
+     return ['me', this.baseRender(), this.mixinRender()].join(' ');
+     }
+     }),
+     aView = new View();
 
-            expect(Object.getPrototypeOf(View.prototype)).to.equal(BaseView.prototype);
-        });
+     expect(aView.render()).to.equal('me base mixin');
+     });
 
-        describe('aliasOfMixin', function () {
-            it('can be used to reference a method created from object mixins', function () {
-                var renderMixin = {render: function () { return 'mixin'; }},
-                    View = Class.create(withMixins(renderMixin), {
-                        mrender: aliasOfMixin('render'),
-                        render: function () { return 'me and ' + this.mrender(); }
-                    }),
-                    aView = new View();
+     it('uses the method resulted from the application of all mixins', function () {
+     var one = {num: function () {return 1;}}, two = {num: function () {return 2;}},
+     Count = Class.create(withMixins(one, two), {
+     mnum: aliasOfMixin('num'),
+     num: function () {
+     return 'is ' + this.mnum();
+     }
+     }),
+     aCount = new Count();
 
-                expect(aView.render()).to.equal('me and mixin');
-            });
+     expect(aCount.num()).to.equal('is 2');
+     });
+     });
+     });
+     // TODO throw error if aliasOfMixin is used without mixins
+     // TODO test for callSuperConstructorMixin
+     describe('Traits', function () {
+     var withTraits = barista.withTraits;
 
-            it('can be used with aliasOfSuper', function () {
-                var BaseView = Class.create({render: function () { return 'base'; }}),
-                    renderMixin = {render: function () { return 'mixin'; }},
-                    View = BaseView.extend(withMixins(renderMixin), {
-                        baseRender: aliasOfSuper('render'),
-                        mixinRender: aliasOfMixin('render'),
-                        render: function () {
-                            return ['me', this.baseRender(), this.mixinRender()].join(' ');
-                        }
-                    }),
-                    aView = new View();
+     it('can be used to add methods', function () {
+     var viewTrait = {render: function () { return 'hello'; }},
+     MyView = Class.create(withTraits(viewTrait)),
+     aView = new MyView();
 
-                expect(aView.render()).to.equal('me base mixin');
-            });
+     expect(aView.render()).to.equal('hello');
+     });
 
-            it('uses the method resulted from the application of all mixins', function () {
-                var one = {num: function () {return 1;}}, two = {num: function () {return 2;}},
-                    Count = Class.create(withMixins(one, two), {
-                        mnum: aliasOfMixin('num'),
-                        num: function () {
-                            return 'is ' + this.mnum();
-                        }
-                    }),
-                    aCount = new Count();
+     it('gives precedence to class methods over trait methods', function () {
+     var viewTrait = {render: function () { return 'hello'; }},
+     MyView = Class.create(withTraits(viewTrait), {render: function () { return 'override'; }}),
+     aView = new MyView();
 
-                expect(aCount.num()).to.equal('is 2');
-            });
-        });
-    });
-    // TODO throw error if aliasOfMixin is used without mixins
-    // TODO test for callSuperConstructorMixin
-    describe('Traits', function () {
-        var withTraits = barista.withTraits;
+     expect(aView.render()).to.equal('override');
+     });
 
-        it('can be used to add methods', function () {
-            var viewTrait = {render: function () { return 'hello'; }},
-                MyView = Class.create(withTraits(viewTrait)),
-                aView = new MyView();
+     it('gives precedence to trait methods over super class methods', function () {
+     var viewTrait = {render: function () { return 'hello'; }},
+     Base = Class.create({render: function () { return 'base'; }}),
+     MyView = Base.extend(withTraits(viewTrait)),
+     aView = new MyView();
 
-            expect(aView.render()).to.equal('hello');
-        });
+     expect(aView.render()).to.equal('hello');
+     });
 
-        it('gives precedence to class methods over trait methods', function () {
-            var viewTrait = {render: function () { return 'hello'; }},
-                MyView = Class.create(withTraits(viewTrait), {render: function () { return 'override'; }}),
-                aView = new MyView();
+     it('marks conflicting trait methods', function () {
+     var templateTrait = {render: function () { return 'template'; }},
+     compositeTrait = {render: function () { return 'composite';}},
+     MyView = Class.create(withTraits(templateTrait, compositeTrait)),
+     aView = new MyView();
 
-            expect(aView.render()).to.equal('override');
-        });
+     expect(function () {
+     aView.render();
+     }).to.throw('The "render" method is defined by multiple traits, you need to specify an implementation');
+     });
 
-        it('gives precedence to trait methods over super class methods', function () {
-            var viewTrait = {render: function () { return 'hello'; }},
-                Base = Class.create({render: function () { return 'base'; }}),
-                MyView = Base.extend(withTraits(viewTrait)),
-                aView = new MyView();
+     it('allows a trait to include another trait', function () {
+     var helloTrait = {hello: function () { return 'hello world'; }},
+     otherTrait = {other: 'hi'},
+     viewTrait = {__includes__: [helloTrait, otherTrait], render: function () {return 'view';}},
+     MyView = Class.create(withTraits(viewTrait)),
+     aView = new MyView();
 
-            expect(aView.render()).to.equal('hello');
-        });
+     expect(aView.hello()).to.equal('hello world');
+     expect(aView.other).to.equal('hi');
+     expect(aView.render()).to.equal('view');
+     });
 
-        it('marks conflicting trait methods', function () {
-            var templateTrait = {render: function () { return 'template'; }},
-                compositeTrait = {render: function () { return 'composite';}},
-                MyView = Class.create(withTraits(templateTrait, compositeTrait)),
-                aView = new MyView();
+     it('allows methods from the same trait given in different composition paths', function () {
+     var helloTrait = {hello: function () { return 'hello world'; }},
+     otherTrait = {__includes__: [helloTrait], other: 'hi'},
+     viewTrait = {__includes__: [helloTrait, otherTrait], render: function () {return 'view';}},
+     MyView = Class.create(withTraits(viewTrait)),
+     aView = new MyView();
 
-            expect(function () {
-                aView.render();
-            }).to.throw('The "render" method is defined by multiple traits, you need to specify an implementation');
-        });
+     expect(aView.hello()).to.equal('hello world');
+     expect(aView.other).to.equal('hi');
+     expect(aView.render()).to.equal('view');
+     });
 
-        it('allows a trait to include another trait', function () {
-            var helloTrait = {hello: function () { return 'hello world'; }},
-                otherTrait = {other: 'hi'},
-                viewTrait = {__includes__: [helloTrait, otherTrait], render: function () {return 'view';}},
-                MyView = Class.create(withTraits(viewTrait)),
-                aView = new MyView();
+     it('allows to use a single trait object in the __includes__ special property', function () {
+     var messageTrait = {message: 'it worked'},
+     valueTrait = {__includes__: messageTrait, value: 1},
+     MyValue = Class.create(withTraits(valueTrait)),
+     aValue = new MyValue();
 
-            expect(aView.hello()).to.equal('hello world');
-            expect(aView.other).to.equal('hi');
-            expect(aView.render()).to.equal('view');
-        });
+     expect(aValue.message).to.equal('it worked');
+     });
 
-        it('allows methods from the same trait given in different composition paths', function () {
-            var helloTrait = {hello: function () { return 'hello world'; }},
-                otherTrait = {__includes__: [helloTrait], other: 'hi'},
-                viewTrait = {__includes__: [helloTrait, otherTrait], render: function () {return 'view';}},
-                MyView = Class.create(withTraits(viewTrait)),
-                aView = new MyView();
+     it('can specify aliases to trait methods', function () {
+     var templateTrait = {render: function () { return 'template'; }},
+     compositeTrait = {render: function () { return 'composite'; }},
+     MyView = Class.create(withTraits(templateTrait, compositeTrait), {
+     render: templateTrait.render
+     }),
+     aView = new MyView();
 
-            expect(aView.hello()).to.equal('hello world');
-            expect(aView.other).to.equal('hi');
-            expect(aView.render()).to.equal('view');
-        });
-
-        it('allows to use a single trait object in the __includes__ special property', function () {
-            var messageTrait = {message: 'it worked'},
-                valueTrait = {__includes__: messageTrait, value: 1},
-                MyValue = Class.create(withTraits(valueTrait)),
-                aValue = new MyValue();
-
-            expect(aValue.message).to.equal('it worked');
-        });
-
-        it('can specify aliases to trait methods', function () {
-            var templateTrait = {render: function () { return 'template'; }},
-                compositeTrait = {render: function () { return 'composite'; }},
-                MyView = Class.create(withTraits(templateTrait, compositeTrait), {
-                    render: templateTrait.render
-                }),
-                aView = new MyView();
-
-            expect(aView.render()).to.equal('template');
-        });
-    });
+     expect(aView.render()).to.equal('template');
+     });
+     }); */
 });

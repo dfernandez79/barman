@@ -2,6 +2,7 @@ barista
 =======
 
 Barista is a small library that helps you with the definition of JavaScript objects.
+
 It allows you to define objects using [single-inheritance], [mixins], and [traits].
 
 Usage
