@@ -10,17 +10,17 @@
 <script src="js/underscore-min.js" type="text/javascript"></script>
 <script src="js/mocha.js" type="text/javascript"></script>
 <script src="js/chai.js" type="text/javascript"></script>
-<script src="../dist/barista-noamd.min.js"></script>
+<script src="../dist/barista.min.js"></script>
 <script>
     mocha.setup('bdd');
 
     // mock Barista require before loading
-    var require = function (name) {
-        switch (name) {
+    var require = function ( name ) {
+        switch ( name ) {
             case 'chai':
                 return chai;
             case '../src/barista':
-                return Barista;
+                return barista;
             default:
                 throw new Error('Unexpected require: ' + name);
         }
@@ -29,7 +29,7 @@
 <script src="../specs/baristaSpec.js" type="text/javascript"></script>
 
 <script type="text/javascript" charset="utf-8">
-    if (navigator.userAgent.indexOf('PhantomJS') < 0) {
+    if ( navigator.userAgent.indexOf('PhantomJS') < 0 ) {
         mocha.run();
     }
 </script>

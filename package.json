@@ -1,23 +1,34 @@
 {
     "name": "barista",
     "description": "A micro framework to brew JavaScript objects.",
-    "version": "0.0.1",
+    "version": "0.1.0",
+    "homepage": "https://github.com/dfernandez79/barista",
+    "author": {
+        "name": "Diego Fernandez",
+        "url": "https://github.com/dfernandez79"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dfernandez79/barista.git"
+    },
+    "bugs": {
+        "url": "https://github.com/dfernandez79/barista/issues"
+    },
+    "main": "src/barista.js",
     "scripts": {
         "test": "grunt test"
     },
-    "main": "src/barista.js",
     "devDependencies": {
-        "grunt": "0.4.0rc5",
-        "grunt-simple-mocha": "~0.3.1",
-        "chai": "~1.4.0",
-        "mocha": "~1.7.4",
+        "grunt": "0.4.0rc6",
+        "grunt-simple-mocha": "0.3.2",
+        "chai": "1.4.2",
+        "mocha": "1.8.1",
         "grunt-contrib-watch": "0.2.0rc5",
-        "grunt-requirejs": "~0.3.1",
-        "grunt-contrib-jshint": "0.1.1rc5",
-        "grunt-mocha": "~0.2.0"
+        "grunt-requirejs": "0.3.1",
+        "grunt-contrib-jshint": "0.1.1rc6",
+        "grunt-mocha": "0.2.1"
     },
     "dependencies": {
-        "amdefine": "0.0.4",
-        "underscore": "~1.4.3"
+        "underscore": "1.4.3"
     }
 }
