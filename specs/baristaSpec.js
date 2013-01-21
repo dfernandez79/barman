@@ -7,8 +7,8 @@ describe('Barista', function () {
 
     var extend = barista.extend,
         merge = barista.merge,
-        mergeConflict = barista.mergeConflict,
-        subclassResponsibility = barista.subclassResponsibility,
+        conflict = barista.conflict,
+        required = barista.required,
         Nil = barista.Nil,
         Class = barista.Class,
         AbstractClassFactory = barista.AbstractClassFactory,
@@ -35,7 +35,7 @@ describe('Barista', function () {
 
             var result = merge({ prop: 'prop from one' }, { prop: 'prop from two' });
 
-            expect(result.prop).to.equal(mergeConflict);
+            expect(result.prop).to.equal(conflict);
 
         });
 
@@ -48,24 +48,32 @@ describe('Barista', function () {
 
         });
 
-    });
+        it('accepts implementations for properties marked as required', function () {
 
+            var result = merge({ prop: required }, { prop: 'value' });
 
-    describe('mergeConflict', function () {
-
-        it('throws an error when executed', function () {
-
-            expect(mergeConflict).to.throw(Error);
+            expect(result.prop).to.equal('value');
 
         });
 
     });
 
-    describe('subclassResponsibility', function () {
+
+    describe('conflict', function () {
 
         it('throws an error when executed', function () {
 
-            expect(subclassResponsibility).to.throw(Error);
+            expect(conflict).to.throw(Error);
+
+        });
+
+    });
+
+    describe('required', function () {
+
+        it('throws an error when executed', function () {
+
+            expect(required).to.throw(Error);
 
         });
 
