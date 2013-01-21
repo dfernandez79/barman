@@ -1,19 +1,19 @@
 var expect = require('chai').expect,
-    barista = require('../src/barman');
+    barman = require('../src/barman');
 
-describe('Barista', function () {
+describe('Barman', function () {
 
     'use strict';
 
-    var extend = barista.extend,
-        merge = barista.merge,
-        conflict = barista.conflict,
-        required = barista.required,
-        Nil = barista.Nil,
-        Class = barista.Class,
-        AbstractClassFactory = barista.AbstractClassFactory,
-        isClassFactory = barista.isClassFactory,
-        withTraits = barista.withTraits;
+    var extend = barman.extend,
+        merge = barman.merge,
+        conflict = barman.conflict,
+        required = barman.required,
+        Nil = barman.Nil,
+        Class = barman.Class,
+        AbstractClassFactory = barman.AbstractClassFactory,
+        isClassFactory = barman.isClassFactory,
+        withTraits = barman.withTraits;
 
 
     describe('merge', function () {

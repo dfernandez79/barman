@@ -28,7 +28,7 @@
 
             factory(require, exports, module);
 
-            root.barista = module.exports;
+            root.barman = module.exports;
 
         };
 

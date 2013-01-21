@@ -92,9 +92,9 @@ module.exports = function ( grunt ) {
                     },
                     onBuildWrite: function ( moduleName, path, contents ) {
 
-                        if ( path === './src/barista.js' ) {
+                        if ( path === './src/barman.js' ) {
 
-                            return contents.replace(/^define\('src\/barista'/, "define('barista'");
+                            return contents.replace(/^define\('src\/barman'/, "define('barman'");
 
                         } else {
                             return contents;

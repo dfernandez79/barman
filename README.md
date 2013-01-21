@@ -1,7 +1,7 @@
-barista
+barman
 =======
 
-Barista is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
+_Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
 
 Its small (2.6k minimized, 1.2k compressed), and plays nice with other frameworks.
 
