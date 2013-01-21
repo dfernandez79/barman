@@ -137,10 +137,10 @@ Installation
 ------------
 
 Design notes
-============
+------------
 
 References
-==========
+----------
 
 License
 -------
