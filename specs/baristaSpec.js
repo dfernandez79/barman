@@ -202,6 +202,14 @@ describe('Barista', function () {
 
             });
 
+            it('throws an exception if the constructor is not a function', function () {
+
+                expect(function () {
+                    Class.create({constructor: 'hello'}).to.throw(TypeError);
+                });
+
+            });
+
         });
 
 
@@ -246,6 +254,41 @@ describe('Barista', function () {
 
                 expect(Parent.prototype.extend).to.be.undefined;
                 expect(anInstance._super()).to.equal(Parent.prototype);
+
+            });
+
+            it('calls to the super constructor if the sub-class do not defines a constructor', function () {
+
+                var Point = Class.create({
+                        constructor: function ( x, y ) {
+                            this.x = x;
+                            this.y = y;
+                        }
+                    }),
+
+                    ColoredPoint = Point.extend({
+                        color: 'blue',
+                        show: function () {
+                            return 'blue ' + this.x + ', ' + this.y;
+                        }
+                    }),
+
+                    aPoint = new ColoredPoint(5, 6);
+
+                expect(aPoint.show()).to.equal('blue 5, 6');
+
+            });
+
+            it('uses the constructor given by the sub-class', function () {
+
+                var Parent = Class.create({constructor: function () { this.x = 10; }}),
+
+                    Sub = Parent.extend({constructor: function () { this.x = 42; }}),
+
+                    anInstance = new Sub();
+
+
+                expect(anInstance.x).to.equal(42);
 
             });
 
