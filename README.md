@@ -10,7 +10,7 @@ Feature tour
 ------------
 
 Define a _class_:
-
+```js
     var View = Class.create({
         render: function () {
             return 'View Render';
@@ -19,9 +19,9 @@ Define a _class_:
 
     var aView = new View();
     aView.render(); // View Render
-
+```
 Extend a _class_:
-
+```js
     var CustomView = View.extend({
         render: function () {
             return 'Custom';
@@ -30,9 +30,9 @@ Extend a _class_:
 
     var aView = new CustomView();
     aView.render(); // Custom
-
+```
 By default the _super class_ constructor is called:
-
+```js
      var Point = Class.create({
              constructor: function ( x, y ) {
                  this.x = x; this.y = y;
@@ -49,9 +49,9 @@ By default the _super class_ constructor is called:
          aPoint = new ColoredPoint(5, 6);
          
     aPoint.show() // blue 5, 6
-
+```
 Delegate to _super class_ method implementation:
-
+```js
     var CustomView = View.extend({
         render: function () {
             return 'Custom call to super ' + this._super('render')();
@@ -60,17 +60,17 @@ Delegate to _super class_ method implementation:
 
     var aView = new CustomView();
     aView.render(); // Custom call to super View Render
-
+```
 Re-define the constructor, calling to the one from the _super class_:
-
+```js
     var XPoint = Point.extend({
         constructor: function (x, y) {
             _super('constructor')(x * 10, y * 20);
         }
     });
-
+```
 Share method implementations using _traits_:
-
+```js
     var View = Class.create({
         render: function () {
             return 'default render';
@@ -94,9 +94,9 @@ Share method implementations using _traits_:
 
     var aView = new CustomView();
     aView.render(); // sub view 1, sub view 2
-
+```
 Traits are represented with plain objects, but they can indicate required methods:
-
+```js
     var templateRenderingTrait = {
         template: required,
         $el: required,
@@ -106,19 +106,19 @@ Traits are represented with plain objects, but they can indicate required method
             return this;
         }
     };
-
+```
 Traits can be composed:
-
+```js
     var MyView = View.extend(
         withTraits(templateRenderingTrait, compositeViewTrait)
     );
-
+```
 Conflicting methods will throw an exception when executed:
-
+```js
     (new MyView()).render(); // throws an exception
-
+```
 Conflicts can be resolved by setting the implementation to use:
-
+```js
     var MyView = View.extend(
         withTraits(templateRenderingTrait, compositeViewTrait),
         
@@ -130,7 +130,7 @@ Conflicts can be resolved by setting the implementation to use:
             this.compositeRender();
         }
     );
-
+```
 
 
 Installation
