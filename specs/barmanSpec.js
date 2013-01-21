@@ -1,5 +1,5 @@
 var expect = require('chai').expect,
-    barista = require('../src/barista');
+    barista = require('../src/barman');
 
 describe('Barista', function () {
 
