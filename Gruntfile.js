@@ -89,6 +89,17 @@ module.exports = function ( grunt ) {
                     wrap: {
                         startFile: 'src/wrap.start',
                         endFile: 'src/wrap.end'
+                    },
+                    onBuildWrite: function ( moduleName, path, contents ) {
+
+                        if ( path === './src/barista.js' ) {
+
+                            return contents.replace(/^define\('src\/barista'/, "define('barista'");
+
+                        } else {
+                            return contents;
+                        }
+
                     }
                 }
             }
