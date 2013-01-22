@@ -32,7 +32,7 @@ aView.render(); // View Render
 ```
 
 
-##### Create a _sub-class_
+#### Create a _sub-class_
 
 ```js
 var CustomView = View.extend({
@@ -81,81 +81,95 @@ var aView = new CustomView();
 aView.render(); // Custom call to super View Render
 ```
 
-#### Overriding constructors
+#### Constructors can be overriden too
 
 ```js
-    var XPoint = Point.extend({
-        constructor: function (x, y) {
-            _super('constructor')(x * 10, y * 20);
+var XPoint = Point.extend({
+    constructor: function (x, y) {
+        _super('constructor')(x * 10, y * 20);
+    }
+});
+```
+
+
+#### Method implementations can be shared between classes using _traits_
+
+```js
+var View = Class.create({
+    render: function () {
+        return 'default render';
+    }
+};
+
+var compositeViewTrait = {
+    subViews: required,
+
+    render: function() {
+        return this.subViews().join();
+    }
+};
+
+var CustomView = View.extend(
+    withTraits(compositeViewTrait),
+    {
+        subViews: function () {
+                return ['sub view 1', 'sub view 2'];
         }
     });
+
+var aView = new CustomView();
+aView.render(); // sub view 1, sub view 2
 ```
-Share method implementations using _traits_:
+
+#### Traits are represented with plain objects, but they can indicate required methods
+
 ```js
-    var View = Class.create({
-        render: function () {
-            return 'default render';
-        }
-    };
-
-    var compositeViewTrait = {
-        subViews: required,
-
-        render: function() {
-            return this.subViews().join();
-        }
-    };
-
-    var CustomView = View.extend(
-        withTraits(compositeViewTrait),
-        {
-            subViews: function () {
-                return ['sub view 1', 'sub view 2'];
-        });
-
-    var aView = new CustomView();
-    aView.render(); // sub view 1, sub view 2
-```
-Traits are represented with plain objects, but they can indicate required methods:
-```js
-    var templateRenderingTrait = {
-        template: required,
-        $el: required,
+var templateRenderingTrait = {
+    template: required,
+    $el: required,
         
-        render: function () {
-            this.$el.html(this.template());
-            return this;
-        }
-    };
-```
-Traits can be composed:
-```js
-    var MyView = View.extend(
-        withTraits(templateRenderingTrait, compositeViewTrait)
-    );
-```
-Conflicting methods will throw an exception when executed:
-```js
-    (new MyView()).render(); // throws an exception
-```
-Conflicts can be resolved by setting the implementation to use:
-```js
-    var MyView = View.extend(
-        withTraits(templateRenderingTrait, compositeViewTrait),
-        
-        compositeRender: compositeViewTrait.render,
-        templateRender: templateRenderingTrait.render,
-        
-        render: function () {
-            this.templateRender();
-            this.compositeRender();
-        }
-    );
+    render: function () {
+        this.$el.html(this.template());
+        return this;
+    }
+};
 ```
 
+#### Traits can be composed
+
+```js
+var MyView = View.extend(
+    withTraits(templateRenderingTrait, compositeViewTrait)
+);
+```
+
+#### Conflicting methods will throw an exception when executed
+
+```js
+(new MyView()).render(); // throws an exception
+```
+
+#### Conflicts can be resolved by setting the implementation to use
+
+```js
+var MyView = View.extend(
+    withTraits(templateRenderingTrait, compositeViewTrait),
+        
+    compositeRender: compositeViewTrait.render,
+    templateRender: templateRenderingTrait.render,
+        
+    render: function () {
+        this.templateRender();
+        this.compositeRender();
+    });
+```
 
 Installation
 ------------
+
+```shell
+npm install barman --save
+```
 
 Design notes
 ------------
