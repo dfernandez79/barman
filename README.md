@@ -113,7 +113,7 @@ var CustomView = View.extend(
     withTraits(compositeViewTrait),
     {
         subViews: function () {
-                return ['sub view 1', 'sub view 2'];
+            return ['sub view 1', 'sub view 2'];
         }
     });
 
@@ -149,7 +149,7 @@ var MyView = View.extend(
 (new MyView()).render(); // throws an exception
 ```
 
-#### Conflicts can be resolved by setting the implementation to use
+#### Conflicts can be resolved by setting which implementation to use
 
 ```js
 var MyView = View.extend(
