@@ -81,7 +81,7 @@ var aView = new CustomView();
 aView.render(); // Custom call to super View Render
 ```
 
-#### Constructors can be overriden too
+#### Constructors can be overridden too
 
 ```js
 var XPoint = Point.extend({
@@ -167,8 +167,80 @@ var MyView = View.extend(
 Installation
 ------------
 
+### Browser without AMD
+
+Barman uses some functions from [underscore], so you'll need to load it:
+
+```html
+<script src="underscore-min.js" type="text/javascript"></script>
+<script src="barman.min.js"></script>
+```
+
+After that you'll have the `window.barman` variable set.
+If you are worried about the download size of underscore + barman, which is small by the way, see the underscore
+dependency notes bellow.
+
+### Browser with AMD
+
+Barman supports AMD without any additional configuration. So you don't need to write an adapter or declare a
+requirejs `shim` configuration.
+
+Barman expects an `underscore` module that returns the underscore object, so you need to configure it:
+
+ ```js
+require.config({
+    paths: {
+        barman: 'barman.min',
+        underscore: 'underscore-min'
+    },
+    shim: {
+        // underscore.js is not an AMD module
+        exports: '_'
+    }
+});
+
+require(['barman'], function (barman) {
+    // use it
+});
+```
+
+### Node.js
+
 ```shell
 npm install barman --save
+```
+
+The `--save` argument adds the barman dependency to your `package.json`.
+Then in your program use `require`, and probably some convenience variables, for example:
+
+```js
+var barman = require('barman'),
+    Class = barman.Class;
+```
+
+### Underscore dependency
+
+Barman uses only a few functions from underscore. Those functions are declared at the beginning of the source code,
+so is easy to replace them with alternative implementations:
+
+* If you don't use AMD: Use setup the `_` global, for example using mout, lodash or your own implementation.
+
+* If you use AMD: Setup an alternative `underscore` module. Then you can use the `map`
+ configuration option added in RequireJS 2:
+
+```js
+require.config({
+    paths: {
+        barman: 'barman.min',
+        'my-underscore': 'my-underscore-impl-for-barman'
+    },
+    // create an alias of the underscore dependency, just for barman
+    map: {
+        barman: {
+            underscore: 'my-underscore'
+        }
+    }
+});
 ```
 
 Design notes
@@ -180,7 +252,10 @@ References
 License
 -------
 
-MIT
+Released under [MIT license]
+
+
+[MIT license]: http://opensource.org/licenses/mit-license.php
 
 [single-inheritance]: http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)
 

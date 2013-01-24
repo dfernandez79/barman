@@ -15,19 +15,21 @@
     }
 
     require.config({
+        baseUrl: './js',
         paths: {
-            barman: '../src/barman',
-            barmanSpec: 'js/barmanSpec.amd',
-            chai: 'js/chai',
-            underscore: 'js/underscore-min'
-        },
-        shim: {
-            underscore: {
-                exports: '_'
-            }
+            barman: '../../src/barman',
+            barmanSpec: 'barmanSpec.amd',
+            chai: 'chai',
+            underscore: 'underscore-min'
         },
         map: {
-            '../src/barman': 'barman'
+            barmanSpec: {
+                '../src/barman': 'barman'
+            },
+
+            barman: {
+                underscore: 'barman-underscore'
+            }
         }
     });
 
