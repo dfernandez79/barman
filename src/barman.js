@@ -176,39 +176,22 @@
         });
 
 
-        function createClassOptionsFrom( args ) {
+        Nil.extend = function () {
 
-            var options = {classFactory: defaultClassFactory, parent: args[0]},
-                i = 1;
+            var args = toArray(arguments),
+                classFactory = (isClassFactory(args[0])) ? args.shift() : defaultClassFactory;
 
-            if ( isClassFactory(args[i]) ) { options.classFactory = args[i++]; }
-            options.instanceMethods = optional(args[i++]);
-            options.staticMethods = optional(args[i]);
+            args.unshift(this);
 
-            return options;
-
-        }
-
-
-        function createClass() {
-
-            var options = createClassOptionsFrom(arguments);
-
-            return options.classFactory.createClass(options.parent, options.instanceMethods, options.staticMethods);
-
-        }
-
-
-        Nil.extend = function ( classFactory, instanceMethods, staticMethods ) {
-
-            return createClass(this, classFactory, instanceMethods, staticMethods);
+            return classFactory.createClass.apply(classFactory, args);
 
         };
 
-        var Class = {
-            create: function ( classFactory, instanceMethods, staticMethods ) {
 
-                return Nil.extend(classFactory, instanceMethods, staticMethods);
+        var Class = {
+            create: function () {
+
+                return Nil.extend.apply(Nil, arguments);
 
             }
         };

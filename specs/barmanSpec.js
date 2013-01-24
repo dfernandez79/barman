@@ -210,6 +210,28 @@ describe('Barman', function () {
 
             });
 
+
+            it('can pass arbitrary arguments to the class factory', function () {
+
+
+                var TestClassFactory = AbstractClassFactory.extend({
+
+                        createClass: function () {
+                            return arguments;
+                        }
+
+                    }),
+
+                    testClass = Class.create(new TestClassFactory(), 'hello', 'world', 'from', 'class factory');
+
+
+                expect(testClass[0]).to.equal(Nil);
+                expect(testClass[1]).to.equal('hello');
+                expect(testClass[2]).to.equal('world');
+                expect(testClass[3]).to.equal('from');
+                expect(testClass[4]).to.equal('class factory');
+
+            });
         });
 
 

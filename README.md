@@ -3,7 +3,7 @@ barman
 
 _Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
 
-It's small (2.6k minimized, 1.2k compressed), and plays nice with other frameworks.
+It's small (2.2k minimized, 1k compressed), and plays nice with other frameworks.
 
 
 Feature tour
