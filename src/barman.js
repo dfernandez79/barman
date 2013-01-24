@@ -267,7 +267,7 @@
 
     if ( typeof define === 'function' && define.amd ) {
         // AMD (ie requirejs)
-        define(factory);
+        define(['underscore'], factory);
     } else if ( typeof module !== 'undefined' && module.exports ) {
         // Node
         module.exports = factory(require('underscore'));
