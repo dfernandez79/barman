@@ -8,8 +8,7 @@ module.exports = function ( grunt ) {
 
         meta: {
             src: 'src/**/*.js',
-            specs: 'specs/**/*Spec.js',
-            releaseBranch: 'master'
+            specs: 'specs/**/*Spec.js'
         },
 
         jshint: {
@@ -70,20 +69,44 @@ module.exports = function ( grunt ) {
         },
 
         mocha: {
-            integration: {
-                src: ['integration-tests/noamd-tests.html'],
-                options: {run: true}
+            noamd: {
+                src: [ 'integration-tests/noamd-tests.html'],
+                options: { run: true }
+            },
+            amd: {
+                src: [ 'integration-tests/amd-tests.html'],
+                options: { run: false }
             }
         },
 
         uglify: {
             dist: {
                 options: {
-                    sourceMap: 'https://raw.github.com/dfernandez79/barman/<%=meta.releaseBranch%>/dist/barman.min.js.map',
-                    sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/<%=meta.releaseBranch%>'
+                    sourceMap: 'dist/barman.min.js.map',
+                    sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>'
                 },
                 files: {
                     'dist/barman.min.js': ['src/barman.js']
+                }
+            }
+        },
+
+        requirejs: {
+            std: {
+                options: {
+                    name: 'barmanSpec',
+                    out: 'integration-tests/js/barmanSpec.amd.js',
+                    optimize: 'none',
+                    baseUrl: 'specs',
+                    paths: {
+                        chai: 'empty:',
+                        underscore: 'empty:',
+                        '../src/barman': 'empty:'
+                    },
+                    cjsTranslate: true,
+                    onBuildWrite: function ( moduleName, path, contents ) {
+                        return contents.replace(/^define\('barmanSpec',/, "define(");
+                    }
                 }
             }
         }
@@ -93,6 +116,7 @@ module.exports = function ( grunt ) {
     grunt.loadTasks('tasks');
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-requirejs');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
@@ -101,7 +125,7 @@ module.exports = function ( grunt ) {
     grunt.registerTask('test', 'simplemocha');
     grunt.registerTask('integration-test', 'mocha');
     grunt.registerTask('lint', 'jshint');
-    grunt.registerTask('dist', ['default', 'uglify', 'integration-test']);
+    grunt.registerTask('dist', ['default', 'uglify', 'requirejs', 'integration-test']);
     grunt.registerTask('default', ['lint', 'test']);
 
 };

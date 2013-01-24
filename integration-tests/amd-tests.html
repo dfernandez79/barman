@@ -7,31 +7,33 @@
 <body>
 <div id="mocha"></div>
 
-<script src="js/underscore-min.js" type="text/javascript"></script>
 <script src="js/mocha.js" type="text/javascript"></script>
-<script src="js/chai.js" type="text/javascript"></script>
-<script src="../dist/barman.min.js"></script>
+<script src="js/require.js"></script>
 <script>
-    mocha.setup('bdd');
-
-    // mock 'barman' require before loading
-    var require = function ( name ) {
-        switch ( name ) {
-            case 'chai':
-                return chai;
-            case '../src/barman':
-                return barman;
-            default:
-                throw new Error('Unexpected require: ' + name);
-        }
-    };
-</script>
-<script src="../specs/barmanSpec.js" type="text/javascript"></script>
-
-<script type="text/javascript" charset="utf-8">
     if ( navigator.userAgent.indexOf('PhantomJS') < 0 ) {
-        mocha.run();
+        mocha.setup('bdd');
     }
+
+    require.config({
+        paths: {
+            barman: '../src/barman',
+            barmanSpec: 'js/barmanSpec.amd',
+            chai: 'js/chai',
+            underscore: 'js/underscore-min'
+        },
+        shim: {
+            underscore: {
+                exports: '_'
+            }
+        },
+        map: {
+            '../src/barman': 'barman'
+        }
+    });
+
+    require(['barmanSpec'], function () {
+        mocha.run();
+    });
 </script>
 </body>
 </html>
