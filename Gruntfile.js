@@ -8,11 +8,13 @@ module.exports = function ( grunt ) {
 
         meta: {
             src: 'src/**/*.js',
-            specs: 'specs/**/*Spec.js'
+            specs: 'specs/**/*Spec.js',
+            releaseBranch: 'master'
         },
 
         jshint: {
             options: {
+                browser: true,
                 node: true,
                 esnext: false,
                 evil: false,
@@ -69,46 +71,28 @@ module.exports = function ( grunt ) {
 
         mocha: {
             integration: {
-                src: ['integration-tests/runner.html'],
+                src: ['integration-tests/noamd-tests.html'],
                 options: {run: true}
             }
         },
 
-        requirejs: {
-            std: {
+        uglify: {
+            dist: {
                 options: {
-                    name: '<%=pkg.main.slice(0, -3)%>',
-                    out: 'dist/<%=pkg.name%>.min.js',
-                    optimize: 'uglify2',
-                    generateSourceMaps: true,
-                    preserveLicenseComments: false,
-                    paths: {
-                        underscore: 'empty:'
-                    },
-                    cjsTranslate: true,
-                    wrap: {
-                        startFile: 'src/wrap.start',
-                        endFile: 'src/wrap.end'
-                    },
-                    onBuildWrite: function ( moduleName, path, contents ) {
-
-                        if ( path === './src/barman.js' ) {
-
-                            return contents.replace(/^define\('src\/barman'/, "define('barman'");
-
-                        } else {
-                            return contents;
-                        }
-
-                    }
+                    sourceMap: 'https://raw.github.com/dfernandez79/barman/<%=meta.releaseBranch%>/dist/barman.min.js.map',
+                    sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/<%=meta.releaseBranch%>'
+                },
+                files: {
+                    'dist/barman.min.js': ['src/barman.js']
                 }
             }
         }
+
     });
 
     grunt.loadTasks('tasks');
 
-    grunt.loadNpmTasks('grunt-requirejs');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
@@ -117,7 +101,7 @@ module.exports = function ( grunt ) {
     grunt.registerTask('test', 'simplemocha');
     grunt.registerTask('integration-test', 'mocha');
     grunt.registerTask('lint', 'jshint');
-    grunt.registerTask('dist', ['default', 'requirejs', 'integration-test']);
+    grunt.registerTask('dist', ['default', 'uglify', 'integration-test']);
     grunt.registerTask('default', ['lint', 'test']);
 
 };

@@ -7,7 +7,13 @@
         "name": "Diego Fernandez",
         "url": "https://github.com/dfernandez79"
     },
-    "keywords": ["traits", "oop", "classes", "objects", "object composition"],
+    "keywords": [
+        "traits",
+        "oop",
+        "classes",
+        "objects",
+        "object composition"
+    ],
     "licenses": [
         {
             "type": "MIT",
@@ -33,7 +39,8 @@
         "grunt-contrib-watch": "0.2.0rc5",
         "grunt-requirejs": "0.3.1",
         "grunt-contrib-jshint": "0.1.1rc6",
-        "grunt-mocha": "0.2.1"
+        "grunt-mocha": "0.2.1",
+        "grunt-contrib-uglify": "0.1.1rc6"
     },
     "dependencies": {
         "underscore": "1.4.3"
