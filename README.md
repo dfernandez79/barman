@@ -1,9 +1,10 @@
 barman
 =======
 
-_Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
+_Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], 
+and [traits].
 
-It's small (2.2k minimized, 1k compressed), and plays nice with other frameworks.
+It's small, 2.2k minimized - 1k compressed, and plays nice with other frameworks.
 
 
 Feature tour
@@ -167,9 +168,23 @@ var MyView = View.extend(
 Installation
 ------------
 
+### Node.js
+
+```shell
+npm install barman --save
+```
+
+The `--save` argument adds the barman dependency to your `package.json`.
+Then in your program use `require`, and probably some convenience variables, for example:
+
+```js
+var barman = require('barman'),
+    Class = barman.Class;
+```
+
 ### Browser without AMD
 
-Barman uses some functions from [underscore], so you'll need to load it:
+Barman uses some functions from [underscore]. So you'll need to make sure that the `_` global is available:
 
 ```html
 <script src="underscore-min.js" type="text/javascript"></script>
@@ -177,15 +192,16 @@ Barman uses some functions from [underscore], so you'll need to load it:
 ```
 
 After that you'll have the `window.barman` variable set.
-If you are worried about the download size of underscore + barman, which is small by the way, see the underscore
+
+If you are worried about the download size of [underscore] + _barman_, see the underscore
 dependency notes bellow.
 
 ### Browser with AMD
 
-Barman supports AMD without any additional configuration. So you don't need to write an adapter or declare a
-requirejs `shim` configuration.
+Barman supports AMD without any additional configuration. So you don't need to write an adapter or a
+[requirejs] `shim` configuration.
 
-Barman expects an `underscore` module that returns the underscore object, so you need to configure it:
+Barman expects an `underscore` module that returns the [underscore] object, so you need to configure it:
 
  ```js
 require.config({
@@ -204,29 +220,16 @@ require(['barman'], function (barman) {
 });
 ```
 
-### Node.js
-
-```shell
-npm install barman --save
-```
-
-The `--save` argument adds the barman dependency to your `package.json`.
-Then in your program use `require`, and probably some convenience variables, for example:
-
-```js
-var barman = require('barman'),
-    Class = barman.Class;
-```
 
 ### Underscore dependency
 
-Barman uses only a few functions from underscore. Those functions are declared at the beginning of the source code,
-so is easy to replace them with alternative implementations:
+Barman uses only a few functions from [underscore]. Those functions are declared at the beginning of the source code,
+so is easy to replace them with alternative implementations. For example you can replace it with [mout] or [lodash].
 
-* If you don't use AMD: Use setup the `_` global, for example using mout, lodash or your own implementation.
+* If you don't use AMD, setup `window._` with the required functions.
 
-* If you use AMD: Setup an alternative `underscore` module. Then you can use the `map`
- configuration option added in RequireJS 2:
+* If you use AMD, setup an alternative `underscore` module. Then you can use the `map`
+ configuration option added in [requirejs] 2:
 
 ```js
 require.config({
@@ -260,3 +263,11 @@ Released under [MIT license]
 [single-inheritance]: http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)
 
 [traits]: http://en.wikipedia.org/wiki/Trait_(computer_programming)
+
+[underscore]: http://underscorejs.org/
+
+[lodash]: http://lodash.com/
+
+[mout]: http://moutjs.com/
+
+[requirejs]: http://requirejs.org/
