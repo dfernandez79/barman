@@ -175,12 +175,7 @@ npm install barman --save
 ```
 
 The `--save` argument adds the barman dependency to your `package.json`.
-Then in your program use `require`, and probably some convenience variables, for example:
 
-```js
-var barman = require('barman'),
-    Class = barman.Class;
-```
 
 ### Browser without AMD
 
@@ -193,8 +188,8 @@ Barman uses some functions from [underscore]. So you'll need to make sure that t
 
 After that you'll have the `window.barman` variable set.
 
-If you are worried about the download size of [underscore] + _barman_, see the underscore
-dependency notes bellow.
+If you are worried about the download size of [underscore] + _barman_, see the **Underscore
+dependency** section bellow.
 
 ### Browser with AMD
 
@@ -248,6 +243,7 @@ require.config({
 
 Design notes
 ------------
+
 
 References
 ----------
