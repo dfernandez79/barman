@@ -193,7 +193,7 @@ dependency** section bellow.
 
 ### Browser with AMD
 
-Barman supports AMD without any adapter or _shim_ configuration. But it dependes on an `underscore` module that returns 
+Barman supports AMD without any adapter or _shim_ configuration. But it depends on an `underscore` module that returns 
 the [underscore] object, so you need to configure it:
 
  ```js
@@ -218,12 +218,12 @@ require(['barman'], function (barman) {
 
 Barman uses only a few functions from [underscore]. Those functions are declared at the 
 [beginning of the source code][source], so is easy to replace them with alternative implementations. 
-For example you can replace it with [mout] or [lodash].
+For example you can replace it using [mout] or [lodash].
 
 * If you don't use AMD, setup `window._` with the required functions.
 
-* If you use AMD, setup an alternative `underscore` module. Then you can use the `map`
- configuration option added in [requirejs] 2:
+* If you use AMD, setup an alternative `underscore` module. Then you can use the [requirejs] `map`
+ configuration option:
 
 ```js
 require.config({
@@ -263,17 +263,16 @@ I wanted something small, that only provides abstractions to define objects. So 
 * [dejavu] - actually it was released when I was already working on barman
 
 All of these libraries had similarities and differences, with more or less features. But they were not exactly
-what I wanted. It doesn't means that barman is _better_, is matter of personal needs and preference, so
+what I wanted. It doesn't means that barman is _better_, it's matter of personal needs and preference, so
 I encourage you to take a look into those libraries too.
 
-The _design principles_ that guided me during the creation of barman are:
+The _design principles_ that guided the creation of barman are:
 
 * **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript,
-but it's common for programmers that comes from class based programming languages. So I preferred to use
-`Class.create` over introducing a new term.
+but it's common for programmers that comes from class based programming languages. So `Class.create` was preferred 
+over introducing a new term.
 
-* **Play nice with _standard_ JavaScript**. It means to avoid special method signatures, or adding too many special
-attributes as much as possible.
+* **Play nice with _standard_ JavaScript**. It means to avoid special method signatures or attributes.
 
 * **Don't re-invent JavaScript**. JavaScript has no type checking, and encapsulation is limited. If you want those
 features you'll probably need some external tool and some special attributes and methods to support them. 
