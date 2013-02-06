@@ -168,11 +168,7 @@ describe('Barman', function () {
 
                 var TestFactory = AbstractClassFactory.extend({
 
-                        createClass: function ( Parent, instanceMethods, staticMethods ) {
-
-                            return 'From ClassFactory';
-
-                        }
+                        createClass: function () { return 'From ClassFactory'; }
 
                     }),
 

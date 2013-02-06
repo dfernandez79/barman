@@ -29,7 +29,8 @@ module.exports = function ( grunt ) {
                 wsh: false,
                 yui: false,
                 nomen: false,
-                white: false
+                white: false,
+                unused: true
             },
 
             buildScripts: ['Gruntfile.js', 'tasks/**/*.js' ],
@@ -116,7 +117,7 @@ module.exports = function ( grunt ) {
     grunt.loadTasks('tasks');
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-requirejs');
+    grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');

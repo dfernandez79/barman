@@ -33,14 +33,6 @@
         }
 
 
-        function optional( arg, defaultValue ) {
-
-            if ( isUndefined(defaultValue) ) { defaultValue = {}; }
-            return isUndefined(arg) ? defaultValue : arg;
-
-        }
-
-
         function mapProperties( srcObj, iterator, result ) {
 
             if ( !result ) { result = {}; }

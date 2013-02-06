@@ -1,6 +1,5 @@
 
-define(['require','exports','module','chai','../src/barman'],function (require, exports, module) {
-var expect = require('chai').expect,
+define(['require','exports','module','chai','../src/barman'],function (require, exports, module) {var expect = require('chai').expect,
     barman = require('../src/barman');
 
 describe('Barman', function () {
@@ -170,11 +169,7 @@ describe('Barman', function () {
 
                 var TestFactory = AbstractClassFactory.extend({
 
-                        createClass: function ( Parent, instanceMethods, staticMethods ) {
-
-                            return 'From ClassFactory';
-
-                        }
+                        createClass: function () { return 'From ClassFactory'; }
 
                     }),
 
