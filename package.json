@@ -1,7 +1,7 @@
 {
   "name": "barman",
   "description": "A small library to brew JavaScript objects.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/dfernandez79/barman",
   "author": {
     "name": "Diego Fernandez",
@@ -36,13 +36,9 @@
     "grunt-simple-mocha": "0.3.2",
     "chai": "1.4.2",
     "mocha": "1.8.1",
-    "grunt-contrib-watch": "0.2.0rc7",
     "grunt-contrib-jshint": "0.1.1rc6",
     "grunt-mocha": "0.2.1",
     "grunt-contrib-uglify": "0.1.1rc6",
     "grunt-contrib-requirejs": "~0.3.4"
-  },
-  "dependencies": {
-    "underscore": "1.4.3"
   }
 }

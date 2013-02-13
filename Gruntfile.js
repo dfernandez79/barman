@@ -52,11 +52,6 @@ module.exports = function ( grunt ) {
             }
         },
 
-        watch: {
-            files: ['<%=meta.src%>', '<%=meta.specs%>'],
-            tasks: ['lint', 'test']
-        },
-
         simplemocha: {
             all: {
                 src: '<%=meta.specs%>',
@@ -101,12 +96,20 @@ module.exports = function ( grunt ) {
                     baseUrl: 'specs',
                     paths: {
                         chai: 'empty:',
-                        underscore: 'empty:',
                         '../src/barman': 'empty:'
                     },
                     cjsTranslate: true,
                     onBuildWrite: function ( moduleName, path, contents ) {
-                        return contents.replace(/^define\('barmanSpec',/, "define(");
+
+                        // hack to remove the module ID from barmanSpec, so is possible to re-locate it
+                        // in the requirejs configuration
+                        if ( moduleName == 'barmanSpec' ) {
+                            return contents.replace(/^define\('barmanSpec',/, "define(")
+                                .replace(/\.\.\/src\/barman/g, 'barman');
+                        }
+
+                        return contents;
+
                     }
                 }
             }
@@ -118,15 +121,15 @@ module.exports = function ( grunt ) {
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
-    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
+
 
     grunt.registerTask('test', 'simplemocha');
-    grunt.registerTask('integration-test', 'mocha');
-    grunt.registerTask('lint', 'jshint');
-    grunt.registerTask('dist', ['default', 'uglify', 'requirejs', 'integration-test']);
-    grunt.registerTask('default', ['lint', 'test']);
+    grunt.registerTask('integration-test', ['requirejs', 'mocha']);
+
+    grunt.registerTask('default', ['jshint', 'test']);
+    grunt.registerTask('dist', ['default', 'uglify', 'integration-test']);
 
 };

@@ -2,16 +2,13 @@
 
     'use strict';
 
-    function factory( _ ) {
+    function factory() {
 
-        var bind = _.bind,
-            each = _.each,
-            isUndefined = _.isUndefined,
-            isObject = _.isObject,
-            isFunction = _.isFunction,
-            extend = _.extend,
-            has = _.has,
-            toArray = _.toArray,
+        var ArrayProto = Array.prototype,
+            ObjectProto = Object.prototype,
+            nativeForEach = ArrayProto.forEach,
+            slice = ArrayProto.slice,
+            toString = ObjectProto.toString,
 
             getPrototypeOf = Object.getPrototypeOf,
             createObject = Object.create,
@@ -21,7 +18,69 @@
             ERR_REQUIRED = 'An implementation is required',
             ERR_CONSTRUCTOR_TYPE = 'The constructor property must be a function',
 
-            CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
+            CLASS_FACTORY_ATTRIBUTE = '*classFactory*',
+
+            isFunction = function ( value ) {
+                return typeof value == 'function';
+            };
+
+
+        // fallback for older versions of Chrome and Safari
+        if ( isFunction(/x/) ) {
+            isFunction = function ( value ) {
+                return value instanceof Function || toString.call(value) === '[object Function]';
+            };
+        }
+
+        function has( object, property ) {
+            return object ? ObjectProto.hasOwnProperty.call(object, property) : false;
+        }
+
+        function extend( obj ) {
+            each(slice.call(arguments, 1), function ( source ) {
+                if ( source ) {
+                    for ( var prop in source ) {
+                        obj[prop] = source[prop];
+                    }
+                }
+            });
+            return obj;
+        }
+
+
+        function isObject( obj ) {
+            return obj === Object(obj);
+        }
+
+        function isUndefined( value ) {
+            return typeof value == 'undefined';
+        }
+
+
+        // This each implementation is based on the source code of underscore.js
+        // It doesn't comply with the specification at http://es5.github.com/#x15.4.4.18 but is enough for the purposes
+        // of this library.
+        function each( obj, func, context ) {
+
+            if ( obj === null ) {
+                return;
+            }
+
+            if ( nativeForEach && obj.forEach === nativeForEach ) {
+                obj.forEach(func, context);
+            } else if ( obj.length === +obj.length ) {
+                for ( var i = 0, l = obj.length; i < l; i++ ) {
+                    func.call(context, obj[i], i, obj);
+                }
+            } else {
+                for ( var key in obj ) {
+                    if ( has(obj, key) ) {
+                        func.call(context, obj[key], key, obj);
+                    }
+                }
+            }
+
+        }
 
 
         function expand( msg, values ) {
@@ -60,12 +119,16 @@
 
 
         function conflict() {
+
             throw new Error(ERR_CONFLICT);
+
         }
 
 
         function required() {
+
             throw new Error(ERR_REQUIRED);
+
         }
 
 
@@ -108,14 +171,22 @@
         Nil.prototype._super = function ( methodName ) {
 
             var thisPrototype = getPrototypeOf(this),
-                superPrototype = getPrototypeOf(thisPrototype);
+                superPrototype = getPrototypeOf(thisPrototype),
+                self = this;
 
             if ( !methodName ) {
                 return superPrototype;
             } else {
                 var superProp = superPrototype[methodName];
                 assertDefinedProperty(superProp, methodName);
-                return isFunction(superProp) ? bind(superProp, this) : superProp;
+
+                if ( isFunction(superProp) ) {
+                    return function () {
+                        return superProp.apply(self, arguments);
+                    };
+                }
+
+                return superProp;
             }
 
         };
@@ -170,7 +241,7 @@
 
         Nil.extend = function () {
 
-            var args = toArray(arguments),
+            var args = slice.call(arguments),
                 classFactory = (isClassFactory(args[0])) ? args.shift() : defaultClassFactory;
 
             args.unshift(this);
@@ -191,7 +262,9 @@
 
         var AbstractClassFactory = Class.create({
 
-            defaultCreateClass: bind(defaultClassFactory.createClass, defaultClassFactory),
+            defaultCreateClass: function () {
+                return defaultClassFactory.createClass.apply(defaultClassFactory, arguments);
+            },
 
             createClass: required
 
@@ -215,8 +288,11 @@
 
 
         function withTraits() {
-            return new TraitsClassFactory(toArray(arguments));
+
+            return new TraitsClassFactory(slice.call(arguments));
+
         }
+
 
         return {
             extend: extend,
@@ -242,12 +318,12 @@
 
     if ( typeof define === 'function' && define.amd ) {
         // AMD (ie requirejs)
-        define(['underscore'], factory);
+        define([], factory);
     } else if ( typeof module !== 'undefined' && module.exports ) {
         // Node
-        module.exports = factory(require('underscore'));
+        module.exports = factory();
     } else {
-        window.barman = factory(window._);
+        window.barman = factory();
     }
 
 })();

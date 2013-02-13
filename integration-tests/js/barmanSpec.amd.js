@@ -1,6 +1,6 @@
 
-define(['require','exports','module','chai','../src/barman'],function (require, exports, module) {var expect = require('chai').expect,
-    barman = require('../src/barman');
+define(['require','exports','module','chai','barman'],function (require, exports, module) {var expect = require('chai').expect,
+    barman = require('barman');
 
 describe('Barman', function () {
 
