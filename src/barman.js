@@ -1,3 +1,8 @@
+//     barman 0.1.0
+//     https://github.com/dfernandez79/barman
+//     Copyright (c) 2013 Diego Fernandez
+//     Barman may be freely distributed under the MIT license.
+
 (function () {
 
     'use strict';
@@ -5,7 +10,6 @@
     function factory() {
 
         var ArrayProto = Array.prototype,
-            ObjectProto = Object.prototype,
             nativeForEach = ArrayProto.forEach,
             slice = ArrayProto.slice,
 
@@ -15,8 +19,18 @@
             CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
 
 
+        // Common helper functions
+        // -----------------------
+
+        // These common helper functions are based on _underscore_ and _lodash_ implementations.
+        //
+        // Why these are included inline, instead of having a dependency to some _underscore_ compatible library?
+        //
+        // Because *barman* uses only a few functions, and the additional dependency made the setup hard.
+        // So after evaluating the trade-offs, they were included here.
+        //
         function has( object, property ) {
-            return object ? ObjectProto.hasOwnProperty.call(object, property) : false;
+            return object ? Object.prototype.hasOwnProperty.call(object, property) : false;
         }
 
         function extend( obj ) {
@@ -38,11 +52,7 @@
             return typeof value == 'undefined';
         }
 
-        // This each implementation is based on the source code of underscore.js
-        // It doesn't comply with the specification at http://es5.github.com/#x15.4.4.18 but is enough for the purposes
-        // of this library.
         function each( obj, func, context ) {
-
             if ( obj === null ) {
                 return;
             }
@@ -60,9 +70,29 @@
                     }
                 }
             }
-
         }
 
+
+        // Merge
+        // -----
+
+        // `merge` is one of the main functions of *barman*.
+        //
+        // It's similar to the commonly used `extend(dest,o1,...,oN)`, but it uses the following strategy
+        // for overwriting properties:
+        //
+        // * if values are different, mark the property as conflict
+        // * if one of the values is marked as required, use the value that is not marked as required
+
+
+        // ### Merge helper functions
+
+        // #### mapProperties(_srcObj_, _iterator_, _result_)
+        //
+        // Returns a new object where each property is the result of applying the `iterator` function over `srcObj`:
+        //
+        //     result.prop = iterator(srcObj.prop, 'prop');
+        //
         function mapProperties( srcObj, iterator, result ) {
 
             if ( !result ) { result = {}; }
@@ -79,45 +109,55 @@
 
         }
 
-        function assertDefinedProperty( property, name ) {
-
-            if ( isUndefined(property) ) {
-                throw new ReferenceError('The property ' + name + ' is not defined');
-            }
-
-        }
-
-
+        // #### conflict()
+        //
+        // Throws an error. Used to indicate _merge conflicts_.
         function conflict() {
-
             throw new Error(
                 'This property was defined by multiple merged objects, override it with the proper implementation');
-
         }
 
+        // #### required()
+        //
+        // Throws an error. Used to indicate that an implementation is required.
         function required() {
-
             throw new Error('An implementation is required');
-
         }
 
-
+        // #### mergeProperty(_value_, _prop_)
+        //
+        // Used by `merge` to map each property.
         function mergeProperty( value, prop ) {
 
             /*jshint validthis:true */
 
+            // The `this` context is set to the merge destination object, while
+            // the arguments `value` and `prop` contains the property-value pair to merge.
             var thisValue = this[prop];
 
             if ( isUndefined(thisValue) || thisValue === value || thisValue === required ) {
+                // If the property is not defined in the target object,
+                // or both values are the same,
+                // or the target value is the `required` marker; use the given `value`.
+
                 return value;
+
             } else if ( value === required ) {
+                // If the given `value` is the `required` marker, use the existing property value.
+
                 return thisValue;
+
             } else {
+                // If both values are different, but not undefined or required, return the `conflict` marker.
+
                 return conflict;
             }
 
         }
 
+        // ### merge(_object_,...)
+        //
+        // Returns a new object, that is the result of merging the properties of each one of the given objects.
         function merge() {
 
             var result = {};
@@ -132,22 +172,37 @@
 
         }
 
+        // Nil
+        // ---
 
+        // `Nil` is the root of the *barman* _class hierarchy_.
         function Nil() { }
 
+        // Every *barman* _class_ has a `__super__` property that returns the parent prototype.
+        // The parent of `Nil` is `Nil`.
         Nil.__super__ = Nil.prototype;
 
+        // ### \_super(_methodName_)
+        // Every object created with *barman* inherits the `_super` method.
         Nil.prototype._super = function ( methodName ) {
 
             var thisPrototype = getPrototypeOf(this),
                 superPrototype = getPrototypeOf(thisPrototype),
                 self = this;
 
+            // The _methodName_ argument is optional.
             if ( !methodName ) {
+                // If _methodName_ is omitted, the function returns the parent prototype.
+
                 return superPrototype;
             } else {
+                // If _methodName_ is given, the function returns the parent function bound to _this_.
+
                 var superProp = superPrototype[methodName];
-                assertDefinedProperty(superProp, methodName);
+
+                if ( isUndefined(superProp) ) {
+                    throw new ReferenceError('The property ' + name + ' is not defined');
+                }
 
                 if ( typeof superProp == 'function' ) {
                     return function () {

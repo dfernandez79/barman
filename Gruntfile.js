@@ -120,7 +120,7 @@ module.exports = function ( grunt ) {
                 src: '<%=meta.src%>',
                 dest: 'docs/',
                 options: {
-                    css: 'docs/source-docs.css'
+                    css: 'docs/annotated-source.css'
                 }
             }
         }
