@@ -8,33 +8,17 @@
             ObjectProto = Object.prototype,
             nativeForEach = ArrayProto.forEach,
             slice = ArrayProto.slice,
-            toString = ObjectProto.toString,
 
             getPrototypeOf = Object.getPrototypeOf,
             createObject = Object.create,
 
-            ERR_CONFLICT = 'This property was defined by multiple merged objects, override it with the proper implementation',
-            ERR_PROPERTY_NOT_DEFINED = 'The property {name} is not defined',
-            ERR_REQUIRED = 'An implementation is required',
-            ERR_CONSTRUCTOR_TYPE = 'The constructor property must be a function',
+            CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
 
-            CLASS_FACTORY_ATTRIBUTE = '*classFactory*',
-
-            isFunction = function ( value ) {
-                return typeof value == 'function';
-            };
-
-
-        // fallback for older versions of Chrome and Safari
-        if ( isFunction(/x/) ) {
-            isFunction = function ( value ) {
-                return value instanceof Function || toString.call(value) === '[object Function]';
-            };
-        }
 
         function has( object, property ) {
             return object ? ObjectProto.hasOwnProperty.call(object, property) : false;
         }
+
 
         function extend( obj ) {
             each(slice.call(arguments, 1), function ( source ) {
@@ -83,15 +67,6 @@
         }
 
 
-        function expand( msg, values ) {
-
-            return msg.replace(/\{([a-zA-Z0-9]+)\}/g, function ( match, key ) {
-                return values[key] || '';
-            });
-
-        }
-
-
         function mapProperties( srcObj, iterator, result ) {
 
             if ( !result ) { result = {}; }
@@ -112,7 +87,7 @@
         function assertDefinedProperty( property, name ) {
 
             if ( isUndefined(property) ) {
-                throw new ReferenceError(expand(ERR_PROPERTY_NOT_DEFINED, {name: name}));
+                throw new ReferenceError('The property ' + name + ' is not defined');
             }
 
         }
@@ -120,14 +95,15 @@
 
         function conflict() {
 
-            throw new Error(ERR_CONFLICT);
+            throw new Error(
+                'This property was defined by multiple merged objects, override it with the proper implementation');
 
         }
 
 
         function required() {
 
-            throw new Error(ERR_REQUIRED);
+            throw new Error('An implementation is required');
 
         }
 
@@ -180,7 +156,7 @@
                 var superProp = superPrototype[methodName];
                 assertDefinedProperty(superProp, methodName);
 
-                if ( isFunction(superProp) ) {
+                if ( typeof superProp == 'function' ) {
                     return function () {
                         return superProp.apply(self, arguments);
                     };
@@ -221,7 +197,7 @@
 
                 } else if ( typeof proto.constructor !== 'function' ) {
 
-                    throw new TypeError(ERR_CONSTRUCTOR_TYPE);
+                    throw new TypeError('The constructor property must be a function');
 
                 }
 

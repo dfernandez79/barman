@@ -141,6 +141,6 @@ module.exports = function ( grunt ) {
     grunt.registerTask('integration-test', ['requirejs', 'mocha']);
 
     grunt.registerTask('default', ['jshint', 'test']);
-    grunt.registerTask('dist', ['default', 'uglify', 'integration-test']);
+    grunt.registerTask('dist', ['default', 'uglify', 'integration-test', 'docco']);
 
 };
