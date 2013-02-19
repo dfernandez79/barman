@@ -113,17 +113,28 @@ module.exports = function ( grunt ) {
                     }
                 }
             }
+        },
+
+        docco: {
+            file: {
+                src: '<%=meta.src%>',
+                dest: 'docs/',
+                options: {
+                    css: 'docs/source-docs.css'
+                }
+            }
         }
 
     });
 
     grunt.loadTasks('tasks');
 
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
+    grunt.loadNpmTasks('grunt-docco');
 
 
     grunt.registerTask('test', 'simplemocha');

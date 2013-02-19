@@ -1,0 +1,319 @@
+<!DOCTYPE html>  <html> <head>   <title>barman.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="source-docs.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               barman.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">factory</span><span class="p">()</span> <span class="p">{</span>
+
+        <span class="kd">var</span> <span class="nx">ArrayProto</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span>
+            <span class="nx">ObjectProto</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span>
+            <span class="nx">nativeForEach</span> <span class="o">=</span> <span class="nx">ArrayProto</span><span class="p">.</span><span class="nx">forEach</span><span class="p">,</span>
+            <span class="nx">slice</span> <span class="o">=</span> <span class="nx">ArrayProto</span><span class="p">.</span><span class="nx">slice</span><span class="p">,</span>
+            <span class="nx">toString</span> <span class="o">=</span> <span class="nx">ObjectProto</span><span class="p">.</span><span class="nx">toString</span><span class="p">,</span>
+
+            <span class="nx">getPrototypeOf</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">getPrototypeOf</span><span class="p">,</span>
+            <span class="nx">createObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">,</span>
+
+            <span class="nx">ERR_CONFLICT</span> <span class="o">=</span> <span class="s1">&#39;This property was defined by multiple merged objects, override it with the proper implementation&#39;</span><span class="p">,</span>
+            <span class="nx">ERR_PROPERTY_NOT_DEFINED</span> <span class="o">=</span> <span class="s1">&#39;The property {name} is not defined&#39;</span><span class="p">,</span>
+            <span class="nx">ERR_REQUIRED</span> <span class="o">=</span> <span class="s1">&#39;An implementation is required&#39;</span><span class="p">,</span>
+            <span class="nx">ERR_CONSTRUCTOR_TYPE</span> <span class="o">=</span> <span class="s1">&#39;The constructor property must be a function&#39;</span><span class="p">,</span>
+
+            <span class="nx">CLASS_FACTORY_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;*classFactory*&#39;</span><span class="p">,</span>
+
+            <span class="nx">isFunction</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">==</span> <span class="s1">&#39;function&#39;</span><span class="p">;</span>
+            <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>fallback for older versions of Chrome and Safari</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="k">if</span> <span class="p">(</span> <span class="nx">isFunction</span><span class="p">(</span><span class="sr">/x/</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="nx">isFunction</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">value</span> <span class="k">instanceof</span> <span class="nb">Function</span> <span class="o">||</span> <span class="nx">toString</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;[object Function]&#39;</span><span class="p">;</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">has</span><span class="p">(</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">property</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">object</span> <span class="o">?</span> <span class="nx">ObjectProto</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">object</span><span class="p">,</span> <span class="nx">property</span><span class="p">)</span> <span class="o">:</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">extend</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="nx">each</span><span class="p">(</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">source</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span> <span class="nx">source</span> <span class="p">)</span> <span class="p">{</span>
+                    <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">prop</span> <span class="k">in</span> <span class="nx">source</span> <span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">obj</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nx">source</span><span class="p">[</span><span class="nx">prop</span><span class="p">];</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+            <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">isObject</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">obj</span> <span class="o">===</span> <span class="nb">Object</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">isUndefined</span><span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">;</span>
+        <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>This each implementation is based on the source code of underscore.js
+It doesn't comply with the specification at http://es5.github.com/#x15.4.4.18 but is enough for the purposes
+of this library.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">each</span><span class="p">(</span> <span class="nx">obj</span><span class="p">,</span> <span class="nx">func</span><span class="p">,</span> <span class="nx">context</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="nx">obj</span> <span class="o">===</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="nx">nativeForEach</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">forEach</span> <span class="o">===</span> <span class="nx">nativeForEach</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="nx">obj</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">func</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="o">+</span><span class="nx">obj</span><span class="p">.</span><span class="nx">length</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">func</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">obj</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span> <span class="nx">has</span><span class="p">(</span><span class="nx">obj</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">func</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">obj</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">expand</span><span class="p">(</span> <span class="nx">msg</span><span class="p">,</span> <span class="nx">values</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\{([a-zA-Z0-9]+)\}/g</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">match</span><span class="p">,</span> <span class="nx">key</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">values</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+            <span class="p">});</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">mapProperties</span><span class="p">(</span> <span class="nx">srcObj</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">result</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">result</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{};</span> <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="nx">srcObj</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="nx">each</span><span class="p">(</span><span class="nx">srcObj</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">prop</span> <span class="p">)</span> <span class="p">{</span>
+
+                    <span class="nx">result</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nx">iterator</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">prop</span><span class="p">);</span>
+
+                <span class="p">},</span> <span class="nx">result</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">assertDefinedProperty</span><span class="p">(</span> <span class="nx">property</span><span class="p">,</span> <span class="nx">name</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="nx">isUndefined</span><span class="p">(</span><span class="nx">property</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nx">ReferenceError</span><span class="p">(</span><span class="nx">expand</span><span class="p">(</span><span class="nx">ERR_PROPERTY_NOT_DEFINED</span><span class="p">,</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="nx">name</span><span class="p">}));</span>
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">conflict</span><span class="p">()</span> <span class="p">{</span>
+
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">ERR_CONFLICT</span><span class="p">);</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">required</span><span class="p">()</span> <span class="p">{</span>
+
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">ERR_REQUIRED</span><span class="p">);</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">mergeProperty</span><span class="p">(</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">prop</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="cm">/*jshint validthis:true */</span>
+
+            <span class="kd">var</span> <span class="nx">thisValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">[</span><span class="nx">prop</span><span class="p">];</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="nx">isUndefined</span><span class="p">(</span><span class="nx">thisValue</span><span class="p">)</span> <span class="o">||</span> <span class="nx">thisValue</span> <span class="o">===</span> <span class="nx">value</span> <span class="o">||</span> <span class="nx">thisValue</span> <span class="o">===</span> <span class="nx">required</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="nx">value</span> <span class="o">===</span> <span class="nx">required</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">thisValue</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">conflict</span><span class="p">;</span>
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">merge</span><span class="p">()</span> <span class="p">{</span>
+
+            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{};</span>
+
+            <span class="nx">each</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+
+                <span class="nx">mapProperties</span><span class="p">(</span><span class="nx">obj</span><span class="p">,</span> <span class="nx">mergeProperty</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+
+            <span class="p">});</span>
+
+            <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">Nil</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+
+        <span class="nx">Nil</span><span class="p">.</span><span class="nx">__super__</span> <span class="o">=</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span>
+
+        <span class="nx">Nil</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">_super</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">methodName</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="kd">var</span> <span class="nx">thisPrototype</span> <span class="o">=</span> <span class="nx">getPrototypeOf</span><span class="p">(</span><span class="k">this</span><span class="p">),</span>
+                <span class="nx">superPrototype</span> <span class="o">=</span> <span class="nx">getPrototypeOf</span><span class="p">(</span><span class="nx">thisPrototype</span><span class="p">),</span>
+                <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">methodName</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">superPrototype</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">superProp</span> <span class="o">=</span> <span class="nx">superPrototype</span><span class="p">[</span><span class="nx">methodName</span><span class="p">];</span>
+                <span class="nx">assertDefinedProperty</span><span class="p">(</span><span class="nx">superProp</span><span class="p">,</span> <span class="nx">methodName</span><span class="p">);</span>
+
+                <span class="k">if</span> <span class="p">(</span> <span class="nx">isFunction</span><span class="p">(</span><span class="nx">superProp</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">superProp</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+                    <span class="p">};</span>
+                <span class="p">}</span>
+
+                <span class="k">return</span> <span class="nx">superProp</span><span class="p">;</span>
+            <span class="p">}</span>
+
+        <span class="p">};</span>
+
+
+        <span class="kd">function</span> <span class="nx">markAsClassFactory</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="nx">obj</span><span class="p">[</span><span class="nx">CLASS_FACTORY_ATTRIBUTE</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">function</span> <span class="nx">isClassFactory</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">return</span> <span class="nx">isObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">CLASS_FACTORY_ATTRIBUTE</span><span class="p">]</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
+
+        <span class="p">}</span>
+
+
+        <span class="kd">var</span> <span class="nx">defaultClassFactory</span> <span class="o">=</span> <span class="nx">markAsClassFactory</span><span class="p">({</span>
+
+            <span class="nx">createClass</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">Parent</span><span class="p">,</span> <span class="nx">instanceMethods</span><span class="p">,</span> <span class="nx">staticMethods</span> <span class="p">)</span> <span class="p">{</span>
+
+                <span class="kd">var</span> <span class="nx">proto</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">createObject</span><span class="p">(</span><span class="nx">Parent</span><span class="p">.</span><span class="nx">prototype</span><span class="p">),</span> <span class="nx">instanceMethods</span><span class="p">);</span>
+
+                <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">has</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="s1">&#39;constructor&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+
+                    <span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">Parent</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+                    <span class="p">};</span>
+
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">!==</span> <span class="s1">&#39;function&#39;</span> <span class="p">)</span> <span class="p">{</span>
+
+                    <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="nx">ERR_CONSTRUCTOR_TYPE</span><span class="p">);</span>
+
+                <span class="p">}</span>
+
+                <span class="kd">var</span> <span class="nx">ctor</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span><span class="p">,</span> <span class="nx">staticMethods</span><span class="p">,</span> <span class="p">{</span><span class="nx">__super__</span><span class="o">:</span> <span class="nx">Parent</span><span class="p">.</span><span class="nx">prototype</span> <span class="p">});</span>
+
+                <span class="k">if</span> <span class="p">(</span> <span class="nx">isUndefined</span><span class="p">(</span><span class="nx">proto</span><span class="p">.</span><span class="nx">_super</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">proto</span><span class="p">.</span><span class="nx">_super</span> <span class="o">=</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">_super</span><span class="p">;</span> <span class="p">}</span>
+
+                <span class="nx">ctor</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">proto</span><span class="p">;</span>
+                <span class="nx">ctor</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span><span class="p">;</span>
+
+                <span class="k">return</span> <span class="nx">ctor</span><span class="p">;</span>
+
+            <span class="p">}</span>
+
+        <span class="p">});</span>
+
+
+        <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+            <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">),</span>
+                <span class="nx">classFactory</span> <span class="o">=</span> <span class="p">(</span><span class="nx">isClassFactory</span><span class="p">(</span><span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">?</span> <span class="nx">args</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span> <span class="o">:</span> <span class="nx">defaultClassFactory</span><span class="p">;</span>
+
+            <span class="nx">args</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+
+            <span class="k">return</span> <span class="nx">classFactory</span><span class="p">.</span><span class="nx">createClass</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">classFactory</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
+
+        <span class="p">};</span>
+
+
+        <span class="kd">var</span> <span class="nx">Class</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">create</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+                <span class="k">return</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">Nil</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+
+            <span class="p">}</span>
+        <span class="p">};</span>
+
+
+        <span class="kd">var</span> <span class="nx">AbstractClassFactory</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span>
+
+            <span class="nx">defaultCreateClass</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">defaultClassFactory</span><span class="p">.</span><span class="nx">createClass</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">defaultClassFactory</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+            <span class="p">},</span>
+
+            <span class="nx">createClass</span><span class="o">:</span> <span class="nx">required</span>
+
+        <span class="p">});</span>
+        <span class="nx">markAsClassFactory</span><span class="p">(</span><span class="nx">AbstractClassFactory</span><span class="p">.</span><span class="nx">prototype</span><span class="p">);</span>
+
+
+        <span class="kd">var</span> <span class="nx">TraitsClassFactory</span> <span class="o">=</span> <span class="nx">AbstractClassFactory</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+
+            <span class="nx">constructor</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">traits</span> <span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">traits</span> <span class="o">=</span> <span class="nx">traits</span><span class="p">;</span> <span class="p">},</span>
+
+            <span class="nx">createClass</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">Parent</span><span class="p">,</span> <span class="nx">instanceMethods</span><span class="p">,</span> <span class="nx">staticMethods</span> <span class="p">)</span> <span class="p">{</span>
+
+                <span class="kd">var</span> <span class="nx">traitComposition</span> <span class="o">=</span> <span class="nx">merge</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">traits</span><span class="p">);</span>
+
+                <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">defaultCreateClass</span><span class="p">(</span><span class="nx">Parent</span><span class="p">,</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">traitComposition</span><span class="p">,</span> <span class="nx">instanceMethods</span><span class="p">),</span> <span class="nx">staticMethods</span><span class="p">);</span>
+
+            <span class="p">}</span>
+
+        <span class="p">});</span>
+
+
+        <span class="kd">function</span> <span class="nx">withTraits</span><span class="p">()</span> <span class="p">{</span>
+
+            <span class="k">return</span> <span class="k">new</span> <span class="nx">TraitsClassFactory</span><span class="p">(</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">));</span>
+
+        <span class="p">}</span>
+
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="nx">extend</span><span class="o">:</span> <span class="nx">extend</span><span class="p">,</span>
+            <span class="nx">merge</span><span class="o">:</span> <span class="nx">merge</span><span class="p">,</span>
+            <span class="nx">conflict</span><span class="o">:</span> <span class="nx">conflict</span><span class="p">,</span>
+
+            <span class="nx">Nil</span><span class="o">:</span> <span class="nx">Nil</span><span class="p">,</span>
+
+            <span class="nx">markAsClassFactory</span><span class="o">:</span> <span class="nx">markAsClassFactory</span><span class="p">,</span>
+            <span class="nx">isClassFactory</span><span class="o">:</span> <span class="nx">isClassFactory</span><span class="p">,</span>
+            <span class="nx">AbstractClassFactory</span><span class="o">:</span> <span class="nx">AbstractClassFactory</span><span class="p">,</span>
+
+            <span class="nx">defaultClassFactory</span><span class="o">:</span> <span class="nx">defaultClassFactory</span><span class="p">,</span>
+            <span class="nx">Class</span><span class="o">:</span> <span class="nx">Class</span><span class="p">,</span>
+
+            <span class="nx">required</span><span class="o">:</span> <span class="nx">required</span><span class="p">,</span>
+
+            <span class="nx">withTraits</span><span class="o">:</span> <span class="nx">withTraits</span>
+        <span class="p">};</span>
+
+    <span class="p">}</span>
+
+
+    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>AMD (ie requirejs)</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">define</span><span class="p">([],</span> <span class="nx">factory</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>Node</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nb">window</span><span class="p">.</span><span class="nx">barman</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">();</span>
+    <span class="p">}</span>
+
+<span class="p">})();</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
