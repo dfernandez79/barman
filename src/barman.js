@@ -19,7 +19,6 @@
             return object ? ObjectProto.hasOwnProperty.call(object, property) : false;
         }
 
-
         function extend( obj ) {
             each(slice.call(arguments, 1), function ( source ) {
                 if ( source ) {
@@ -31,7 +30,6 @@
             return obj;
         }
 
-
         function isObject( obj ) {
             return obj === Object(obj);
         }
@@ -39,7 +37,6 @@
         function isUndefined( value ) {
             return typeof value == 'undefined';
         }
-
 
         // This each implementation is based on the source code of underscore.js
         // It doesn't comply with the specification at http://es5.github.com/#x15.4.4.18 but is enough for the purposes
@@ -66,7 +63,6 @@
 
         }
 
-
         function mapProperties( srcObj, iterator, result ) {
 
             if ( !result ) { result = {}; }
@@ -83,7 +79,6 @@
 
         }
 
-
         function assertDefinedProperty( property, name ) {
 
             if ( isUndefined(property) ) {
@@ -99,7 +94,6 @@
                 'This property was defined by multiple merged objects, override it with the proper implementation');
 
         }
-
 
         function required() {
 
@@ -123,7 +117,6 @@
             }
 
         }
-
 
         function merge() {
 
@@ -175,13 +168,11 @@
 
         }
 
-
         function isClassFactory( obj ) {
 
             return isObject(obj) && obj[CLASS_FACTORY_ATTRIBUTE] === true;
 
         }
-
 
         var defaultClassFactory = markAsClassFactory({
 
@@ -261,7 +252,6 @@
             }
 
         });
-
 
         function withTraits() {
 
