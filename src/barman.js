@@ -8,27 +8,29 @@
     'use strict';
 
     function factory() {
-
-        var ArrayProto = Array.prototype,
-            nativeForEach = ArrayProto.forEach,
-            slice = ArrayProto.slice,
-
-            getPrototypeOf = Object.getPrototypeOf,
-            createObject = Object.create,
-
-            CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
-
-
         // Common helper functions
         // -----------------------
 
         // These common helper functions are based on _underscore_ and _lodash_ implementations.
         //
-        // Why these are included inline, instead of having a dependency to some _underscore_ compatible library?
+        // Why these are included inline? Why not having a dependency to some _underscore_ compatible library?
         //
         // Because *barman* uses only a few functions, and the additional dependency made the setup hard.
         // So after evaluating the trade-offs, they were included here.
         //
+
+        var ArrayProto = Array.prototype,
+            nativeForEach = ArrayProto.forEach,
+            slice = ArrayProto.slice;
+
+        function isUndefined( value ) {
+            return typeof value == 'undefined';
+        }
+
+        function isFunction( value ) {
+            return typeof value === 'function';
+        }
+
         function has( object, property ) {
             return object ? Object.prototype.hasOwnProperty.call(object, property) : false;
         }
@@ -46,10 +48,6 @@
 
         function isObject( obj ) {
             return obj === Object(obj);
-        }
-
-        function isUndefined( value ) {
-            return typeof value == 'undefined';
         }
 
         function each( obj, func, context ) {
@@ -78,11 +76,12 @@
 
         // `merge` is one of the main functions of *barman*.
         //
-        // It's similar to the commonly used `extend(dest,o1,...,oN)`, but it uses the following strategy
+        // It's similar to the commonly used `extend({}, o1,...,oN)`, but it uses the following strategy
         // for overwriting properties:
         //
-        // * if values are different, mark the property as conflict
-        // * if one of the values is marked as required, use the value that is not marked as required
+        // * if values are different, the destination property is marked as `conflict`
+        // * if one of the values is marked as `required`, the destination property uses the value not marked as
+        //   required
 
 
         // ### Merge helper functions
@@ -92,6 +91,8 @@
         // Returns a new object where each property is the result of applying the `iterator` function over `srcObj`:
         //
         //     result.prop = iterator(srcObj.prop, 'prop');
+        //
+        // _result_ is optional, and an empty object will be used if it's omitted.
         //
         function mapProperties( srcObj, iterator, result ) {
 
@@ -106,12 +107,12 @@
             }
 
             return result;
-
         }
 
         // #### conflict()
         //
         // Throws an error. Used to indicate _merge conflicts_.
+        //
         function conflict() {
             throw new Error(
                 'This property was defined by multiple merged objects, override it with the proper implementation');
@@ -120,6 +121,7 @@
         // #### required()
         //
         // Throws an error. Used to indicate that an implementation is required.
+        //
         function required() {
             throw new Error('An implementation is required');
         }
@@ -127,6 +129,7 @@
         // #### mergeProperty(_value_, _prop_)
         //
         // Used by `merge` to map each property.
+        //
         function mergeProperty( value, prop ) {
 
             /*jshint validthis:true */
@@ -152,12 +155,12 @@
 
                 return conflict;
             }
-
         }
 
         // ### merge(_object_,...)
         //
         // Returns a new object, that is the result of merging the properties of each one of the given objects.
+        //
         function merge() {
 
             var result = {};
@@ -169,8 +172,8 @@
             });
 
             return result;
-
         }
+
 
         // Nil
         // ---
@@ -183,10 +186,13 @@
         Nil.__super__ = Nil.prototype;
 
         // ### \_super(_methodName_)
+        //
         // Every object created with *barman* inherits the `_super` method.
+        //
         Nil.prototype._super = function ( methodName ) {
 
-            var thisPrototype = getPrototypeOf(this),
+            var getPrototypeOf = Object.getPrototypeOf,
+                thisPrototype = getPrototypeOf(this),
                 superPrototype = getPrototypeOf(thisPrototype),
                 self = this;
 
@@ -204,7 +210,7 @@
                     throw new ReferenceError('The property ' + name + ' is not defined');
                 }
 
-                if ( typeof superProp == 'function' ) {
+                if ( isFunction(superProp) ) {
                     return function () {
                         return superProp.apply(self, arguments);
                     };
@@ -212,36 +218,47 @@
 
                 return superProp;
             }
-
         };
 
 
-        function markAsClassFactory( obj ) {
+        // Default class factory
+        // ---------------------
 
+        // Extension and creation of _classes_ is delegated to _ClassFactory_ objects.
+        //
+        // Those objects are marked with the special attribute _CLASS\_FACTORY\_ATTRIBUTE_, so they can be distinguished
+        // by _Class.create_ and _Nil.extend_.
+        //
+        var CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
+
+        // ### markAsClassFactory(_obj_)
+        //
+        // Adds the _CLASS\_FACTORY\_ATTRIBUTE_ to an object.
+        //
+        function markAsClassFactory( obj ) {
             obj[CLASS_FACTORY_ATTRIBUTE] = true;
             return obj;
-
         }
 
+        // ### isClassFactory(_obj_)
+        //
+        // Returns true if the object is marked as a class factory.
+        //
         function isClassFactory( obj ) {
-
             return isObject(obj) && obj[CLASS_FACTORY_ATTRIBUTE] === true;
-
         }
 
         var defaultClassFactory = markAsClassFactory({
 
             createClass: function ( Parent, instanceMethods, staticMethods ) {
 
-                var proto = extend(createObject(Parent.prototype), instanceMethods);
+                var proto = extend(Object.create(Parent.prototype), instanceMethods);
 
                 if ( !has(proto, 'constructor') ) {
 
-                    proto.constructor = function () {
-                        Parent.apply(this, arguments);
-                    };
+                    proto.constructor = function () { Parent.apply(this, arguments); };
 
-                } else if ( typeof proto.constructor !== 'function' ) {
+                } else if ( !isFunction(proto.constructor) ) {
 
                     throw new TypeError('The constructor property must be a function');
 
@@ -255,32 +272,31 @@
                 ctor.extend = Nil.extend;
 
                 return ctor;
-
             }
 
         });
 
 
-        Nil.extend = function () {
+        // Nil.extend and Class.create
+        // ---------------------------
 
+        Nil.extend = function () {
             var args = slice.call(arguments),
                 classFactory = (isClassFactory(args[0])) ? args.shift() : defaultClassFactory;
 
             args.unshift(this);
 
             return classFactory.createClass.apply(classFactory, args);
-
         };
-
 
         var Class = {
             create: function () {
-
                 return Nil.extend.apply(Nil, arguments);
-
             }
         };
 
+        // AbstractClassFactory
+        // --------------------
 
         var AbstractClassFactory = Class.create({
 
@@ -293,6 +309,9 @@
         });
         markAsClassFactory(AbstractClassFactory.prototype);
 
+
+        // TraitsClassFactory
+        // ------------------
 
         var TraitsClassFactory = AbstractClassFactory.extend({
 
@@ -309,11 +328,12 @@
         });
 
         function withTraits() {
-
             return new TraitsClassFactory(slice.call(arguments));
-
         }
 
+
+        // Public function and objects
+        // ---------------------------
 
         return {
             extend: extend,
@@ -336,14 +356,22 @@
 
     }
 
+    // Module export
+    // -------------
 
+    // Barman can be used in different contexts:
+    //
     if ( typeof define === 'function' && define.amd ) {
-        // AMD (ie requirejs)
+        // * If _define_ is a function for AMD, export barman using define.
         define([], factory);
+
     } else if ( typeof module !== 'undefined' && module.exports ) {
-        // Node
+        // * If _module.exports_ is available (Node.js), export barman using it.
         module.exports = factory();
+
     } else {
+        // * Otherwise, assume a browser environment and use the _window_ global to export the _barman_ variable.
+
         window.barman = factory();
     }
 

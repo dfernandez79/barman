@@ -6,21 +6,24 @@ Barman may be freely distributed under the MIT license.
 
     <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
 
-    <span class="kd">function</span> <span class="nx">factory</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">function</span> <span class="nx">factory</span><span class="p">()</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h2>Common helper functions</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>These common helper functions are based on <em>underscore</em> and <em>lodash</em> implementations.</p>
 
-        <span class="kd">var</span> <span class="nx">ArrayProto</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span>
-            <span class="nx">nativeForEach</span> <span class="o">=</span> <span class="nx">ArrayProto</span><span class="p">.</span><span class="nx">forEach</span><span class="p">,</span>
-            <span class="nx">slice</span> <span class="o">=</span> <span class="nx">ArrayProto</span><span class="p">.</span><span class="nx">slice</span><span class="p">,</span>
-
-            <span class="nx">getPrototypeOf</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">getPrototypeOf</span><span class="p">,</span>
-            <span class="nx">createObject</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">,</span>
-
-            <span class="nx">CLASS_FACTORY_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;*classFactory*&#39;</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h2>Common helper functions</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>These common helper functions are based on <em>underscore</em> and <em>lodash</em> implementations.</p>
-
-<p>Why these are included inline, instead of having a dependency to some <em>underscore</em> compatible library?</p>
+<p>Why these are included inline? Why not having a dependency to some <em>underscore</em> compatible library?</p>
 
 <p>Because <em>barman</em> uses only a few functions, and the additional dependency made the setup hard.
-So after evaluating the trade-offs, they were included here.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">has</span><span class="p">(</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">property</span> <span class="p">)</span> <span class="p">{</span>
+So after evaluating the trade-offs, they were included here.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">var</span> <span class="nx">ArrayProto</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span>
+            <span class="nx">nativeForEach</span> <span class="o">=</span> <span class="nx">ArrayProto</span><span class="p">.</span><span class="nx">forEach</span><span class="p">,</span>
+            <span class="nx">slice</span> <span class="o">=</span> <span class="nx">ArrayProto</span><span class="p">.</span><span class="nx">slice</span><span class="p">;</span>
+
+        <span class="kd">function</span> <span class="nx">isUndefined</span><span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">isFunction</span><span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">has</span><span class="p">(</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">property</span> <span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nx">object</span> <span class="o">?</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">object</span><span class="p">,</span> <span class="nx">property</span><span class="p">)</span> <span class="o">:</span> <span class="kc">false</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -37,10 +40,6 @@ So after evaluating the trade-offs, they were included here.</p>             </t
 
         <span class="kd">function</span> <span class="nx">isObject</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nx">obj</span> <span class="o">===</span> <span class="nb">Object</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
-        <span class="p">}</span>
-
-        <span class="kd">function</span> <span class="nx">isUndefined</span><span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">;</span>
         <span class="p">}</span>
 
         <span class="kd">function</span> <span class="nx">each</span><span class="p">(</span> <span class="nx">obj</span><span class="p">,</span> <span class="nx">func</span><span class="p">,</span> <span class="nx">context</span> <span class="p">)</span> <span class="p">{</span>
@@ -63,18 +62,21 @@ So after evaluating the trade-offs, they were included here.</p>             </t
             <span class="p">}</span>
         <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <h2>Merge</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p><code>merge</code> is one of the main functions of <em>barman</em>.</p>
 
-<p>It's similar to the commonly used <code>extend(dest,o1,...,oN)</code>, but it uses the following strategy
+<p>It's similar to the commonly used <code>extend({}, o1,...,oN)</code>, but it uses the following strategy
 for overwriting properties:</p>
 
 <ul>
-<li>if values are different, mark the property as conflict</li>
-<li>if one of the values is marked as required, use the value that is not marked as required</li>
+<li>if values are different, the destination property is marked as <code>conflict</code></li>
+<li>if one of the values is marked as <code>required</code>, the destination property uses the value not marked as
+required</li>
 </ul>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <h3>Merge helper functions</h3>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h4>mapProperties(<em>srcObj</em>, <em>iterator</em>, <em>result</em>)</h4>
 
 <p>Returns a new object where each property is the result of applying the <code>iterator</code> function over <code>srcObj</code>:</p>
 
 <pre><code>result.prop = iterator(srcObj.prop, 'prop');
-</code></pre>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">mapProperties</span><span class="p">(</span> <span class="nx">srcObj</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">result</span> <span class="p">)</span> <span class="p">{</span>
+</code></pre>
+
+<p><em>result</em> is optional, and an empty object will be used if it's omitted.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">mapProperties</span><span class="p">(</span> <span class="nx">srcObj</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">result</span> <span class="p">)</span> <span class="p">{</span>
 
             <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">result</span> <span class="p">)</span> <span class="p">{</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{};</span> <span class="p">}</span>
 
@@ -87,7 +89,6 @@ for overwriting properties:</p>
             <span class="p">}</span>
 
             <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
-
         <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <h4>conflict()</h4>
 
 <p>Throws an error. Used to indicate <em>merge conflicts</em>.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">conflict</span><span class="p">()</span> <span class="p">{</span>
@@ -112,7 +113,6 @@ or the target value is the <code>required</code> marker; use the given <code>val
 
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>If both values are different, but not undefined or required, return the <code>conflict</code> marker.</p>             </td>             <td class="code">               <div class="highlight"><pre>                <span class="k">return</span> <span class="nx">conflict</span><span class="p">;</span>
             <span class="p">}</span>
-
         <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <h3>merge(<em>object</em>,...)</h3>
 
 <p>Returns a new object, that is the result of merging the properties of each one of the given objects.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">merge</span><span class="p">()</span> <span class="p">{</span>
@@ -126,13 +126,13 @@ or the target value is the <code>required</code> marker; use the given <code>val
             <span class="p">});</span>
 
             <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
-
         <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <h2>Nil</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p><code>Nil</code> is the root of the <em>barman</em> <em>class hierarchy</em>.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">Nil</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>Every <em>barman</em> <em>class</em> has a <code>__super__</code> property that returns the parent prototype.
 The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">Nil</span><span class="p">.</span><span class="nx">__super__</span> <span class="o">=</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <h3>_super(<em>methodName</em>)</h3>
 
 <p>Every object created with <em>barman</em> inherits the <code>_super</code> method.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">Nil</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">_super</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">methodName</span> <span class="p">)</span> <span class="p">{</span>
 
-            <span class="kd">var</span> <span class="nx">thisPrototype</span> <span class="o">=</span> <span class="nx">getPrototypeOf</span><span class="p">(</span><span class="k">this</span><span class="p">),</span>
+            <span class="kd">var</span> <span class="nx">getPrototypeOf</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">getPrototypeOf</span><span class="p">,</span>
+                <span class="nx">thisPrototype</span> <span class="o">=</span> <span class="nx">getPrototypeOf</span><span class="p">(</span><span class="k">this</span><span class="p">),</span>
                 <span class="nx">superPrototype</span> <span class="o">=</span> <span class="nx">getPrototypeOf</span><span class="p">(</span><span class="nx">thisPrototype</span><span class="p">),</span>
                 <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <p>The <em>methodName</em> argument is optional.</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">methodName</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <p>If <em>methodName</em> is omitted, the function returns the parent prototype.</p>             </td>             <td class="code">               <div class="highlight"><pre>                <span class="k">return</span> <span class="nx">superPrototype</span><span class="p">;</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>If <em>methodName</em> is given, the function returns the parent function bound to <em>this</em>.</p>             </td>             <td class="code">               <div class="highlight"><pre>                <span class="kd">var</span> <span class="nx">superProp</span> <span class="o">=</span> <span class="nx">superPrototype</span><span class="p">[</span><span class="nx">methodName</span><span class="p">];</span>
@@ -141,7 +141,7 @@ The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>       
                     <span class="k">throw</span> <span class="k">new</span> <span class="nx">ReferenceError</span><span class="p">(</span><span class="s1">&#39;The property &#39;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s1">&#39; is not defined&#39;</span><span class="p">);</span>
                 <span class="p">}</span>
 
-                <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">superProp</span> <span class="o">==</span> <span class="s1">&#39;function&#39;</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span> <span class="nx">isFunction</span><span class="p">(</span><span class="nx">superProp</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
                     <span class="k">return</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
                         <span class="k">return</span> <span class="nx">superProp</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
                     <span class="p">};</span>
@@ -149,36 +149,31 @@ The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>       
 
                 <span class="k">return</span> <span class="nx">superProp</span><span class="p">;</span>
             <span class="p">}</span>
+        <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <h2>Default class factory</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <p>Extension and creation of <em>classes</em> is delegated to <em>ClassFactory</em> objects.</p>
 
-        <span class="p">};</span>
+<p>Those objects are marked with the special attribute <em>CLASS_FACTORY_ATTRIBUTE</em>, so they can be distinguished
+by <em>Class.create</em> and <em>Nil.extend</em>.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">var</span> <span class="nx">CLASS_FACTORY_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;*classFactory*&#39;</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-25">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-25">&#182;</a>               </div>               <h3>markAsClassFactory(<em>obj</em>)</h3>
 
-
-        <span class="kd">function</span> <span class="nx">markAsClassFactory</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
-
+<p>Adds the <em>CLASS_FACTORY_ATTRIBUTE</em> to an object.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">markAsClassFactory</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
             <span class="nx">obj</span><span class="p">[</span><span class="nx">CLASS_FACTORY_ATTRIBUTE</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
             <span class="k">return</span> <span class="nx">obj</span><span class="p">;</span>
+        <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-26">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-26">&#182;</a>               </div>               <h3>isClassFactory(<em>obj</em>)</h3>
 
-        <span class="p">}</span>
-
-        <span class="kd">function</span> <span class="nx">isClassFactory</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
-
+<p>Returns true if the object is marked as a class factory.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">isClassFactory</span><span class="p">(</span> <span class="nx">obj</span> <span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nx">isObject</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">CLASS_FACTORY_ATTRIBUTE</span><span class="p">]</span> <span class="o">===</span> <span class="kc">true</span><span class="p">;</span>
-
         <span class="p">}</span>
 
         <span class="kd">var</span> <span class="nx">defaultClassFactory</span> <span class="o">=</span> <span class="nx">markAsClassFactory</span><span class="p">({</span>
 
             <span class="nx">createClass</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">Parent</span><span class="p">,</span> <span class="nx">instanceMethods</span><span class="p">,</span> <span class="nx">staticMethods</span> <span class="p">)</span> <span class="p">{</span>
 
-                <span class="kd">var</span> <span class="nx">proto</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">createObject</span><span class="p">(</span><span class="nx">Parent</span><span class="p">.</span><span class="nx">prototype</span><span class="p">),</span> <span class="nx">instanceMethods</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">proto</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">Parent</span><span class="p">.</span><span class="nx">prototype</span><span class="p">),</span> <span class="nx">instanceMethods</span><span class="p">);</span>
 
                 <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">has</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="s1">&#39;constructor&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
 
-                    <span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-                        <span class="nx">Parent</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
-                    <span class="p">};</span>
+                    <span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="nx">Parent</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span> <span class="p">};</span>
 
-                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">!==</span> <span class="s1">&#39;function&#39;</span> <span class="p">)</span> <span class="p">{</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">proto</span><span class="p">.</span><span class="nx">constructor</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
 
                     <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="s1">&#39;The constructor property must be a function&#39;</span><span class="p">);</span>
 
@@ -192,34 +187,22 @@ The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>       
                 <span class="nx">ctor</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span><span class="p">;</span>
 
                 <span class="k">return</span> <span class="nx">ctor</span><span class="p">;</span>
-
             <span class="p">}</span>
 
-        <span class="p">});</span>
-
-
-        <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-
+        <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-27">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-27">&#182;</a>               </div>               <h2>Nil.extend and Class.create</h2>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
             <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">),</span>
                 <span class="nx">classFactory</span> <span class="o">=</span> <span class="p">(</span><span class="nx">isClassFactory</span><span class="p">(</span><span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">?</span> <span class="nx">args</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span> <span class="o">:</span> <span class="nx">defaultClassFactory</span><span class="p">;</span>
 
             <span class="nx">args</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
 
             <span class="k">return</span> <span class="nx">classFactory</span><span class="p">.</span><span class="nx">createClass</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">classFactory</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
-
         <span class="p">};</span>
-
 
         <span class="kd">var</span> <span class="nx">Class</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nx">create</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-
                 <span class="k">return</span> <span class="nx">Nil</span><span class="p">.</span><span class="nx">extend</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">Nil</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
-
             <span class="p">}</span>
-        <span class="p">};</span>
-
-
-        <span class="kd">var</span> <span class="nx">AbstractClassFactory</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span>
+        <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-28">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-28">&#182;</a>               </div>               <h2>AbstractClassFactory</h2>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">var</span> <span class="nx">AbstractClassFactory</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span>
 
             <span class="nx">defaultCreateClass</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
                 <span class="k">return</span> <span class="nx">defaultClassFactory</span><span class="p">.</span><span class="nx">createClass</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">defaultClassFactory</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
@@ -228,10 +211,7 @@ The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>       
             <span class="nx">createClass</span><span class="o">:</span> <span class="nx">required</span>
 
         <span class="p">});</span>
-        <span class="nx">markAsClassFactory</span><span class="p">(</span><span class="nx">AbstractClassFactory</span><span class="p">.</span><span class="nx">prototype</span><span class="p">);</span>
-
-
-        <span class="kd">var</span> <span class="nx">TraitsClassFactory</span> <span class="o">=</span> <span class="nx">AbstractClassFactory</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+        <span class="nx">markAsClassFactory</span><span class="p">(</span><span class="nx">AbstractClassFactory</span><span class="p">.</span><span class="nx">prototype</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <h2>TraitsClassFactory</h2>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">var</span> <span class="nx">TraitsClassFactory</span> <span class="o">=</span> <span class="nx">AbstractClassFactory</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
 
             <span class="nx">constructor</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">traits</span> <span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">traits</span> <span class="o">=</span> <span class="nx">traits</span><span class="p">;</span> <span class="p">},</span>
 
@@ -246,13 +226,8 @@ The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>       
         <span class="p">});</span>
 
         <span class="kd">function</span> <span class="nx">withTraits</span><span class="p">()</span> <span class="p">{</span>
-
             <span class="k">return</span> <span class="k">new</span> <span class="nx">TraitsClassFactory</span><span class="p">(</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">));</span>
-
-        <span class="p">}</span>
-
-
-        <span class="k">return</span> <span class="p">{</span>
+        <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <h2>Public function and objects</h2>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="k">return</span> <span class="p">{</span>
             <span class="nx">extend</span><span class="o">:</span> <span class="nx">extend</span><span class="p">,</span>
             <span class="nx">merge</span><span class="o">:</span> <span class="nx">merge</span><span class="p">,</span>
             <span class="nx">conflict</span><span class="o">:</span> <span class="nx">conflict</span><span class="p">,</span>
@@ -271,13 +246,17 @@ The parent of <code>Nil</code> is <code>Nil</code>.</p>             </td>       
             <span class="nx">withTraits</span><span class="o">:</span> <span class="nx">withTraits</span>
         <span class="p">};</span>
 
-    <span class="p">}</span>
+    <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <h2>Module export</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-32">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-32">&#182;</a>               </div>               <p>Barman can be used in different contexts:</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-33">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-33">&#182;</a>               </div>               <ul>
+<li>If <em>define</em> is a function for AMD, export barman using define.</li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">define</span><span class="p">([],</span> <span class="nx">factory</span><span class="p">);</span>
 
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-34">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-34">&#182;</a>               </div>               <ul>
+<li>If <em>module.exports</em> is available (Node.js), export barman using it.</li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">();</span>
 
-    <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <p>AMD (ie requirejs)</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">define</span><span class="p">([],</span> <span class="nx">factory</span><span class="p">);</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <p>Node</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">();</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nb">window</span><span class="p">.</span><span class="nx">barman</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-35">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-35">&#182;</a>               </div>               <ul>
+<li>Otherwise, assume a browser environment and use the <em>window</em> global to export the <em>barman</em> variable.</li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nb">window</span><span class="p">.</span><span class="nx">barman</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">();</span>
     <span class="p">}</span>
 
 <span class="p">})();</span>
