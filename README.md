@@ -1,10 +1,32 @@
-barman
+Barman
 ======
 
 _Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
 
-It's small, 2.2k minimized - 1k compressed, and plays nice with other frameworks.
+It's small, 2.5k minimized - 1k compressed, and plays nice with other frameworks.
 
+----------------------------------------------------------------
+
+Installation
+------------
+
+### Node.js
+
+```shell
+npm install barman --save
+```
+
+The `--save` argument adds the dependency to your `package.json`.
+
+### Browser
+
+Barman can be loaded as a plain script, or as a AMD module.
+
+If you load it as a plain script, a global called `barman` will be added to your `window` object.
+
+If you load it using AMD, the `barman` object is returned by the module and no global is registered.
+
+----------------------------------------------------------------
 
 Feature tour
 ------------
@@ -17,7 +39,6 @@ var barman = require('barman'),
     required = barman.required,
     withTraits = barman.withTraits;
 ```
-For details on how to load _barman_ in your project, look into the *Installation* section bellow.
 
 
 #### Create a _class_
@@ -83,6 +104,7 @@ var aView = new CustomView();
 aView.render(); // Custom call to super View Render
 ```
 
+
 #### Constructors can be overridden too
 
 ```js
@@ -123,6 +145,7 @@ var aView = new CustomView();
 aView.render(); // sub view 1, sub view 2
 ```
 
+
 #### Traits are represented with plain objects, but they can indicate required methods
 
 ```js
@@ -137,6 +160,7 @@ var templateRenderingTrait = {
 };
 ```
 
+
 #### Traits can be composed
 
 ```js
@@ -145,11 +169,13 @@ var MyView = View.extend(
 );
 ```
 
+
 #### Conflicting methods will throw an exception when executed
 
 ```js
 (new MyView()).render(); // throws an exception
 ```
+
 
 #### Conflicts can be resolved by setting which implementation to use
 
@@ -166,78 +192,6 @@ var MyView = View.extend(
     });
 ```
 
-Installation
-------------
-
-### Node.js
-
-```shell
-npm install barman --save
-```
-
-The `--save` argument adds the barman dependency to your `package.json`.
-
-
-### Browser
-
-Barman depends only in [some functions][source] from the [underscore] library. And you have several options on how to add it into your web project:
-
-1. Using AMD: The library is designed with AMD in mind, so you don't need any special configuration. Only make the [underscore] dependency available to the barman module.
-
-2. Plain script: load an [underscore] compatible library first, as long you provide a `_` global with the required functions is should work.
-
-3. All-in-one bundle: It's version packaged with the required [underscore] functions using implementations from [mout]. Is intended to be used in a non-AMD setup; for AMD you can use [underscore] or _barman-underscore_ as dependencies.
-  
-#### Using AMD
-
-##### with underscore
-
-```js
-require.config({
-    paths: {
-        barman: 'barman.min',
-        underscore: 'underscore-min'
-    },
-    shim: {
-        // underscore.js is not an AMD module
-        exports: '_'
-    }
-});
-
-require(['barman'], function (barman) {
-    // use it
-});
-```
-
-##### with an alternative underscore implementation
-
-```js
-require.config({
-    paths: {
-        barman: 'barman.min',
-        'my-underscore': 'my-underscore-impl-for-barman'
-    },
-    // create an alias of the underscore dependency, just for barman
-    map: {
-        barman: {
-            underscore: 'my-underscore'
-        }
-    }
-});
-```
-
-#### Plain script
-
-```html
-<script src="underscore-min.js" type="text/javascript"></script>
-<script src="barman.min.js"></script>
-```
-
-#### All-in-one bundle
-
-```html
-<script src="barman.all.min.js"></script>
-```
 
 ----------------------------------------------------------------
 
@@ -246,7 +200,8 @@ Design notes
 
 #### Why another?
 
-Creating and manipulating objects in JavaScript is very easy: if you need single-inheritance, then set the [prototype chain]; if you need to share methods between objects, then [modify the prototype] directly.
+Creating and manipulating objects in JavaScript is very easy: if you need [single-inheritance], then set the [prototype chain]; if you need to share methods between objects, then [modify the prototype] directly.
+
 But those operations are low level, which means code duplication and more chances to make mistakes. That's why most frameworks provides their own abstractions.
 
 For example Backbone, Closure, YUI, Dojo, Prototype, and ExtJS, have functions to do [single-inheritance]; but with them you also get a full UI or application framework.
@@ -258,26 +213,20 @@ I wanted something small, that only provides abstractions to define objects. So 
 * [chains]
 * [dejavu] - actually it was released when I was already working on barman
 
-All of these libraries had similarities and differences, with more or less features. But they were not exactly what I wanted. It doesn't means that barman is _better_, it's matter of personal needs and preference, so
-I encourage you to take a look into those libraries too.
+All of these libraries had similarities and differences, with more or less features. But they were not exactly what I wanted. It doesn't means that barman is _better_, it's matter of personal needs and preference, so I encourage you to take a look into those libraries too.
 
 The _design principles_ that guided the creation of barman are:
 
-* **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript,
-but it's common for programmers that comes from class based programming languages. So `Class.create` was preferred 
-over introducing a new term.
+* **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript, but it's common for programmers that comes from class based programming languages. So `Class.create` was preferred over introducing a new term.
 
 * **Play nice with _standard_ JavaScript**. It means to avoid special method signatures or attributes.
 
-* **Don't re-invent JavaScript**. JavaScript has no type checking, and encapsulation is limited. If you want those
-features you'll probably need some external tool and some special attributes and methods to support them. 
-I didn't wanted to add those features to barman. If you really want them, probably other options that suits your 
-needs are: [dejavu] which provides some limited constraint checking; [Dart] and [Typescript] that are different 
-programming languages designed to fix some of the JavaScript issues.
+* **Don't re-invent JavaScript**. JavaScript has no type checking, and encapsulation is limited. If you want those features you'll probably need some external tool, and special attributes/methods to support them. 
+I didn't wanted to add those features to barman. If you really want them, you can consider other options like: [dejavu] which provides some limited constraint checking; or a different programing language for the web like [Dart] or [Typescript].
 
 #### Mixins and traits
 
-I based the work on barman in two papers:
+The work on barman, was based in this two papers:
 
 * The [mixins paper] from Gilad Bracha.
 * The [traits paper] from Stephan Ducasse.
@@ -325,9 +274,9 @@ But the _class factory_ idea was keep because it makes easy to extend the framew
 
 #### Method decorations
 
-_Special method_ or _method decorations_ was another idea that seemed good at first, but then I changed my mind. 
+The object that you give to the _class factory_ is an specification of the methods that you want to create. So instead of using functions you can use an object to describe some special case. That approach is used by [compose] with the name of _method decorations_, and is more or less like a macro to define methods.
 
-What I mean with _special method_? The object that you give to the _class factory_ is an specification of the methods that you want to create. So instead of using functions you can use an object to describe some special case, for example:
+For example, one possible use case for _method decorations_ is to create a method that is injected with a reference to super (like in Prototype):
 
 ```js
 SuperClass.extend({
@@ -338,13 +287,11 @@ SuperClass.extend({
 });
 ```
 
-Since the _class factoriy_ has access to some metadata, like the method name, it can be used as a kind of _macro_. This idea is used by [compose] and reminds me to some extend to [Groovy AST] transformations.
-
-But I discarded the idea, because of the following reasons:
+But I discarded the idea, because I couldn't find any good use case where it applies:
 
 * Injecting super in that way, like Prototype does, is hard to read, and adds complexity to the handling of function arguments.
 
-* [compose] uses this kind of method specification to have aliases, but after playing with aliases I found that it was better to use a plain function reference: 
+* [compose] uses this kind of method specification to have aliases, but after playing with aliases I found that it's better to use a plain function reference: 
 ```js
 // I don't see any advantage of having, this:
 {method: from(SuperClass, 'other')}
