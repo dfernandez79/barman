@@ -7,7 +7,6 @@ It's small (2.5k minimized - 1k compressed) and plays nice with other frameworks
 
 
 ----------------------------------------------------------------
-
 Installation
 ------------
 
@@ -26,9 +25,10 @@ Barman can be loaded as a plain script or as [AMD] module:
 * When loaded as a plain script, a global called `barman` will be added to the `window` object.
 * When loaded using [AMD], the `barman` object is returned by the module and no global will be registered.
 
+In both cases you can use the minified version: `dist/barman.min.js` (which includes a [source map]); or the full source: `src/barman.js`.
+
 
 ----------------------------------------------------------------
-
 Feature tour
 ------------
 
@@ -214,9 +214,11 @@ I wanted something small, that only provides abstractions to define objects. So 
 * [chains]
 * [dejavu] - actually it was released when I was already working on barman
 
-All of these libraries had similarities and differences, with more or less features. But they were not exactly what I wanted. It doesn't means that barman is _better_, it's matter of personal needs and preference, so I encourage you to take a look into those libraries too.
+All of these libraries had similarities and differences, with more or less features. 
 
-The _design principles_ that guided the creation of barman are:
+But they were not exactly what I wanted. It doesn't means that barman is _better_, it's matter of personal needs and preference, so I encourage you to take a look into those libraries too.
+
+The _guiding design principles_ of barman are:
 
 * **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript, but it's common for programmers that comes from class based programming languages. So `Class.create` was preferred over introducing a new term.
 
@@ -227,15 +229,15 @@ I didn't wanted to add those features to barman. If you really need them, you ca
 
 #### Mixins and traits
 
-The work on barman, was based in this two papers:
+The work on barman, was based in two papers:
 
 * The [mixins paper] from Gilad Bracha and William Cook.
 * The [traits paper] from Nathanael Scharli, Stephane Ducasse, Oscar Nierstrasz, and Andrew P. Black
 
 Reading the last one is recommend if you want to understand what means _trait_ in the context of barman. But if you are lazy about reading, here is a small summary about _mixins_ and _traits_:
 
-* **Mixins**: Is a way of sharing implementation by adding a set of methods to a _class_.
-* **Traits**: Has the same goal as mixins, but adds some rules on how the methods are added to avoid mistakes.
+* **Mixins**: Is a way of sharing implementation by adding a set of methods to a _class_. In JavaScript, the concept is simple because there isn't _classes_ and there isn't _type annotations_, two concepts that overlap in most class based languages. So what means a mixin in JavaScript terms? Just sharing a bunch of methods by adding them to an object.
+* **Traits**: Has the same goal as mixins, but adds some rules on how the methods are added to avoid mistakes. Note that barman uses the term _trait_ as in the mentioned traits paper. Some programming languages uses the same term with other meanings: [Scala] uses trait to mean mixin, [Self] uses trait to mean an object prototype.
 
 #### Functional mixins
 
@@ -252,7 +254,7 @@ But this approach has some problems:
 * **What if you want to override a method?** Some people use [function wrappers] to do that. But they are very confusing, for example: what means _before_ or _after_? Is before _my_ function or before the mixin function?
 You don't know, again it depends on the implementation details of each function.
 
-As you can see the main point here is that you have a lot of freedom on how to extend objects, but that freedom adds more uncertainty that makes maintainability and program understanding hard.
+The main point here is that you have a lot of freedom on how to extend objects, but that freedom adds more uncertainty that makes maintainability and program understanding hard.
 
 Another way of doing mixins in JavaScript is by using objects. That's the approach used  by a lot of frameworks:
 
@@ -292,7 +294,7 @@ But the _class factory_ idea was keep because it makes easy to extend the framew
 
 The object that you give to the _class factory_ is an specification of the methods that you want to create. So instead of using functions you can use an object to describe some special case. That approach is used by [compose] with the name of _method decorations_, and is more or less like a macro to define methods.
 
-For example, one possible use case for _method decorations_ is to create a method that is injected with a reference to super (like in Prototype):
+For example, one possible use case for _method decorations_ is to create a method that is injected with a reference to super (like in [Prototype]):
 
 ```js
 SuperClass.extend({
@@ -303,11 +305,11 @@ SuperClass.extend({
 });
 ```
 
-But I discarded the idea, because I couldn't find any good use case where it applies:
+But the idea was discarded, because I couldn't find any good use case to apply it:
 
-* Injecting super in that way, like Prototype does, is hard to read, and adds complexity to the handling of function arguments.
+* Injecting super in that way, like [Prototype] does, is hard to read, and adds complexity to the handling of function arguments.
 
-* [compose] uses this kind of method specification to have aliases, but after playing with aliases I found that it's better to use a plain function reference: 
+* [compose] uses this kind of method specification to have aliases, but after playing with aliases I didn't found the advantage of it: 
 ```js
 // I don't see any advantage of having, this:
 {method: from(SuperClass, 'other')}
@@ -335,17 +337,26 @@ This two cases can be implemented with a function similar to `extend`, that I ca
 ```js
 result = merge(o1, o2)
 ```
-If _o1_ and _o2_ defines the same property but with a different value, the property is replaced with a `conflict` function that throws an error when executed (remember, is not my goal to add a pseudo-type checking to JavaScript). To resolve conflicts, you only need to overwrite the conflicting methods:
+If _o1_ and _o2_ defines the same property but with a different value, the property is replaced with a `conflict` function that throws an error when executed (remember, is not my goal to add a pseudo-type checking to JavaScript). 
+
+But how a conflict is resolved? You only need to overwrite the conflicting methods. And the usual `extend` fits very well for that task:
+
 ```js
 result = extend(merge(o1, o2), {prop: impl});
 ```
+
 In that way choosing which implementation to use is easy:
 ```js
 result = extend(merge(o1, o2), {prop: o1.prop});
 ```
-With this implementation you don't have a proper _Trait class_, but it works and covers all the characteristics of a trait mentioned in the [traits paper].
 
+With this implementation you don't have a proper _Trait class_, but it works and covers all the characteristics of a trait mentioned in the [traits paper]:
+* Composition of traits is symetric: `merge(o1, o2) == merge(o2, o1)`
+* The same method added from different traits doesn't generate a conflict: `merge(o1, o2, o1) == merge(o1, o2)`
+* Traits that uses other traits is possible, because methods are _flattened_: `merge(o1, merge(o1, o2)) == merge(o1, o2)`
+* You can do aliasing and choose how to resolve conflicts.
 
+----------------------------------------------------------------
 License
 -------
 
@@ -359,40 +370,25 @@ Released under [MIT license]
 [mixins]: http://en.wikipedia.org/wiki/Mixins
 [prototype chain]: https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Inheritance_and_the_prototype_chain
 [modify the prototype]: https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Details_of_the_Object_Model#Adding_properties
+[source map]: http://net.tutsplus.com/tutorials/tools-and-tips/source-maps-101/
+[mixins paper]: http://www.bracha.org/oopsla90.pdf
+[traits paper]: http://scg.unibe.ch/archive/papers/Scha03aTraits.pdf
+[function wrappers]: https://speakerdeck.com/anguscroll/how-we-learned-to-stop-worrying-and-love-javascript
+
+[Scala]: http://www.scala-lang.org/
+[Self]: http://en.wikipedia.org/wiki/Self_(programming_language)#Traits
 
 [AMD]: http://requirejs.org/docs/whyamd.html#amd
-
 [Backbone]: http://backbonejs.org/
 [Closure]: https://developers.google.com/closure/
 [YUI]: http://yuilibrary.com/
 [Dojo]: http://dojotoolkit.org/
 [Prototype]: http://prototypejs.org/
 [ExtJS]: http://www.sencha.com/products/extjs
-
 [traitsjs]: http://soft.vub.ac.be/~tvcutsem/traitsjs/
 [compose]: https://github.com/kriszyp/compose
 [chains]: https://github.com/stomlinson/Chains
 [dejavu]: https://github.com/IndigoUnited/dejavu
-
 [Dart]: http://www.dartlang.org/
 [Typescript]: http://www.typescriptlang.org/
 
-[mixins paper]: http://www.bracha.org/oopsla90.pdf
-[traits paper]: http://scg.unibe.ch/archive/papers/Scha03aTraits.pdf
-
-[underscore]: http://underscorejs.org/
-
-[lodash]: http://lodash.com/
-
-[mout]: http://moutjs.com/
-
-[requirejs]: http://requirejs.org/
-
-
-[function wrappers]: https://speakerdeck.com/anguscroll/how-we-learned-to-stop-worrying-and-love-javascript
-
-
-
-[source]: https://github.com/dfernandez79/barman/blob/master/src/barman.js
-
-[Groovy AST]: http://groovy.codehaus.org/Compile-time+Metaprogramming+-+AST+Transformations
