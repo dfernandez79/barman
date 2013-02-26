@@ -79,6 +79,8 @@ module.exports = function ( grunt ) {
             dist: {
                 options: {
                     sourceMap: 'dist/barman.min.js.map',
+                    sourceMapPrefix: 'dist',
+                    sourceMappingURL: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>/dist/barman.min.js.map',
                     sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>'
                 },
                 files: {

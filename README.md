@@ -25,8 +25,7 @@ Barman can be loaded as a plain script or as [AMD] module:
 * When loaded as a plain script, a global called `barman` will be added to the `window` object.
 * When loaded using [AMD], the `barman` object is returned by the module and no global will be registered.
 
-In both cases you can use the minified version: `dist/barman.min.js` (which includes a [source map]); or the full source: `src/barman.js`.
-
+In both cases you can use the minified version: `dist/barman.min.js`, which includes a [source map]; or the full source: `src/barman.js`.
 
 ----------------------------------------------------------------
 Feature tour
@@ -174,6 +173,7 @@ var MyView = View.extend(
 #### Conflicting methods will throw an exception when executed
 
 ```js
+// render is defined by templateRenderingTrait and compositeViewTrait
 (new MyView()).render(); // throws an exception
 ```
 
@@ -183,19 +183,33 @@ var MyView = View.extend(
 ```js
 var MyView = View.extend(
     withTraits(templateRenderingTrait, compositeViewTrait),
-        
+    
+    // aliases to trait methods    
     compositeRender: compositeViewTrait.render,
     templateRender: templateRenderingTrait.render,
-        
+    
+    // re-defines the conflicting render method    
     render: function () {
         this.templateRender();
         this.compositeRender();
     });
 ```
 
+----------------------------------------------------------------
+Development
+-----------
+
+If you are going to fork this project, you'll need these tools:
+
+* [Nodejs]
+* [Grunt]
+
+Before contributing with a _pull request_ do a `grunt dist`  to run the linter and unit tests.
+
+If you want to understand the source code, or create your own library, the following _Design Notes_ will be helpful.
+
 
 ----------------------------------------------------------------
-
 Design notes
 ------------
 
@@ -351,7 +365,8 @@ result = extend(merge(o1, o2), {prop: o1.prop});
 ```
 
 With this implementation you don't have a proper _Trait class_, but it works and covers all the characteristics of a trait mentioned in the [traits paper]:
-* Composition of traits is symetric: `merge(o1, o2) == merge(o2, o1)`
+
+* Composition of traits is symmetric: `merge(o1, o2) == merge(o2, o1)`
 * The same method added from different traits doesn't generate a conflict: `merge(o1, o2, o1) == merge(o1, o2)`
 * Traits that uses other traits is possible, because methods are _flattened_: `merge(o1, merge(o1, o2)) == merge(o1, o2)`
 * You can do aliasing and choose how to resolve conflicts.
@@ -391,4 +406,5 @@ Released under [MIT license]
 [dejavu]: https://github.com/IndigoUnited/dejavu
 [Dart]: http://www.dartlang.org/
 [Typescript]: http://www.typescriptlang.org/
-
+[Nodejs]: http://nodejs.org/
+[Grunt]: http://gruntjs.com/
