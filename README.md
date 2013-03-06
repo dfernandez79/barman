@@ -91,12 +91,12 @@ aPoint.show() // red 5, 6
 ```
 
 
-#### _Super class_ delegation, can be done using the `_super` method
+#### _Super class_ delegation, can be done using `_callSuper`
 
 ```js
 var CustomView = View.extend({
     render: function () {
-        return 'Custom call to super ' + this._super('render')();
+        return 'Custom call to super ' + this._callSuper('render');
     }
 });
 
@@ -110,7 +110,7 @@ aView.render(); // Custom call to super View Render
 ```js
 var XPoint = Point.extend({
     constructor: function (x, y) {
-        _super('constructor')(x * 10, y * 20);
+        this._callSuper('constructor', x * 10, y * 20);
     }
 });
 ```
@@ -370,6 +370,18 @@ With this implementation you don't have a proper _Trait class_, but it works and
 * The same method added from different traits doesn't generate a conflict: `merge(o1, o2, o1) == merge(o1, o2)`
 * Traits that uses other traits is possible, because methods are _flattened_: `merge(o1, merge(o1, o2)) == merge(o1, o2)`
 * You can do aliasing and choose how to resolve conflicts.
+
+
+----------------------------------------------------------------
+Change log
+----------
+
+* 0.2.0 - **Breaking changes** `_super` was removed, instead use `_callSuper` or `_applySuper`
+  * Why? Super is used for method delegation, so it makes no sense to use `_super()`.
+  Using `_super('methodName')()` is long to write the new syntax makes calling super shorter.
+  The _apply_ version was added to make passing of arguments easier.
+* 0.1.1 - Removal of `underscore` dependency. Better documentation (both source and readme). Source code refactoring.
+* 0.1.0 - Initial release, it had a dependency with `underscore`.
 
 ----------------------------------------------------------------
 License

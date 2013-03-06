@@ -185,39 +185,36 @@
         // The parent of `Nil` is `Nil`.
         Nil.__super__ = Nil.prototype;
 
-        // ### \_super(_methodName_)
+        // ### \_applySuper(_methodName_, _\[ arguments \]_)
         //
-        // Every object created with *barman* inherits the `_super` method.
+        // Allows to call the `__super__` implementation of a method.
+        // It's similar to `Function.apply` but it always uses `this` as context.
         //
-        Nil.prototype._super = function ( methodName ) {
+        // The _methodName_ argument is required, and an error is thrown if it's omitted.
+        //
+        Nil.prototype._applySuper = function ( methodName, args ) {
 
             var getPrototypeOf = Object.getPrototypeOf,
-                thisPrototype = getPrototypeOf(this),
-                superPrototype = getPrototypeOf(thisPrototype),
-                self = this;
+                superPrototype = getPrototypeOf(getPrototypeOf(this)),
+                superProp = superPrototype[methodName];
 
-            // The _methodName_ argument is optional.
             if ( !methodName ) {
-                // If _methodName_ is omitted, the function returns the parent prototype.
-
-                return superPrototype;
-            } else {
-                // If _methodName_ is given, the function returns the parent function bound to _this_.
-
-                var superProp = superPrototype[methodName];
-
-                if ( isUndefined(superProp) ) {
-                    throw new ReferenceError('The property ' + name + ' is not defined');
-                }
-
-                if ( isFunction(superProp) ) {
-                    return function () {
-                        return superProp.apply(self, arguments);
-                    };
-                }
-
-                return superProp;
+                throw new Error('The name of the method to call is required');
             }
+
+            if ( isUndefined(superProp) ) {
+                throw new ReferenceError("__super__ doesn't define a method named " + name);
+            }
+
+            return superProp.apply(this, args);
+        };
+
+        // ### \_callSuper(_methodName_, _\[ arg1, ... \]_)
+        //
+        // The variable arguments version of `_applySuper`.
+        //
+        Nil.prototype._callSuper = function ( methodName ) {
+            return this._applySuper(methodName, slice.call(arguments, 1));
         };
 
 
@@ -266,7 +263,8 @@
 
                 var ctor = extend(proto.constructor, staticMethods, {__super__: Parent.prototype });
 
-                if ( isUndefined(proto._super) ) { proto._super = Nil.prototype._super; }
+                if ( isUndefined(proto._callSuper) ) { proto._callSuper = Nil.prototype._callSuper; }
+                if ( isUndefined(proto._applySuper) ) { proto._applySuper = Nil.prototype._applySuper; }
 
                 ctor.prototype = proto;
                 ctor.extend = Nil.extend;

@@ -32,6 +32,7 @@ describe('Barman', function () {
 
         });
 
+
         it('marks conflicting properties', function () {
 
             var result = merge({ prop: 'prop from one' }, { prop: 'prop from two' });
@@ -39,6 +40,7 @@ describe('Barman', function () {
             expect(result.prop).to.equal(conflict);
 
         });
+
 
         it('accepts properties that has the same value', function () {
 
@@ -48,6 +50,7 @@ describe('Barman', function () {
             expect(result.prop).to.equal(prop);
 
         });
+
 
         it('accepts implementations for properties marked as required', function () {
 
@@ -88,17 +91,6 @@ describe('Barman', function () {
 
         });
 
-        it('provides a _super function', function () {
-
-            var SubNil = function () {};
-            SubNil.prototype = new Nil();
-
-            var anInstance = new SubNil();
-
-            expect(anInstance._super()).to.equal(Nil.prototype);
-
-        });
-
     });
 
 
@@ -112,6 +104,7 @@ describe('Barman', function () {
 
             });
 
+
             it('returns a function with prototype.constructor referencing to itself', function () {
 
                 var NewClass = Class.create();
@@ -119,6 +112,7 @@ describe('Barman', function () {
                 expect(NewClass.prototype.constructor).to.equal(NewClass);
 
             });
+
 
             it('can describe object properties', function () {
 
@@ -128,6 +122,7 @@ describe('Barman', function () {
                 expect(aPoint.x).to.equal(10);
 
             });
+
 
             it('can specify an object constructor', function () {
 
@@ -141,6 +136,7 @@ describe('Barman', function () {
 
             });
 
+
             it('returns classes that can be extended', function () {
 
                 var Widget = Class.create({ render: 'Widget.render' }),
@@ -151,11 +147,13 @@ describe('Barman', function () {
 
             });
 
+
             it('uses Nil as the parent class', function () {
 
                 expect(Class.create().__super__).to.equal(Nil.prototype);
 
             });
+
 
             it('accepts the specification of "static" properties as an argument', function () {
 
@@ -164,6 +162,7 @@ describe('Barman', function () {
                 expect(MyClass.staticProp).to.equal('hello');
 
             });
+
 
             it('accepts a "class factory" as an argument', function () {
 
@@ -178,6 +177,7 @@ describe('Barman', function () {
                 expect(createdClass).to.equal('From ClassFactory');
 
             });
+
 
             it('gives the proper arguments to the "class factory"', function () {
 
@@ -198,6 +198,7 @@ describe('Barman', function () {
                 expect(createdClass.parent).to.equal(Nil);
 
             });
+
 
             it('throws an exception if the constructor is not a function', function () {
 
@@ -245,6 +246,7 @@ describe('Barman', function () {
 
             });
 
+
             it('supports getPrototypeOf to do super delegation', function () {
 
                 var Widget = Class.create({ render: 'SUPER' }),
@@ -262,7 +264,8 @@ describe('Barman', function () {
 
             });
 
-            it('adds the _super method even if the parent does not have it', function () {
+
+            it('adds the _callSuper and _applySuper methods even if the parent does not have it', function () {
 
                 var Parent = function () {};
 
@@ -271,10 +274,13 @@ describe('Barman', function () {
                 var SubClass = Parent.extend(),
                     anInstance = new SubClass();
 
-                expect(Parent.prototype.extend).to.be.undefined;
-                expect(anInstance._super()).to.equal(Parent.prototype);
+                expect(Parent.prototype._callSuper).to.be.undefined;
+                expect(Parent.prototype._applySuper).to.be.undefined;
+                expect(anInstance._callSuper).to.be.a('function');
+                expect(anInstance._applySuper).to.be.a('function');
 
             });
+
 
             it('calls to the super constructor if the sub-class do not defines a constructor', function () {
 
@@ -298,6 +304,7 @@ describe('Barman', function () {
 
             });
 
+
             it('uses the constructor given by the sub-class', function () {
 
                 var Parent = Class.create({constructor: function () { this.x = 10; }}),
@@ -314,44 +321,114 @@ describe('Barman', function () {
         });
     });
 
-    describe('_super method', function () {
+    describe('super class delegation', function () {
 
         var Widget = Class.create({
                 value: 987,
 
                 render: function () {
                     return 'SUPER ' + this.x;
+                },
+
+                show: function () {
+                    return Array.prototype.slice.call(arguments).join('');
                 }
             }),
 
-            CustomWidget = Widget.extend({x: 123}),
+            CustomWidget = Widget.extend({
+                x: 123,
+                render: function () { return 'override'; },
+                show: function () { return 'override'; }
+            }),
 
             aWidget = new CustomWidget();
 
+        describe('_callSuper', function () {
 
-        it('returns __super__ when no argument is given', function () {
+            it('throws an error when no argument is given', function () {
 
-            expect(aWidget._super()).to.equal(CustomWidget.__super__);
+                expect(function () {
+                    aWidget._callSuper();
+                }).to.throw(Error);
+
+            });
+
+
+            it('calls the super implementation of a method', function () {
+
+                expect(aWidget._callSuper('render')).to.equal('SUPER 123');
+
+            });
+
+
+            it('throws ReferenceError when a invalid name is given', function () {
+
+                expect(function () {
+                    aWidget._callSuper('bla');
+                }).to.throw(ReferenceError);
+
+            });
+
+
+            it('throws TypeError error if when a non-function property is given', function () {
+
+                expect(function () {
+                    aWidget._callSuper('value');
+                }).to.throw(TypeError);
+
+            });
+
+
+            it('passes arguments to the function', function () {
+
+                expect(aWidget._callSuper('show', 'hello')).to.equal('hello');
+
+            });
 
         });
 
-        it('returns a function bound to this when the method name is given', function () {
 
-            expect(aWidget._super('render')()).to.equal('SUPER 123');
+        describe('_applySuper', function () {
 
-        });
+            it('throws an error when no argument is given', function () {
 
-        it('throws ReferenceError when a invalid method name is given', function () {
+                expect(function () {
+                    aWidget._applySuper();
+                }).to.throw(Error);
 
-            expect(function () {
-                aWidget._super('bla');
-            }).to.throw(ReferenceError);
+            });
 
-        });
 
-        it('works with non-function properties too', function () {
+            it('calls the super implementation of a method', function () {
 
-            expect(aWidget._super('value')).to.equal(987);
+                expect(aWidget._applySuper('render')).to.equal('SUPER 123');
+
+            });
+
+
+            it('throws ReferenceError when a invalid name is given', function () {
+
+                expect(function () {
+                    aWidget._applySuper('bla');
+                }).to.throw(ReferenceError);
+
+            });
+
+
+            it('throws TypeError error if when a non-function property is given', function () {
+
+                expect(function () {
+                    aWidget._applySuper('value');
+                }).to.throw(TypeError);
+
+            });
+
+
+            it('passes arguments to the function', function () {
+
+                expect(aWidget._applySuper('show', ['hello', ' world'])).to.equal('hello world');
+
+            });
 
         });
 
@@ -364,6 +441,7 @@ describe('Barman', function () {
             expect(isClassFactory(withTraits())).to.be.true;
 
         });
+
 
         it('gives precedence to class properties over trait properties', function () {
 
@@ -384,6 +462,7 @@ describe('Barman', function () {
 
         });
 
+
         it('gives precedence to trait properties over super class properties', function () {
 
             var BaseView = Class.create({
@@ -402,6 +481,7 @@ describe('Barman', function () {
 
         });
 
+
         it('preserves the prototype chain', function () {
 
             var BaseView = Class.create({
@@ -417,6 +497,7 @@ describe('Barman', function () {
             expect(Object.getPrototypeOf(View.prototype)).to.equal(BaseView.prototype);
 
         });
+
 
         it('marks conflicting trait methods', function () {
 
@@ -440,6 +521,7 @@ describe('Barman', function () {
             }).to.throw(Error, 'This property was defined by multiple merged objects, override it with the proper implementation');
 
         });
+
 
         it('allows a trait to include another trait', function () {
 
@@ -467,6 +549,7 @@ describe('Barman', function () {
             expect(aView.render()).to.equal('view');
 
         });
+
 
         it('can specify aliases to trait methods', function () {
 
