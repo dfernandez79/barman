@@ -140,9 +140,9 @@ module.exports = function ( grunt ) {
 
 
     grunt.registerTask('test', 'simplemocha');
-    grunt.registerTask('integration-test', ['requirejs', 'mocha']);
+    grunt.registerTask('integration-test', ['uglify', 'requirejs', 'mocha']);
 
     grunt.registerTask('default', ['jshint', 'test']);
-    grunt.registerTask('dist', ['default', 'uglify', 'integration-test', 'docco']);
+    grunt.registerTask('dist', ['default', 'integration-test', 'docco']);
 
 };
