@@ -212,21 +212,22 @@ If you want to understand the source code, or create your own library, the follo
 #### Running _integration tests_
 
 The intention of _integration tests_ is to test barman in a browser environment.
-When you execute `grunt integration-test` tests are run using [PhantomJS], and the libraries located in the `dist` directory are used.
+When you execute `grunt integration-test` tests are run using [PhantomJS].
 
 You can also run the integration tests directly from your browser:
 
-1. If you made changes, run `grunt uglify requirejs` to update the files inside `dist` and `integration-tests/js/barmanSpec.amd.js`
-2. Use a browser to open the html files inside `integration-tests`
+1. If you made changes, run `grunt uglify` to generate the minimized files in `dist`.
+2. Open the html files inside `integration-tests`.
 
-If opening the files directly doesn't work because of security restrictions to the `file:///` protocol, you can use a small static web server.
+
+If opening the html files directly doesn't work because of security restrictions to the `file:///` protocol, you can use a small static web server.
 [Python] provides simple HTTP server that you can use in any platform by running:
 
 ```shell
 python -m SimpleHTTPServer port
 ```
 
-Where _port_ is the port to listen for incoming connections. Run from the project root since html pages will try to use `../dist`.
+Where _port_ is the port to listen for incoming connections. Run the HTTP server from the project root since html pages will try to use `../dist` and `../specs.
 
 ----------------------------------------------------------------
 Design notes

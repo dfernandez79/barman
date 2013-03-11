@@ -23,6 +23,18 @@
             nativeForEach = ArrayProto.forEach,
             slice = ArrayProto.slice;
 
+        // IE < 9 has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
+        // `JSCRIPT_NON_ENUMERABLE` array contains those ignored properties, so we iterate over them in the `each`
+        // function. And `JSCRIPT_NON_ENUMERABLE_SET` is just a small optimization to avoid `indexOf` when
+        // testing for inclusion in `JSCRIPT_NON_ENUMERABLE`.
+        var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+                                       'toLocaleString', 'toString', 'valueOf' ],
+            JSCRIPT_NON_ENUMERABLE_SET = {
+                'check_constructor': true, 'check_hasOwnProperty': true, 'check_isPrototypeOf': true,
+                'check_propertyIsEnumerable': true, 'check_toLocaleString': true, 'check_toString': true,
+                'check_valueOf': true
+            };
+
         function isUndefined( value ) {
             return typeof value == 'undefined';
         }
@@ -38,9 +50,7 @@
         function extend( obj ) {
             each(slice.call(arguments, 1), function ( source ) {
                 if ( source ) {
-                    for ( var prop in source ) {
-                        obj[prop] = source[prop];
-                    }
+                    each(source, function ( value, prop ) { obj[prop] = value; });
                 }
             });
             return obj;
@@ -50,7 +60,15 @@
             return obj === Object(obj);
         }
 
+        // #### each( _obj_, _func_, _context_ )
+        //
+        // Of all the common helper functions `each` is the only one that differs from _underscore_ or
+        // _lodash_. The main difference is that it ensures to iterate over the JScript (IE < 9) hidden
+        // object properties.
+        //
         function each( obj, func, context ) {
+            var i, len, jscriptNonEnumCalled = false;
+
             if ( obj === null ) {
                 return;
             }
@@ -58,13 +76,25 @@
             if ( nativeForEach && obj.forEach === nativeForEach ) {
                 obj.forEach(func, context);
             } else if ( obj.length === +obj.length ) {
-                for ( var i = 0, l = obj.length; i < l; i++ ) {
+                for ( i = 0, len = obj.length; i < len; i++ ) {
                     func.call(context, obj[i], i, obj);
                 }
             } else {
+                // If we are iterating over an object.
                 for ( var key in obj ) {
                     if ( has(obj, key) ) {
                         func.call(context, obj[key], key, obj);
+                        // Check if some of JScript hidden properties was iterated in the `for in` loop.
+                        jscriptNonEnumCalled = jscriptNonEnumCalled || JSCRIPT_NON_ENUMERABLE_SET['check_' + key];
+                    }
+                }
+                // If none of the JScript hidden properties was iterated, we don't know if they are not redefined or
+                // they were ignored by the engine, so we check them explicitly.
+                if ( !jscriptNonEnumCalled ) {
+                    for ( i = 0, len = JSCRIPT_NON_ENUMERABLE.length; i < len; i++ ) {
+                        if ( has(obj, JSCRIPT_NON_ENUMERABLE[i]) ) {
+                            func.call(context, obj[JSCRIPT_NON_ENUMERABLE[i]], JSCRIPT_NON_ENUMERABLE[i], obj);
+                        }
                     }
                 }
             }
@@ -192,10 +222,11 @@
         //
         // The _methodName_ argument is required, and an error is thrown if it's omitted.
         //
+        // Note that this function only works if the `__super__` attribute wasn't removed from the constructor.
+        //
         Nil.prototype._applySuper = function ( methodName, args ) {
 
-            var getPrototypeOf = Object.getPrototypeOf,
-                superPrototype = getPrototypeOf(getPrototypeOf(this)),
+            var superPrototype = this.constructor.__super__,
                 superProp = superPrototype[methodName];
 
             if ( !methodName ) {
@@ -206,7 +237,13 @@
                 throw new ReferenceError("__super__ doesn't define a method named " + name);
             }
 
-            return superProp.apply(this, args);
+            // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
+            // undefined arguments throws a `TypeError`.
+            if ( isUndefined(args) ) {
+                return superProp.apply(this);
+            } else {
+                return superProp.apply(this, args);
+            }
         };
 
         // ### \_callSuper(_methodName_, _\[ arg1, ... \]_)
@@ -249,7 +286,7 @@
 
             createClass: function ( Parent, instanceMethods, staticMethods ) {
 
-                var proto = extend(Object.create(Parent.prototype), instanceMethods);
+                var proto = extend(this._clone(Parent.prototype), instanceMethods);
 
                 if ( !has(proto, 'constructor') ) {
 
@@ -270,6 +307,17 @@
                 ctor.extend = Nil.extend;
 
                 return ctor;
+            },
+
+            _clone: function ( proto ) {
+                function Empty() {}
+
+                if ( has(Object, 'create') ) {
+                    return Object.create(proto);
+                } else {
+                    Empty.prototype = proto;
+                    return new Empty();
+                }
             }
 
         });

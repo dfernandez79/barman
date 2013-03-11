@@ -14,7 +14,8 @@
                 Class = barman.Class,
                 AbstractClassFactory = barman.AbstractClassFactory,
                 isClassFactory = barman.isClassFactory,
-                withTraits = barman.withTraits;
+                withTraits = barman.withTraits,
+                ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip;
 
             function ofType( exceptionCtor ) {
                 return function ( e ) {
@@ -252,7 +253,7 @@
                     });
 
 
-                    it('supports getPrototypeOf to do super delegation', function () {
+                    ifGetPrototypeOfIsSupportedIt('supports getPrototypeOf to do super delegation', function () {
 
                         var Widget = Class.create({ render: 'SUPER' }),
 
@@ -487,7 +488,7 @@
                 });
 
 
-                it('preserves the prototype chain', function () {
+                ifGetPrototypeOfIsSupportedIt('preserves the prototype chain', function () {
 
                     var BaseView = Class.create({
                             render: 'base'

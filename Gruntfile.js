@@ -89,34 +89,6 @@ module.exports = function ( grunt ) {
             }
         },
 
-        requirejs: {
-            std: {
-                options: {
-                    name: 'barmanSpec',
-                    out: 'integration-tests/js/barmanSpec.amd.js',
-                    optimize: 'none',
-                    baseUrl: 'specs',
-                    paths: {
-                        'expect': 'empty:',
-                        '../src/barman': 'empty:'
-                    },
-                    cjsTranslate: true,
-                    onBuildWrite: function ( moduleName, path, contents ) {
-
-                        // hack to remove the module ID from barmanSpec, so is possible to re-locate it
-                        // in the requirejs configuration
-                        if ( moduleName == 'barmanSpec' ) {
-                            return contents.replace(/^define\('barmanSpec',/, "define(")
-                                .replace(/\.\.\/src\/barman/g, 'barman');
-                        }
-
-                        return contents;
-
-                    }
-                }
-            }
-        },
-
         docco: {
             file: {
                 src: '<%=meta.src%>',
@@ -133,7 +105,6 @@ module.exports = function ( grunt ) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
     grunt.loadNpmTasks('grunt-docco');
