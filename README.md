@@ -331,7 +331,7 @@ But the idea was discarded, because I couldn't find any good use case to apply i
 {method: SupeClass.other}
 ```
 
-### The _aha! moment_: the merge function
+#### The _aha! moment_: the merge function
 
 A mayor simplification to the framework came while implementing trait composition.
 
@@ -364,7 +364,7 @@ In that way choosing which implementation to use is easy:
 result = extend(merge(o1, o2), {prop: o1.prop});
 ```
 
-With this implementation you don't have a proper _Trait class_, but it works and covers all the characteristics of a trait mentioned in the [traits paper]:
+With this implementation you don't have a proper _Trait class_, but it works and covers most of the characteristics of a trait mentioned in the [traits paper]:
 
 * Composition of traits is symmetric: `merge(o1, o2) == merge(o2, o1)`
 * The same method added from different traits doesn't generate a conflict: `merge(o1, o2, o1) == merge(o1, o2)`
@@ -372,15 +372,56 @@ With this implementation you don't have a proper _Trait class_, but it works and
 * You can do aliasing and choose how to resolve conflicts.
 
 
+#### Limitations of the traits implementation
+
+The mentioned [traits paper] also specifies the following requirement for traits:
+
+_"Traits do not specify any state variables, and the methods provided by traits never access state variables directly."_
+
+Most of the reasons for this restriction comes from the [Smalltalk] implementation in which the paper is based:
+
+* [Smalltalk] is not statically typed and all the instance variables are _nil_ until you initialize them in a method. It means that you cannot tell if two traits are going to use a _compatible_ initial variable value, and you cannot ensure that initialization only happens once.
+
+* In [Smalltalk] instance variables determines the _class shape_: how the class is represented in memory.
+
+  And since compiled methods are not designed to be shared between classes, they are tightly coupled with the _class shape_: bytecode references instance variables by index.
+
+  But the purpose of traits is to share methods between classes, so if you allow instance variables you have to re-compile the class hierarchy each time that you touch a trait that affects it.
+  The big issue of re-compilation is that instance variables clashes will cause a compilation error, and you have to handle those errors in some way.
+
+As you can see adding support for instance variables in the [Smalltalk] traits implementation is a big headache, so is better to avoid instance variables in traits.
+
+
+But how these problems applies to JavaScript?
+
+* In JavaScript there is no difference between instance variables and methods (besides the value type): methods and instance variables are just slots in a _hash map_, there is no such thing as _class shape_.
+
+* Nothing prevents you from doing `this.myVar=value` inside your function implementation.
+
+In this context what barman gives you is a way of merging properties for your prototype definition. It doesn't try to resolve this _fundamental_ problems.
+It finds conflicts using strict equality `===`, and applies that strategy for all the object _slots_.
+
+If you want to be picky about traits definition, barman doesn't implement _true traits_, neither does [traitsjs]. But I keep using the name `withTraits` in the library to make a distinction from plain mixins.
+
+
+
 ----------------------------------------------------------------
 Change log
 ----------
 
 * 0.2.0 - **Breaking changes** `_super` was removed, instead use `_callSuper` or `_applySuper`
-  * Why? Super is used for method delegation, so it makes no sense to use `_super()`.
-  Using `_super('methodName')()` is long to write the new syntax makes calling super shorter.
-  The _apply_ version was added to make passing of arguments easier.
+
+  Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
+
+  With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
+  for a variable arguments methods forces you to use the long `_super('methodName').apply(this, arguments)` syntax.
+
+  The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
+
+
 * 0.1.1 - Removal of `underscore` dependency. Better documentation (both source and readme). Source code refactoring.
+
+
 * 0.1.0 - Initial release, it had a dependency with `underscore`.
 
 ----------------------------------------------------------------
@@ -404,6 +445,7 @@ Released under [MIT license]
 
 [Scala]: http://www.scala-lang.org/
 [Self]: http://en.wikipedia.org/wiki/Self_(programming_language)#Traits
+[Smalltalk]: http://en.wikipedia.org/wiki/Smalltalk
 
 [AMD]: http://requirejs.org/docs/whyamd.html#amd
 [Backbone]: http://backbonejs.org/
