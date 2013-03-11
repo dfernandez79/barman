@@ -209,6 +209,25 @@ Before contributing with a _pull request_ do a `grunt dist`  to run the linter a
 If you want to understand the source code, or create your own library, the following _Design Notes_ will be helpful.
 
 
+#### Running _integration tests_
+
+The intention of _integration tests_ is to test barman in a browser environment.
+When you execute `grunt integration-test` tests are run using [PhantomJS], and the libraries located in the `dist` directory are used.
+
+You can also run the integration tests directly from your browser:
+
+1. If you made changes, run `grunt uglify requirejs` to update the files inside `dist` and `integration-tests/js/barmanSpec.amd.js`
+2. Use a browser to open the html files inside `integration-tests`
+
+If opening the files directly doesn't work because of security restrictions to the `file:///` protocol, you can use a small static web server.
+[Python] provides simple HTTP server that you can use in any platform by running:
+
+```shell
+python -m SimpleHTTPServer port
+```
+
+Where _port_ is the port to listen for incoming connections. Run from the project root since html pages will try to use `../dist`.
+
 ----------------------------------------------------------------
 Design notes
 ------------
@@ -446,6 +465,7 @@ Released under [MIT license]
 [Scala]: http://www.scala-lang.org/
 [Self]: http://en.wikipedia.org/wiki/Self_(programming_language)#Traits
 [Smalltalk]: http://en.wikipedia.org/wiki/Smalltalk
+[Pyhton]: http://www.python.org/
 
 [AMD]: http://requirejs.org/docs/whyamd.html#amd
 [Backbone]: http://backbonejs.org/
@@ -462,3 +482,4 @@ Released under [MIT license]
 [Typescript]: http://www.typescriptlang.org/
 [Nodejs]: http://nodejs.org/
 [Grunt]: http://gruntjs.com/
+[PhantomJS]: http://phantomjs.org/
