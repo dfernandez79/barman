@@ -1,4 +1,4 @@
-//     barman 0.1.1
+//     barman 0.2.0
 //     https://github.com/dfernandez79/barman
 //     Copyright (c) 2013 Diego Fernandez
 //     Barman may be freely distributed under the MIT license.

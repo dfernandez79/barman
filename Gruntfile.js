@@ -97,7 +97,7 @@ module.exports = function ( grunt ) {
                     optimize: 'none',
                     baseUrl: 'specs',
                     paths: {
-                        chai: 'empty:',
+                        'expect': 'empty:',
                         '../src/barman': 'empty:'
                     },
                     cjsTranslate: true,
@@ -140,7 +140,7 @@ module.exports = function ( grunt ) {
 
 
     grunt.registerTask('test', 'simplemocha');
-    grunt.registerTask('integration-test', ['uglify', 'requirejs', 'mocha']);
+    grunt.registerTask('integration-test', ['uglify', 'mocha']);
 
     grunt.registerTask('default', ['jshint', 'test']);
     grunt.registerTask('dist', ['default', 'integration-test', 'docco']);

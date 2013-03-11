@@ -3,6 +3,7 @@
 <head>
     <title>Barman Integration Tests (AMD)</title>
     <link rel="stylesheet" href="css/mocha.css" type="text/css">
+    <!--[if lt IE 9]><script src="js/es5-sham.min.js" type="text/javascript"></script><![endif]-->
 </head>
 <body>
 <div id="mocha"></div>
@@ -18,8 +19,12 @@
         baseUrl: './js',
         paths: {
             barman: '../../src/barman',
-            barmanSpec: 'barmanSpec.amd',
-            chai: 'chai'
+            barmanSpec: '../../specs/barmanSpec'
+        },
+        shim: {
+            expect: {
+                exports: 'expect'
+            }
         }
     });
 

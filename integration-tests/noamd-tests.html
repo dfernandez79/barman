@@ -3,27 +3,16 @@
 <head>
     <title>Barman Integration Tests (no AMD)</title>
     <link rel="stylesheet" href="css/mocha.css" type="text/css">
+    <!--[if lt IE 9]><script src="js/es5-sham.min.js" type="text/javascript"></script><![endif]-->
 </head>
 <body>
 <div id="mocha"></div>
 
 <script src="js/mocha.js" type="text/javascript"></script>
-<script src="js/chai.js" type="text/javascript"></script>
+<script src="js/expect.js" type="text/javascript"></script>
 <script src="../dist/barman.min.js"></script>
 <script>
     mocha.setup('bdd');
-
-    // mock 'barmanSpec' require before loading
-    var require = function ( name ) {
-        switch ( name ) {
-            case 'chai':
-                return chai;
-            case '../src/barman':
-                return barman;
-            default:
-                throw new Error('Unexpected require: ' + name);
-        }
-    };
 </script>
 <script src="../specs/barmanSpec.js" type="text/javascript"></script>
 
