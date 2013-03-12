@@ -25,15 +25,9 @@
 
         // IE < 9 has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
         // `JSCRIPT_NON_ENUMERABLE` array contains those ignored properties, so we iterate over them in the `each`
-        // function. And `JSCRIPT_NON_ENUMERABLE_SET` is just a small optimization to avoid `indexOf` when
-        // testing for inclusion in `JSCRIPT_NON_ENUMERABLE`.
+        // function.
         var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
-                                       'toLocaleString', 'toString', 'valueOf' ],
-            JSCRIPT_NON_ENUMERABLE_SET = {
-                'check_constructor': true, 'check_hasOwnProperty': true, 'check_isPrototypeOf': true,
-                'check_propertyIsEnumerable': true, 'check_toLocaleString': true, 'check_toString': true,
-                'check_valueOf': true
-            };
+                                       'toLocaleString', 'toString', 'valueOf' ];
 
         function isUndefined( value ) {
             return typeof value == 'undefined';
@@ -85,7 +79,7 @@
                     if ( has(obj, key) ) {
                         func.call(context, obj[key], key, obj);
                         // Check if some of JScript hidden properties was iterated in the `for in` loop.
-                        jscriptNonEnumCalled = jscriptNonEnumCalled || JSCRIPT_NON_ENUMERABLE_SET['check_' + key];
+                        jscriptNonEnumCalled = jscriptNonEnumCalled || JSCRIPT_NON_ENUMERABLE.indexOf(key) !== -1;
                     }
                 }
                 // If none of the JScript hidden properties was iterated, we don't know if they are not redefined or
