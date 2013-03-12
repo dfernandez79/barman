@@ -3,7 +3,7 @@ Barman [![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://
 
 _Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
 
-It's small (2.5k minimized - 1k compressed) and plays nice with other frameworks.
+It's small and plays nice with other frameworks.
 
 
 ----------------------------------------------------------------
@@ -20,7 +20,9 @@ The `--save` option adds the dependency to your `package.json`.
 
 ### Browser
 
-Barman can be loaded as a plain script or as [AMD] module:
+Barman was tested on IE 8, Firefox, Safari, and Chrome. 
+
+On the browser it can be loaded as a plain script or using [AMD]:
 
 * When loaded as a plain script, a global called `barman` will be added to the `window` object.
 * When loaded using [AMD], the `barman` object is returned by the module and no global will be registered.
@@ -41,7 +43,7 @@ var barman = require('barman'),
 ```
 
 
-#### Create a _class_
+### Create a _class_
 
 ```js
 var View = Class.create({
@@ -55,7 +57,7 @@ aView.render(); // View Render
 ```
 
 
-#### Create a _sub-class_
+### Create a _sub-class_
 
 ```js
 var CustomView = View.extend({
@@ -69,7 +71,7 @@ aView.render(); // Custom
 ```
 
 
-#### The _super class_ constructor is called by default
+### The _super class_ constructor is called by default
 
 ```js
 var Point = Class.create({
@@ -91,7 +93,7 @@ aPoint.show() // red 5, 6
 ```
 
 
-#### _Super class_ delegation, can be done using `_callSuper`
+### _Super class_ delegation, can be done using `_callSuper`
 
 ```js
 var CustomView = View.extend({
@@ -105,7 +107,7 @@ aView.render(); // Custom call to super View Render
 ```
 
 
-#### Constructors can be overridden too
+### Constructors can be overridden too
 
 ```js
 var XPoint = Point.extend({
@@ -116,7 +118,7 @@ var XPoint = Point.extend({
 ```
 
 
-#### Method implementations can be shared between classes using _traits_
+### Method implementations can be shared between classes using _traits_
 
 ```js
 var View = Class.create({
@@ -146,7 +148,7 @@ aView.render(); // sub view 1, sub view 2
 ```
 
 
-#### Traits are represented with plain objects, but they can indicate required methods
+### Traits are represented with plain objects, and they can indicate required methods
 
 ```js
 var templateRenderingTrait = {
@@ -161,7 +163,7 @@ var templateRenderingTrait = {
 ```
 
 
-#### Traits can be composed
+### Traits can be composed
 
 ```js
 var MyView = View.extend(
@@ -170,7 +172,7 @@ var MyView = View.extend(
 ```
 
 
-#### Conflicting methods will throw an exception when executed
+### Conflicting methods will throw an exception when executed
 
 ```js
 // render is defined by templateRenderingTrait and compositeViewTrait
@@ -178,7 +180,7 @@ var MyView = View.extend(
 ```
 
 
-#### Conflicts can be resolved by setting which implementation to use
+### Conflicts can be resolved by setting which implementation to use
 
 ```js
 var MyView = View.extend(
@@ -206,10 +208,10 @@ If you are going to fork this project, you'll need these tools:
 
 Before contributing with a _pull request_ do a `grunt dist`  to run the linter and unit tests.
 
-If you want to understand the source code, or create your own library, the following _Design Notes_ will be helpful.
+If you want to understand the source code, or create your own library, the _Design Notes_ below will be helpful.
 
 
-#### Running _integration tests_
+### Running _integration tests_
 
 The intention of _integration tests_ is to test barman in a browser environment.
 When you execute `grunt integration-test` tests are run using [PhantomJS].
@@ -233,7 +235,7 @@ Where _port_ is the port to listen for incoming connections. Run the HTTP server
 Design notes
 ------------
 
-#### Why another?
+### Why another?
 
 Creating and manipulating objects in JavaScript is very easy: if you need [single-inheritance], then set the [prototype chain]; if you need to share methods between objects, then [modify the prototype] directly.
 
@@ -261,7 +263,7 @@ The _guiding design principles_ of barman are:
 * **Don't re-invent JavaScript**. JavaScript has no type checking, and limited encapsulation. If you want those features you'll probably need some external tool, and special attributes/methods to support them. 
 I didn't wanted to add those features to barman. If you really need them, you can consider other options like: [dejavu] which provides some limited constraint checking; or a different programing language for the web like [Dart] or [Typescript].
 
-#### Mixins and traits
+### Mixins and traits
 
 The work on barman, was based in two papers:
 
@@ -273,7 +275,7 @@ Reading the last one is recommend if you want to understand what means _trait_ i
 * **Mixins**: Is a way of sharing implementation by adding a set of methods to a _class_. In JavaScript, the concept is simple because there isn't _classes_ and there isn't _type annotations_, two concepts that overlap in most class based languages. So what means a mixin in JavaScript terms? Just sharing a bunch of methods by adding them to an object.
 * **Traits**: Has the same goal as mixins, but adds some rules on how the methods are added to avoid mistakes. Note that barman uses the term _trait_ as in the mentioned traits paper. Some programming languages uses the same term with other meanings: [Scala] uses trait to mean mixin, [Self] uses trait to mean an object prototype.
 
-#### Functional mixins
+### Functional mixins
 
 Doing _mixins_ in JavaScript is easy. Just create functions that adds properties to an object:
 
@@ -324,7 +326,7 @@ In the end the problems surpasses the benefits, so I decided to remove support f
 
 But the _class factory_ idea was keep because it makes easy to extend the framework.
 
-#### Method decorations
+### Method decorations
 
 The object that you give to the _class factory_ is an specification of the methods that you want to create. So instead of using functions you can use an object to describe some special case. That approach is used by [compose] with the name of _method decorations_, and is more or less like a macro to define methods.
 
@@ -392,11 +394,11 @@ With this implementation you don't have a proper _Trait class_, but it works and
 * You can do aliasing and choose how to resolve conflicts.
 
 
-#### Limitations of the traits implementation
+### Limitations of the traits implementation
 
 The mentioned [traits paper] also specifies the following requirement for traits:
 
-_"Traits do not specify any state variables, and the methods provided by traits never access state variables directly."_
+> "Traits do not specify any state variables, and the methods provided by traits never access state variables directly."
 
 Most of the reasons for this restriction comes from the [Smalltalk] implementation in which the paper is based:
 
@@ -412,7 +414,7 @@ Most of the reasons for this restriction comes from the [Smalltalk] implementati
 As you can see adding support for instance variables in the [Smalltalk] traits implementation is a big headache, so is better to avoid instance variables in traits.
 
 
-But how these problems applies to JavaScript?
+##### But how these problems applies to JavaScript?
 
 * In JavaScript there is no difference between instance variables and methods (besides the value type): methods and instance variables are just slots in a _hash map_, there is no such thing as _class shape_.
 
