@@ -276,11 +276,18 @@
             return isObject(obj) && obj[CLASS_FACTORY_ATTRIBUTE] === true;
         }
 
+        var clone = has(Object, 'create') ? Object.create : function ( proto ) {
+            function Empty() {}
+
+            Empty.prototype = proto;
+            return new Empty();
+        };
+
         var defaultClassFactory = markAsClassFactory({
 
             createClass: function ( Parent, instanceMethods, staticMethods ) {
 
-                var proto = extend(this._clone(Parent.prototype), instanceMethods);
+                var proto = extend(clone(Parent.prototype), instanceMethods);
 
                 if ( !has(proto, 'constructor') ) {
 
@@ -301,17 +308,6 @@
                 ctor.extend = Nil.extend;
 
                 return ctor;
-            },
-
-            _clone: function ( proto ) {
-                function Empty() {}
-
-                if ( has(Object, 'create') ) {
-                    return Object.create(proto);
-                } else {
-                    Empty.prototype = proto;
-                    return new Empty();
-                }
             }
 
         });
