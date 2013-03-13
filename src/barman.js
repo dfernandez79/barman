@@ -23,33 +23,28 @@
             nativeForEach = ArrayProto.forEach,
             slice = ArrayProto.slice;
 
-        // IE < 9 has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
-        // `JSCRIPT_NON_ENUMERABLE` array contains those ignored properties, so we iterate over them in the `each`
-        // function.
-        var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
-                                       'toLocaleString', 'toString', 'valueOf' ];
-
+        // #### isUndefined( _value_ )
+        //
         function isUndefined( value ) {
             return typeof value == 'undefined';
         }
 
+        // #### isFunction( _value_ )
+        //
         function isFunction( value ) {
             return typeof value === 'function';
         }
 
+        // #### has( _object_, _property_ )
+        //
+        // A _safe_ version of `hasOwnProperty`.
+        //
         function has( object, property ) {
             return object ? Object.prototype.hasOwnProperty.call(object, property) : false;
         }
 
-        function extend( obj ) {
-            each(slice.call(arguments, 1), function ( source ) {
-                if ( source ) {
-                    each(source, function ( value, prop ) { obj[prop] = value; });
-                }
-            });
-            return obj;
-        }
-
+        // #### isObject( _obj_ )
+        //
         function isObject( obj ) {
             return obj === Object(obj);
         }
@@ -60,8 +55,53 @@
         // _lodash_. The main difference is that it ensures to iterate over the JScript (IE < 9) hidden
         // object properties.
         //
-        function each( obj, func, context ) {
+
+        // IE < 9 has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
+        // `JSCRIPT_NON_ENUMERABLE` array contains those ignored properties, so we iterate over them in the `each`
+        // function.
+        var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+                                       'toLocaleString', 'toString', 'valueOf' ];
+
+        function engineIgnoresObjectProps() {
+            var obj = {constructor: 1};
+            for ( var key in obj ) {
+                if ( has(obj, key) ) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // The special case for IE is handled by different implementations of the `eachKey` internal function.
+        var eachKey = engineIgnoresObjectProps() ? function ( obj, func, context ) {
+
             var i, len, jscriptNonEnumCalled = false;
+
+            for ( var key in obj ) {
+                if ( has(obj, key) ) {
+                    func.call(context, obj[key], key, obj);
+                    jscriptNonEnumCalled = jscriptNonEnumCalled || JSCRIPT_NON_ENUMERABLE.indexOf(key) !== -1;
+                }
+            }
+
+            if ( !jscriptNonEnumCalled ) {
+                for ( i = 0, len = JSCRIPT_NON_ENUMERABLE.length; i < len; i++ ) {
+                    if ( has(obj, JSCRIPT_NON_ENUMERABLE[i]) ) {
+                        func.call(context, obj[JSCRIPT_NON_ENUMERABLE[i]], JSCRIPT_NON_ENUMERABLE[i], obj);
+                    }
+                }
+            }
+
+        } : function ( obj, func, context ) {
+            for ( var key in obj ) {
+                if ( has(obj, key) ) {
+                    func.call(context, obj[key], key, obj);
+                }
+            }
+        };
+
+        function each( obj, func, context ) {
+            var i, len;
 
             if ( obj === null ) {
                 return;
@@ -74,24 +114,19 @@
                     func.call(context, obj[i], i, obj);
                 }
             } else {
-                // If we are iterating over an object.
-                for ( var key in obj ) {
-                    if ( has(obj, key) ) {
-                        func.call(context, obj[key], key, obj);
-                        // Check if some of JScript hidden properties was iterated in the `for in` loop.
-                        jscriptNonEnumCalled = jscriptNonEnumCalled || JSCRIPT_NON_ENUMERABLE.indexOf(key) !== -1;
-                    }
-                }
-                // If none of the JScript hidden properties was iterated, we don't know if they are not redefined or
-                // they were ignored by the engine, so we check them explicitly.
-                if ( !jscriptNonEnumCalled ) {
-                    for ( i = 0, len = JSCRIPT_NON_ENUMERABLE.length; i < len; i++ ) {
-                        if ( has(obj, JSCRIPT_NON_ENUMERABLE[i]) ) {
-                            func.call(context, obj[JSCRIPT_NON_ENUMERABLE[i]], JSCRIPT_NON_ENUMERABLE[i], obj);
-                        }
-                    }
-                }
+                eachKey(obj, func, context);
             }
+        }
+
+        // #### extend( _obj_, ... )
+        //
+        function extend( obj ) {
+            each(slice.call(arguments, 1), function ( source ) {
+                if ( source ) {
+                    each(source, function ( value, prop ) { obj[prop] = value; });
+                }
+            });
+            return obj;
         }
 
 
@@ -363,7 +398,7 @@
 
         });
 
-        function withTraits() {
+        function include() {
             return new TraitsClassFactory(slice.call(arguments));
         }
 
@@ -387,7 +422,7 @@
 
             required: required,
 
-            withTraits: withTraits
+            include: include
         };
 
     }

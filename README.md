@@ -1,7 +1,7 @@
 Barman [![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman)
 ======
 
-_Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance], and [traits].
+_Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance] and [traits].
 
 It's small and plays nice with other frameworks.
 
@@ -25,7 +25,7 @@ Barman was tested on IE 8, Firefox, Safari, and Chrome.
 On the browser it can be loaded as a plain script or using [AMD]:
 
 * When loaded as a plain script, a global called `barman` will be added to the `window` object.
-* When loaded using [AMD], the `barman` object is returned by the module and no global will be registered.
+* When loaded using [AMD], the `barman` object is returned by the module and no global will be created.
 
 In both cases you can use the minified version: `dist/barman.min.js`, which includes a [source map]; or the full source: `src/barman.js`.
 
@@ -39,7 +39,7 @@ The following examples assumes that some variables were defined:
 var barman = require('barman'),
     Class = barman.Class,
     required = barman.required,
-    withTraits = barman.withTraits;
+    include = barman.include;
 ```
 
 
@@ -136,7 +136,7 @@ var compositeViewTrait = {
 };
 
 var CustomView = View.extend(
-    withTraits(compositeViewTrait),
+    include(compositeViewTrait),
     {
         subViews: function () {
             return ['sub view 1', 'sub view 2'];
@@ -167,7 +167,7 @@ var templateRenderingTrait = {
 
 ```js
 var MyView = View.extend(
-    withTraits(templateRenderingTrait, compositeViewTrait)
+    include(templateRenderingTrait, compositeViewTrait)
 );
 ```
 
@@ -184,7 +184,7 @@ var MyView = View.extend(
 
 ```js
 var MyView = View.extend(
-    withTraits(templateRenderingTrait, compositeViewTrait),
+    include(templateRenderingTrait, compositeViewTrait),
     
     // aliases to trait methods    
     compositeRender: compositeViewTrait.render,
@@ -206,9 +206,9 @@ If you are going to fork this project, you'll need these tools:
 * [Nodejs]
 * [Grunt]
 
-Before contributing with a _pull request_ do a `grunt dist`  to run the linter and unit tests.
+Before contributing with a _pull request_ do a `grunt dist` to run the linter and unit tests.
 
-If you want to understand the source code, or create your own library, the _Design Notes_ below will be helpful.
+To understand the source code, or create your own library, the _Design Notes_ below will be helpful.
 
 
 ### Running _integration tests_
@@ -221,15 +221,17 @@ You can also run the integration tests directly from your browser:
 1. If you made changes, run `grunt uglify` to generate the minimized files in `dist`.
 2. Open the html files inside `integration-tests`.
 
-
 If opening the html files directly doesn't work because of security restrictions to the `file:///` protocol, you can use a small static web server.
-[Python] provides simple HTTP server that you can use in any platform by running:
+[Python] provides a simple HTTP server that you can use in any platform by running:
 
 ```shell
 python -m SimpleHTTPServer port
 ```
 
-Where _port_ is the port to listen for incoming connections. Run the HTTP server from the project root since html pages will try to use `../dist` and `../specs.
+Where _port_ is the port to listen for incoming connections.
+
+Be sure to run the HTTP server from the project root since html pages will try to use `../dist` and `../specs.
+
 
 ----------------------------------------------------------------
 Design notes
@@ -311,7 +313,7 @@ Class.create(
 );
 ```
 
-to traits:
+to traits (note `withTraits` was later renamed to `include`):
 
 ```js
 Class.create(
@@ -409,21 +411,21 @@ Most of the reasons for this restriction comes from the [Smalltalk] implementati
   And since compiled methods are not designed to be shared between classes, they are tightly coupled with the _class shape_: bytecode references instance variables by index.
 
   But the purpose of traits is to share methods between classes, so if you allow instance variables you have to re-compile the class hierarchy each time that you touch a trait that affects it.
-  The big issue of re-compilation is that instance variables clashes will cause a compilation error, and you have to handle those errors in some way.
+  The big issue of re-compilation is that if instance variables clashes there will be a compilation error, and you have to handle those errors in some way.
 
-As you can see adding support for instance variables in the [Smalltalk] traits implementation is a big headache, so is better to avoid instance variables in traits.
+As you can see adding support for instance variables in the [Smalltalk] traits implementation is a big headache, so is better to avoid them.
 
 
 ##### But how these problems applies to JavaScript?
 
 * In JavaScript there is no difference between instance variables and methods (besides the value type): methods and instance variables are just slots in a _hash map_, there is no such thing as _class shape_.
 
-* Nothing prevents you from doing `this.myVar=value` inside your function implementation.
+* Nothing prevents you from doing `this.myVar = value` inside your function implementation.
 
 In this context what barman gives you is a way of merging properties for your prototype definition. It doesn't try to resolve this _fundamental_ problems.
 It finds conflicts using strict equality `===`, and applies that strategy for all the object _slots_.
 
-If you want to be picky about traits definition, barman doesn't implement _true traits_, neither does [traitsjs]. But I keep using the name `withTraits` in the library to make a distinction from plain mixins.
+If you want to be picky about traits definition, barman doesn't implement _true traits_, neither does [traitsjs]. But I keep using the name _traits_ to make a distinction from the _last-one-wins_ strategy of mixins.
 
 
 
@@ -431,14 +433,20 @@ If you want to be picky about traits definition, barman doesn't implement _true 
 Change log
 ----------
 
-* 0.2.0 - **Breaking changes** `_super` was removed, instead use `_callSuper` or `_applySuper`
+* 0.2.0 - **Breaking changes**
 
-  Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
+  * Support for Internet Explorer 8
 
-  With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
-  for a variable arguments methods forces you to use the long `_super('methodName').apply(this, arguments)` syntax.
+  * `_super` was removed, instead use `_callSuper` or `_applySuper`
 
-  The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
+    Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
+
+    With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
+    for a variable arguments methods forces you to use the long `_super('methodName').apply(this, arguments)` syntax.
+
+    The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
+
+  * `withTraits` was renamed to `include`: this is helpful for people that never heard about traits before.
 
 
 * 0.1.1 - Removal of `underscore` dependency. Better documentation (both source and readme). Source code refactoring.

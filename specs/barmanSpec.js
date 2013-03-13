@@ -14,7 +14,7 @@
                 Class = barman.Class,
                 AbstractClassFactory = barman.AbstractClassFactory,
                 isClassFactory = barman.isClassFactory,
-                withTraits = barman.withTraits,
+                include = barman.include,
                 ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip;
 
             function ofType( exceptionCtor ) {
@@ -440,11 +440,11 @@
 
             });
 
-            describe('withTraits', function () {
+            describe('include', function () {
 
                 it('returns an instance of a class factory', function () {
 
-                    expect(isClassFactory(withTraits())).to.be.ok();
+                    expect(isClassFactory(include())).to.be.ok();
 
                 });
 
@@ -457,7 +457,7 @@
                         },
 
                         View = Class.create(
-                            withTraits(templateRendering), {
+                            include(templateRendering), {
                                 render: 'from subclass'
                             }),
 
@@ -479,7 +479,7 @@
                             render: 'trait'
                         },
 
-                        View = BaseView.extend(withTraits(testTrait)),
+                        View = BaseView.extend(include(testTrait)),
 
                         aView = new View();
 
@@ -498,7 +498,7 @@
                             render: 'trait'
                         },
 
-                        View = BaseView.extend(withTraits(testTrait));
+                        View = BaseView.extend(include(testTrait));
 
                     expect(Object.getPrototypeOf(View.prototype)).to.equal(BaseView.prototype);
 
@@ -518,7 +518,7 @@
                             }
                         },
 
-                        MyView = Class.create(withTraits(templateTrait, compositeTrait)),
+                        MyView = Class.create(include(templateTrait, compositeTrait)),
 
                         aView = new MyView();
 
@@ -546,7 +546,7 @@
                                 }
                             }) ,
 
-                        MyView = Class.create(withTraits(viewTrait)),
+                        MyView = Class.create(include(viewTrait)),
 
                         aView = new MyView();
 
@@ -569,7 +569,7 @@
                         },
 
                         MyView = Class.create(
-                            withTraits(templateTrait, compositeTrait), {
+                            include(templateTrait, compositeTrait), {
                                 render: templateTrait.render
                             }),
 
