@@ -18,6 +18,7 @@
         paths: {
             barman: '../dist/barman.min',
             barmanSpec: '../specs/barmanSpec',
+            coffeeCompatibilitySpec: '../specs/coffeeCompatibilitySpec',
             expect: 'lib/expect'
         },
         shim: {
@@ -27,7 +28,7 @@
         }
     });
 
-    require(['barmanSpec'], function () {
+    require(['barmanSpec', 'coffeeCompatibilitySpec'], function () {
         mocha.run();
     });
 </script>

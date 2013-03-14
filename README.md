@@ -93,7 +93,7 @@ aPoint.show() // red 5, 6
 ```
 
 
-### _Super class_ delegation, can be done using `_callSuper`
+### _Super class_ delegation, can be done using _\_callSuper_
 
 ```js
 var CustomView = View.extend({
@@ -196,6 +196,40 @@ var MyView = View.extend(
         this.compositeRender();
     });
 ```
+
+### CoffeeScript compatibility
+
+#### CoffeScript classes can extend Barman classes
+```coffee
+SomeBarmanClass = Class.create
+    hello: -> 'Hello World'
+    other: -> 'Other'
+
+class MyCoffeeClass extends SomeBarmanClass
+    hello: -> super + ' from super'
+    other: -> "#{@_callSuper 'other'} called with _callSuper"
+
+anInstance = new MyCoffeeClass
+anInstance.hello() # returns "Hello world from super"
+anInstance.other() # returns "Other called with _callSuper"
+```
+
+#### The _subclass_ method can be used to extend CoffeScript classes using _traits_
+```coffee
+class MyCoffeeClass
+    hello: -> 'Hello from Coffee'
+
+otherTrait = other: 'This comes from a trait'
+
+MyBarmanClass = subclass MyCoffeeClass,
+    include otherTrait,
+    hello: -> "#{@_callSuper 'hello'} worked!"
+
+anInstance = new MyBarmanClass
+
+anInstance.other # returns "This comes from a trait"
+```
+
 
 ----------------------------------------------------------------
 Development
@@ -433,12 +467,12 @@ If you want to be picky about traits definition, barman doesn't implement _true 
 Change log
 ----------
 
-* 0.2.0 - **Breaking changes**
+* 0.2.0 - **API Changes**
 
   * Support for Internet Explorer 8
 
   * `_super` was removed, instead use `_callSuper` or `_applySuper`
-
+    
     Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
 
     With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
@@ -447,6 +481,8 @@ Change log
     The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
 
   * `withTraits` was renamed to `include`: this is helpful for people that never heard about traits before.
+
+  * `subclass` added as a convenience method to extend non-Barman classes.
 
 
 * 0.1.1 - Removal of `underscore` dependency. Better documentation (both source and readme). Source code refactoring.

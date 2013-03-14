@@ -17,7 +17,7 @@ factory = (expect, barman) ->
 					hello: -> super + ' from super'
 					other: -> "#{@_callSuper 'other'} called with _callSuper"
 
-				anInstance = new MyCoffeeClass
+				anInstance = new MyCoffeeClass()
 
 				expect( anInstance.hello() ).to.be 'Hello World from super'
 				expect( anInstance.other() ).to.be 'Other called with _callSuper'
@@ -30,7 +30,7 @@ factory = (expect, barman) ->
 				MyBarmanClass = subclass MyCoffeeClass,
 					hello: -> "#{@_callSuper 'hello'} worked!"
 				
-				anInstance = new MyBarmanClass
+				anInstance = new MyBarmanClass()
 
 				expect( anInstance.hello() ).to.be 'Hello from Coffee worked!'
 
@@ -42,7 +42,7 @@ factory = (expect, barman) ->
 					include otherTrait,
 					hello: -> "#{@_callSuper 'hello'} worked!"
 				
-				anInstance = new MyBarmanClass
+				anInstance = new MyBarmanClass()
 
 				expect( anInstance.hello() ).to.be 'Hello from Coffee worked!'
 				expect( anInstance.other ).to.be 'This comes from a trait'
@@ -56,4 +56,4 @@ else if typeof module isnt 'undefined' and module.exports
 	module.exports = factory(require('expect.js'), require('../src/barman'))
 
 else
-	window.barman = factory(window.expect, window.barman)
+	window.coffeCompactibilitySpec = factory(window.expect, window.barman)
