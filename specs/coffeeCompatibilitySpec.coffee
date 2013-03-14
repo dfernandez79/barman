@@ -1,6 +1,8 @@
 factory = (expect, barman) ->
 	
 	Class = barman.Class
+	subclass = barman.subclass
+	include = barman.include
 
 	describe 'Barman CoffeeScript Compatibility', ->
 
@@ -21,7 +23,31 @@ factory = (expect, barman) ->
 				expect( anInstance.other() ).to.be 'Other called with _callSuper'
 
 		describe 'subclass', ->
-			it 'can extend a CoffeeScript class'
+			class MyCoffeeClass
+				hello: -> 'Hello from Coffee'
+
+			it 'can extend a CoffeeScript class', ->
+				MyBarmanClass = subclass MyCoffeeClass,
+					hello: -> "#{@_callSuper 'hello'} worked!"
+				
+				anInstance = new MyBarmanClass
+
+				expect( anInstance.hello() ).to.be 'Hello from Coffee worked!'
+
+			it 'supports traits', ->
+				otherTrait =
+					other: 'This comes from a trait'
+
+				MyBarmanClass = subclass MyCoffeeClass,
+					include otherTrait,
+					hello: -> "#{@_callSuper 'hello'} worked!"
+				
+				anInstance = new MyBarmanClass
+
+				expect( anInstance.hello() ).to.be 'Hello from Coffee worked!'
+				expect( anInstance.other ).to.be 'This comes from a trait'
+
+
 
 if typeof define is 'function' and define.amd
 	define ['expect', 'barman'], factory

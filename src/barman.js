@@ -383,8 +383,8 @@
         });
 
 
-        // Nil.extend and Class.create
-        // ---------------------------
+        // Convenience class creation functions
+        // ------------------------------------
 
         // #### Nil.extend( _\[classFactory\]_, _args_ )
         //
@@ -409,6 +409,14 @@
                 return Nil.extend.apply(Nil, arguments);
             }
         };
+
+        // #### subclass( _Parent_, _args_ )
+        //
+        // A shortcut to `Nil.extend`, that makes easy to sub-class non-barman classes.
+        //
+        function subclass(Parent) {
+            return Nil.extend.apply(Parent, slice.call(arguments, 1));    
+        }
 
         // AbstractClassFactory
         // --------------------
@@ -473,6 +481,7 @@
 
             defaultClassFactory: defaultClassFactory,
             Class: Class,
+            subclass: subclass,
 
             required: required,
 
