@@ -599,7 +599,7 @@
     } else {
 
         // Plain browser
-        window.barman = factory(window.expect, window.barman);
+        window.barmanSpecs = factory(window.expect, window.barman);
     }
 
 })();

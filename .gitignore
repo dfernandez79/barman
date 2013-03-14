@@ -1,6 +1,5 @@
 .idea
-_SpecRunner.html
 npm-debug.log
 node_modules
 .DS_Store
-integration-tests/js/barmanSpec.amd.js
+specs/coffeeCompatibilitySpec.js

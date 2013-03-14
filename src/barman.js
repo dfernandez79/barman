@@ -8,6 +8,7 @@
     'use strict';
 
     function factory() {
+        //
         // Common helper functions
         // -----------------------
 
@@ -25,11 +26,15 @@
 
         // #### isUndefined( _value_ )
         //
+        // A shortcut for `typeof`.
+        //
         function isUndefined( value ) {
             return typeof value == 'undefined';
         }
 
         // #### isFunction( _value_ )
+        //
+        // A shortcut for `typeof`.
         //
         function isFunction( value ) {
             return typeof value === 'function';
@@ -43,22 +48,25 @@
             return object ? Object.prototype.hasOwnProperty.call(object, property) : false;
         }
 
-        // #### isObject( _obj_ )
+        // #### isObject( _value_ )
         //
-        function isObject( obj ) {
-            return obj === Object(obj);
+        // Check if _value_ it's an object. It handles the _null_ corner case better than `typeof`.
+        //
+        function isObject( value ) {
+            return value === Object(value);
         }
 
-        // #### each( _obj_, _func_, _context_ )
+        
+        // #### `each` helper functions
         //
         // Of all the common helper functions `each` is the only one that differs from _underscore_ or
         // _lodash_. The main difference is that it ensures to iterate over the JScript (IE < 9) hidden
         // object properties.
         //
-
-        // IE < 9 has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
+        // JScript has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
         // `JSCRIPT_NON_ENUMERABLE` array contains those ignored properties, so we iterate over them in the `each`
         // function.
+        //
         var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
                                        'toLocaleString', 'toString', 'valueOf' ];
 
@@ -72,7 +80,9 @@
             return true;
         }
 
-        // The special case for IE is handled by different implementations of the `eachKey` internal function.
+        //
+        // The special case for JScript is handled by different implementations of the `eachKey` internal function.
+        //
         var eachKey = engineIgnoresObjectProps() ? function ( obj, func, context ) {
 
             var i, len, jscriptNonEnumCalled = false;
@@ -100,6 +110,10 @@
             }
         };
 
+        // #### each( _obj_, _func_, _context_ )
+        //
+        // Same as <http://underscorejs.org/#each> but takes account of the special JScript case.
+        //
         function each( obj, func, context ) {
             var i, len;
 
@@ -119,6 +133,9 @@
         }
 
         // #### extend( _obj_, ... )
+        //
+        // Same as <http://underscorejs.org/#extend> but uses `each` to iterate, so we handle the JScript special case
+        // properly.
         //
         function extend( obj ) {
             each(slice.call(arguments, 1), function ( source ) {
@@ -216,7 +233,7 @@
             }
         }
 
-        // ### merge(_object_,...)
+        // #### merge(_object_,...)
         //
         // Returns a new object, that is the result of merging the properties of each one of the given objects.
         //
@@ -244,7 +261,7 @@
         // The parent of `Nil` is `Nil`.
         Nil.__super__ = Nil.prototype;
 
-        // ### \_applySuper(_methodName_, _\[ arguments \]_)
+        // #### \_applySuper(_methodName_, _\[ arguments \]_)
         //
         // Allows to call the `__super__` implementation of a method.
         // It's similar to `Function.apply` but it always uses `this` as context.
@@ -267,7 +284,7 @@
             }
 
             // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
-            // undefined arguments throws a `TypeError`.
+            // undefined arguments throws an exception.
             if ( isUndefined(args) ) {
                 return superProp.apply(this);
             } else {
@@ -275,7 +292,7 @@
             }
         };
 
-        // ### \_callSuper(_methodName_, _\[ arg1, ... \]_)
+        // #### \_callSuper(_methodName_, _\[ arg1, ... \]_)
         //
         // The variable arguments version of `_applySuper`.
         //
@@ -294,7 +311,7 @@
         //
         var CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
 
-        // ### markAsClassFactory(_obj_)
+        // #### markAsClassFactory(_obj_)
         //
         // Adds the _CLASS\_FACTORY\_ATTRIBUTE_ to an object.
         //
@@ -303,7 +320,7 @@
             return obj;
         }
 
-        // ### isClassFactory(_obj_)
+        // #### isClassFactory(_obj_)
         //
         // Returns true if the object is marked as a class factory.
         //
@@ -311,6 +328,11 @@
             return isObject(obj) && obj[CLASS_FACTORY_ATTRIBUTE] === true;
         }
 
+        // #### clone(_obj_)
+        //
+        // Makes a shallow clone on an object. If the JavaScript engine implements `Object.clone` we use it. If not
+        // we fallback to the usual "clone by using new" approach.
+        //
         var clone = has(Object, 'create') ? Object.create : function ( proto ) {
             function Empty() {}
 
@@ -318,12 +340,20 @@
             return new Empty();
         };
 
+        // ### defaultClassFactory object
+        //
+        // It's the default implementation of a _ClassFactory_, and one of the _core_ functions of *barman*.
+        //
         var defaultClassFactory = markAsClassFactory({
 
+            // #### createClass( _Parent_, _instanceMethods_, _staticMethods_ )
+            //
             createClass: function ( Parent, instanceMethods, staticMethods ) {
 
+                // * Clone the `Parent.prototype` and extend it with the sub-class methods. 
                 var proto = extend(clone(Parent.prototype), instanceMethods);
 
+                // * Check if we define a _constructor_, if not define one that calls the parent constructor.
                 if ( !has(proto, 'constructor') ) {
 
                     proto.constructor = function () { Parent.apply(this, arguments); };
@@ -334,11 +364,16 @@
 
                 }
 
+                // * Extend the constructor function with the `staticMethods.
                 var ctor = extend(proto.constructor, staticMethods, {__super__: Parent.prototype });
 
+                // * Ensure that `_callSuper` and `_applySuper` are defined.
                 if ( isUndefined(proto._callSuper) ) { proto._callSuper = Nil.prototype._callSuper; }
                 if ( isUndefined(proto._applySuper) ) { proto._applySuper = Nil.prototype._applySuper; }
 
+                // * Finally ensure that the costructor has the right prototype and `extend` function. Note that
+                // you can't redefine `extend` with the `staticMethods`, if you want to customize `extend` use a
+                // _ClassFactory_.
                 ctor.prototype = proto;
                 ctor.extend = Nil.extend;
 
@@ -351,6 +386,11 @@
         // Nil.extend and Class.create
         // ---------------------------
 
+        // #### Nil.extend( _\[classFactory\]_, _args_ )
+        //
+        // If no `classFactory` is given it uses `defaultClassFactory`. The interpretation of the rest arguments depends
+        // on the _ClassFactory_, see `defaultClassFactory.createClass`.
+        // 
         Nil.extend = function () {
             var args = slice.call(arguments),
                 classFactory = (isClassFactory(args[0])) ? args.shift() : defaultClassFactory;
@@ -360,6 +400,10 @@
             return classFactory.createClass.apply(classFactory, args);
         };
 
+        // #### Class.create( _\[classFactory\]_, _args_ )
+        //
+        // It's a shortcut to `Nil.extend`.
+        //
         var Class = {
             create: function () {
                 return Nil.extend.apply(Nil, arguments);
@@ -369,6 +413,9 @@
         // AbstractClassFactory
         // --------------------
 
+        // Base class for custom class factories. It defines the class factory marker attribute, and provides
+        // a convenience method to call the `defaultClassFactory`.
+        //
         var AbstractClassFactory = Class.create({
 
             defaultCreateClass: function () {
@@ -383,7 +430,10 @@
 
         // TraitsClassFactory
         // ------------------
-
+        //
+        // A _ClassFactory_ that composes objects using _traits_.
+        // For more information about _traits_ see the _Design Notes_ on the [README](../README.md).
+        //
         var TraitsClassFactory = AbstractClassFactory.extend({
 
             constructor: function ( traits ) { this.traits = traits; },
@@ -398,6 +448,10 @@
 
         });
 
+        // #### include( _trait_, ... )
+        //
+        // A nice way to create a `TraitsClassFactory` instance.
+        //
         function include() {
             return new TraitsClassFactory(slice.call(arguments));
         }

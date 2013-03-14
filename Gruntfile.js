@@ -75,6 +75,14 @@ module.exports = function ( grunt ) {
             }
         },
 
+        coffee: {
+            tests: {
+                files: {
+                    'specs/coffeeCompatibilitySpec.js': 'specs/coffeeCompatibilitySpec.coffee'
+                }
+            }
+        },
+
         uglify: {
             dist: {
                 options: {
@@ -97,7 +105,9 @@ module.exports = function ( grunt ) {
                     css: 'docs/annotated-source.css'
                 }
             }
-        }
+        },
+
+        clean: ['specs/coffeeCompatibilitySpec.js']
 
     });
 
@@ -105,13 +115,15 @@ module.exports = function ( grunt ) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-coffee');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
     grunt.loadNpmTasks('grunt-docco');
 
 
-    grunt.registerTask('test', 'simplemocha');
-    grunt.registerTask('integration-test', ['uglify', 'mocha']);
+    grunt.registerTask('test', ['coffee:tests', 'simplemocha']);
+    grunt.registerTask('integration-test', ['coffee:tests', 'uglify', 'mocha']);
 
     grunt.registerTask('default', ['jshint', 'test']);
     grunt.registerTask('dist', ['default', 'integration-test', 'docco']);
