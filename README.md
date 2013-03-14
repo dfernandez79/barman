@@ -262,7 +262,7 @@ python -m SimpleHTTPServer port
 
 Where _port_ is the port to listen for incoming connections.
 
-Be sure to run the HTTP server from the project root since html pages will try to use `../dist` and `../specs.
+Be sure to run the HTTP server from the project root since html pages will try to use `../dist` and `../specs`.
 
 
 ----------------------------------------------------------------
