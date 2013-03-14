@@ -22,7 +22,16 @@
 
         var ArrayProto = Array.prototype,
             nativeForEach = ArrayProto.forEach,
-            slice = ArrayProto.slice;
+            slice = ArrayProto.slice,
+            indexOf = ArrayProto.indexOf ? ArrayProto.indexOf : function ( value ) {
+                /*jshint validthis: true */
+                for ( var i = 0, len = this.length; i < len; i++ ) {
+                    if ( this[i] === value ) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
 
         // #### isUndefined( _value_ )
         //
@@ -56,7 +65,7 @@
             return value === Object(value);
         }
 
-        
+
         // #### `each` helper functions
         //
         // Of all the common helper functions `each` is the only one that differs from _underscore_ or
@@ -90,7 +99,7 @@
             for ( var key in obj ) {
                 if ( has(obj, key) ) {
                     func.call(context, obj[key], key, obj);
-                    jscriptNonEnumCalled = jscriptNonEnumCalled || JSCRIPT_NON_ENUMERABLE.indexOf(key) !== -1;
+                    jscriptNonEnumCalled = jscriptNonEnumCalled || indexOf.call(JSCRIPT_NON_ENUMERABLE, key) !== -1;
                 }
             }
 
@@ -410,12 +419,12 @@
             }
         };
 
-        // #### subclass( _Parent_, _args_ )
+        // #### subclassOf( _Parent_, _args_ )
         //
         // A shortcut to `Nil.extend`, that makes easy to sub-class non-barman classes.
         //
-        function subclass(Parent) {
-            return Nil.extend.apply(Parent, slice.call(arguments, 1));    
+        function subclassOf( Parent ) {
+            return Nil.extend.apply(Parent, slice.call(arguments, 1));
         }
 
         // AbstractClassFactory
@@ -481,7 +490,7 @@
 
             defaultClassFactory: defaultClassFactory,
             Class: Class,
-            subclass: subclass,
+            subclassOf: subclassOf,
 
             required: required,
 

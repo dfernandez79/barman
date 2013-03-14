@@ -43,7 +43,7 @@ module.exports = function ( grunt ) {
             },
 
             specs: {
-                files: {src: '<%=meta.specs%>'},
+                files: {src: ['<%=meta.specs%>', '!specs/coffeeCompatibilitySpec.js']},
                 options: {
                     es5: true,
                     expr: true,
