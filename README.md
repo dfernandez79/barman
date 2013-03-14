@@ -20,9 +20,7 @@ The `--save` option adds the dependency to your `package.json`.
 
 ### Browser
 
-Barman was tested on IE 8, Firefox, Safari, and Chrome. 
-
-On the browser it can be loaded as a plain script or using [AMD]:
+Barman was tested on IE 8, Firefox, Safari, and Chrome. It can be loaded as a plain script or using [AMD]:
 
 * When loaded as a plain script, a global called `barman` will be added to the `window` object.
 * When loaded using [AMD], the `barman` object is returned by the module and no global will be created.
@@ -209,23 +207,23 @@ class MyCoffeeClass extends SomeBarmanClass
     hello: -> super + ' from super'
     other: -> "#{@_callSuper 'other'} called with _callSuper"
 
-anInstance = new MyCoffeeClass
+anInstance = new MyCoffeeClass()
 anInstance.hello() # returns "Hello world from super"
 anInstance.other() # returns "Other called with _callSuper"
 ```
 
-#### The _subclass_ method can be used to extend CoffeScript classes using _traits_
+#### The _subclassOf_ method can be used to extend CoffeScript classes using _traits_
 ```coffee
 class MyCoffeeClass
     hello: -> 'Hello from Coffee'
 
 otherTrait = other: 'This comes from a trait'
 
-MyBarmanClass = subclass MyCoffeeClass,
+MyBarmanClass = subclassOf MyCoffeeClass,
     include otherTrait,
     hello: -> "#{@_callSuper 'hello'} worked!"
 
-anInstance = new MyBarmanClass
+anInstance = new MyBarmanClass()
 
 anInstance.other # returns "This comes from a trait"
 ```
@@ -467,22 +465,24 @@ If you want to be picky about traits definition, barman doesn't implement _true 
 Change log
 ----------
 
-* 0.2.0 - **API Changes**
+* 0.2.0
 
   * Support for Internet Explorer 8
 
+  **API Changes**
+  
   * `_super` was removed, instead use `_callSuper` or `_applySuper`
     
-    Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
+       Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
 
-    With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
-    for a variable arguments methods forces you to use the long `_super('methodName').apply(this, arguments)` syntax.
+       With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
+       for a variable arguments methods forces you to use the long `_super('methodName').apply(this, arguments)` syntax.
 
-    The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
+       The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
 
-  * `withTraits` was renamed to `include`: this is helpful for people that never heard about traits before.
+  * `withTraits` was renamed to `include`, this is helpful for people that never heard about traits before.
 
-  * `subclass` added as a convenience method to extend non-Barman classes.
+  * `subclassOf` added as a convenience method to extend non-Barman classes.
 
 
 * 0.1.1 - Removal of `underscore` dependency. Better documentation (both source and readme). Source code refactoring.
@@ -512,7 +512,7 @@ Released under [MIT license]
 [Scala]: http://www.scala-lang.org/
 [Self]: http://en.wikipedia.org/wiki/Self_(programming_language)#Traits
 [Smalltalk]: http://en.wikipedia.org/wiki/Smalltalk
-[Pyhton]: http://www.python.org/
+[Python]: http://www.python.org/
 
 [AMD]: http://requirejs.org/docs/whyamd.html#amd
 [Backbone]: http://backbonejs.org/
