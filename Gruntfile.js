@@ -89,7 +89,8 @@ module.exports = function ( grunt ) {
                     sourceMap: 'dist/barman.min.js.map',
                     sourceMapPrefix: 'dist',
                     sourceMappingURL: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>/dist/barman.min.js.map',
-                    sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>'
+                    sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>',
+                    preserveComments: function ( node, comment ) { return comment.line < 4; }
                 },
                 files: {
                     'dist/barman.min.js': ['src/barman.js']
