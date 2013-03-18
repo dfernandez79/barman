@@ -1,0 +1,10 @@
+{
+  "name": "barman",
+  "version": "0.2.0",
+  "main": "dist/barman.min.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ]
+}
