@@ -197,7 +197,7 @@ var MyView = View.extend(
 
 ### CoffeeScript compatibility
 
-#### CoffeScript classes can extend Barman classes
+#### CoffeeScript classes can extend Barman classes
 ```coffee
 SomeBarmanClass = Class.create
     hello: -> 'Hello World'
@@ -212,7 +212,7 @@ anInstance.hello() # returns "Hello world from super"
 anInstance.other() # returns "Other called with _callSuper"
 ```
 
-#### The _subclassOf_ method can be used to extend CoffeScript classes using _traits_
+#### The _subclassOf_ method can be used to extend CoffeeScript classes using _traits_
 ```coffee
 class MyCoffeeClass
     hello: -> 'Hello from Coffee'
@@ -262,7 +262,7 @@ python -m SimpleHTTPServer port
 
 Where _port_ is the port to listen for incoming connections.
 
-Be sure to run the HTTP server from the project root since html pages will try to use `../dist` and `../specs.
+Be sure to run the HTTP server from the project root since html pages will try to use `../dist` and `../specs`.
 
 
 ----------------------------------------------------------------
