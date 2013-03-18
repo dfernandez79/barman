@@ -1,10 +1,16 @@
 {
-  "name": "barman",
-  "version": "0.2.0",
-  "main": "dist/barman.min.js",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "components"
-  ]
+    "name": "barman",
+    "version": "0.2.0",
+    "main": "./dist/barman.min.js",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "components",
+        "git-hooks",
+        "specs",
+        "integration-tests",
+        "docs",
+        "tasks",
+        "Gruntfile.js"
+    ]
 }
