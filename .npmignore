@@ -1,0 +1,11 @@
+dist
+docs
+git-hooks
+integration-tests
+specs
+tasks
+Gruntfile.js
+component.json
+.travis.yml
+.gitignore
+.idea
