@@ -186,7 +186,7 @@ var MyView = View.extend(
 
 ```js
 var MyView = View.extend(
-    include(templateRenderingTrait, compositeViewTrait),
+    include(templateRenderingTrait, compositeViewTrait), {
     
     // aliases to trait methods    
     compositeRender: compositeViewTrait.render,
@@ -196,7 +196,9 @@ var MyView = View.extend(
     render: function () {
         this.templateRender();
         this.compositeRender();
-    });
+    }
+
+});
 ```
 
 ### CoffeeScript compatibility
