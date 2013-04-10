@@ -178,7 +178,7 @@ var templateViewTrait = {render: function () { return 'template'; } },
 
 var MyView = View.extend(
     include(templateRenderingTrait, compositeViewTrait)
-); // throws an exception render is defined by templateRenderingTrait and compositeViewTrait
+); // throws an exception: render is defined by templateRenderingTrait and compositeViewTrait
 ```
 
 
@@ -216,7 +216,7 @@ anInstance.hello() # returns "Hello world from super"
 anInstance.other() # returns "Other called with _callSuper"
 ```
 
-#### The _subclassOf_ method can be used to extend CoffeeScript classes using _traits_
+#### The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_
 ```coffee
 class MyCoffeeClass
     hello: -> 'Hello from Coffee'
