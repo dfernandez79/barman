@@ -310,7 +310,7 @@ License
 Released under [MIT license]
 
 
-[design notes]: https://github.com/dfernandez79/barman/blob/master/docs/design-notes.md
+[design notes]: https://github.com/dfernandez79/barman/blob/master/docs/notes.md
 
 [MIT license]: http://opensource.org/licenses/mit-license.php
 
