@@ -244,7 +244,7 @@ If you are going to fork this project, you'll need these tools:
 
 Before contributing with a _pull request_ do a `grunt dist` to run the linter and unit tests.
 
-To understand the source code, or create your own library, see the [design notes].
+A good starting point to understand the source code and design of the library are the [design notes].
 
 
 ### Running _integration tests_
@@ -323,3 +323,4 @@ Released under [MIT license]
 [Nodejs]: http://nodejs.org/
 [Grunt]: http://gruntjs.com/
 [PhantomJS]: http://phantomjs.org/
+[Python]: http://www.python.org/
