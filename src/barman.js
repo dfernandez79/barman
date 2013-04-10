@@ -1,4 +1,4 @@
-//     barman 0.2.0
+//     barman 0.2.1
 //     https://github.com/dfernandez79/barman
 //     Copyright (c) 2013 Diego Fernandez
 //     Barman may be freely distributed under the MIT license.
@@ -339,7 +339,7 @@
 
         // #### clone(_obj_)
         //
-        // Makes a shallow clone on an object. If the JavaScript engine implements `Object.clone` we use it. If not
+        // Makes a shallow clone on an object. If the JavaScript engine implements `Object.create` we use it. If not
         // we fallback to the usual "clone by using new" approach.
         //
         var clone = has(Object, 'create') ? Object.create : function ( proto ) {
@@ -457,10 +457,23 @@
 
             createClass: function ( Parent, instanceMethods, staticMethods ) {
 
-                var traitComposition = merge.apply(null, this.traits);
+                var traitComposition = merge.apply(null, this.traits),
+                    newClass = this.defaultCreateClass(Parent, extend(traitComposition, instanceMethods), staticMethods);
 
-                return this.defaultCreateClass(Parent, extend(traitComposition, instanceMethods), staticMethods);
+                this._assertNoConflict(newClass.prototype);
 
+                return newClass;
+
+            },
+
+            _assertNoConflict: function ( obj ) {
+                var conflicts = [];
+                each(obj, function ( value, name ) { if ( value === conflict ) { conflicts.push(name); } });
+
+                if ( conflicts.length > 0 ) {
+                    throw new Error('There is a merge conflict for the following properties: ' +
+                        conflicts.sort().join(','));
+                }
             }
 
         });

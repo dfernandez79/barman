@@ -68,7 +68,6 @@
 
             });
 
-
             describe('conflict', function () {
 
                 it('throws an error when executed', function () {
@@ -98,7 +97,6 @@
                 });
 
             });
-
 
             describe('Class', function () {
 
@@ -505,30 +503,6 @@
                 });
 
 
-                it('marks conflicting trait methods', function () {
-
-                    var templateTrait = {
-                            render: function () {
-                                return 'template';
-                            }
-                        },
-                        compositeTrait = {
-                            render: function () {
-                                return 'composite';
-                            }
-                        },
-
-                        MyView = Class.create(include(templateTrait, compositeTrait)),
-
-                        aView = new MyView();
-
-                    expect(function () {
-                        aView.render();
-                    }).to.throwException('This property was defined by multiple merged objects, override it with the proper implementation');
-
-                });
-
-
                 it('allows a trait to include another trait', function () {
 
                     var helloTrait = {
@@ -579,6 +553,77 @@
 
                 });
 
+
+                it('throws an exception if there is conflicting methods', function () {
+
+                    var templateTrait = {
+                            render: function () {
+                                return 'template';
+                            }
+                        },
+                        compositeTrait = {
+                            render: function () {
+                                return 'composite';
+                            }
+                        };
+
+                    expect(function () { Class.create(include(templateTrait, compositeTrait)); }).to.throwException();
+
+                });
+
+
+                it('gives a description of the conflicting methods when a conflict exception is thrown', function () {
+
+                    var templateTrait = {
+                            render: function () {
+                                return 'template';
+                            },
+                            other: function () {
+                                return 'hello';
+                            }
+                        },
+                        compositeTrait = {
+                            render: function () {
+                                return 'composite';
+                            },
+                            other: function () {
+                                return 'world';
+                            }
+                        };
+
+                    expect(function () {
+                        Class.create(include(templateTrait, compositeTrait));
+                    }).to.throwException('There is a merge conflict for the following properties: other, render');
+
+                });
+
+
+                it('do not throws an exception when conflicts are resolved', function () {
+
+                    var templateTrait = {
+                            render: function () {
+                                return 'template';
+                            }
+                        },
+                        compositeTrait = {
+                            render: function () {
+                                return 'composite';
+                            }
+                        },
+
+                        MyView = Class.create(include(templateTrait, compositeTrait), {
+                            templateRender: templateTrait.render,
+                            compositeRender: compositeTrait.render,
+                            render: function () {
+                                return this.templateRender() + ' ' + this.compositeRender();
+                            }
+                        }),
+
+                        aView = new MyView();
+
+                    expect(aView.render()).to.equal('template composite');
+
+                });
             });
         });
 
