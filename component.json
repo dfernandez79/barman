@@ -1,6 +1,7 @@
 {
     "name": "barman",
-    "version": "0.2.1",
+    "description": "A small library to brew JavaScript objects.",
+    "version": "0.2.2",
     "main": "./dist/barman.min.js",
     "ignore": [
         "**/.*",
