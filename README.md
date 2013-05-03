@@ -1,9 +1,11 @@
 Barman [![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman)
 ======
 
-_Barman_ is a small library to _brew_ JavaScript objects. It allows you to define objects using [single-inheritance] and [traits].
+_Barman_ is a small library to _brew_ JavaScript objects.
 
-It's small and plays nice with other frameworks.
+It simplifies the definition of objects using [single-inheritance] and [traits like][traits] composition.
+
+It works with [Nodejs] and all mayor browsers, including IE 8.
 
 
 ----------------------------------------------------------------
@@ -16,22 +18,25 @@ Installation
 npm install barman --save
 ```
 
-The `--save` option adds the dependency to your `package.json`.
-
 ### Browser
 
-Barman was tested on IE 8, Firefox, Safari, and Chrome. It can be loaded as a plain script or using [AMD]:
+_Barman_ doesn't have any external dependency, you can load it directly or with [AMD]:
+ 
+* **dist/barman.min.js**: minimized with a [source map] link for easy debugging.
+* **src/barman.js**: full source including comments.
 
-* When loaded as a plain script, a global called `barman` will be added to the `window` object.
-* When loaded using [AMD], the `barman` object is returned by the module and no global will be created.
+It's also available on [cdnjs], and as [Twitter Bower] package:
 
-In both cases you can use the minified version: `dist/barman.min.js`, which includes a [source map]; or the full source: `src/barman.js`.
+```shell
+bower install barman
+```
+
 
 ----------------------------------------------------------------
-Examples
---------
+Feature walkthrough
+-------------------
 
-The following examples assumes that some variables were defined:
+First **define some convenient variables**:
 
 ```js
 var barman = require('barman'),
@@ -40,165 +45,178 @@ var barman = require('barman'),
     include = barman.include;
 ```
 
-
-### Create a _class_
-
-```js
-var View = Class.create({
-    render: function () {
-        return 'View Render';
-    }
-});
-
-var aView = new View();
-aView.render(); // View Render
-```
-
-
-### Create a _sub-class_
+To **define a _class_**, use `Class.create` ([run on jsfiddle](http://jsfiddle.net/XHT4K/1/)): 
 
 ```js
-var CustomView = View.extend({
-    render: function () {
-        return 'Custom';
-    }
-});
-
-var aView = new CustomView();
-aView.render(); // Custom
-```
-
-
-### The _super class_ constructor is called by default
-
-```js
-var Point = Class.create({
-        constructor: function ( x, y ) {
-            this.x = x; this.y = y;
-        }
-    }),
-
-    ColoredPoint = Point.extend({
-        color: 'red',
-        show: function () {
-            return this.color + ' ' + this.x + ', ' + this.y;
-        }
-    }),
-
-    aPoint = new ColoredPoint(5, 6);
-    
-aPoint.show() // red 5, 6
-```
-
-
-### _Super class_ delegation, can be done using _\_callSuper_
-
-```js
-var CustomView = View.extend({
-    render: function () {
-        return 'Custom call to super ' + this._callSuper('render');
-    }
-});
-
-var aView = new CustomView();
-aView.render(); // Custom call to super View Render
-```
-
-
-### Constructors can be overridden too
-
-```js
-var XPoint = Point.extend({
-    constructor: function (x, y) {
-        this._callSuper('constructor', x * 10, y * 20);
-    }
-});
-```
-
-
-### Method implementations can be shared between classes using _traits_
-
-```js
-var View = Class.create({
-    render: function () {
-        return 'default render';
-    }
-};
-
-var compositeViewTrait = {
-    subViews: required,
-
-    render: function() {
-        return this.subViews().join();
-    }
-};
-
-var CustomView = View.extend(
-    include(compositeViewTrait),
-    {
-        subViews: function () {
-            return ['sub view 1', 'sub view 2'];
-        }
-    });
-
-var aView = new CustomView();
-aView.render(); // sub view 1, sub view 2
-```
-
-
-### Traits are represented with plain objects, and they can indicate required methods
-
-```js
-var templateRenderingTrait = {
-    template: required,
-    $el: required,
+var Message = Class.create({
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    },
         
-    render: function () {
-        this.$el.html(this.template());
-        return this;
+    createElement: function () {
+        return $('<div></div>').text('Hello Barman!');        
+    }
+});    
+        
+// Append "Hello Barman!" to #container
+new Message().appendTo($('#container'));
+```
+
+To **create a sub-class**, use `extend` ([run on jsfiddle](http://jsfiddle.net/LynWL/)):
+
+```js
+var ColoredMessage = Message.extend({
+    color: 'red',
+        
+    createElement: function () {
+        return $('<div></div>').text('Hello Barman!').css('color', this.color);
+    }
+});
+                                        
+// Append a red "Hello Barman!" message to #container
+new ColoredMessage().appendTo($('#container'));
+```
+
+We have some code duplication here. Let's **use `_callSuper` to call the super-class implementation** ([run on jsfiddle](http://jsfiddle.net/LynWL/5/)):
+
+```js
+var ColoredMessage = Message.extend({
+    color: 'red',
+    
+    createElement: function () {
+        return this._callSuper('createElement').css('color', this.color);
+    }
+});
+```    
+
+Saying always _"Hello Barman!"_ is boring, a `Message` **constructor** in  will help ([run on jsfiddle](http://jsfiddle.net/LynWL/6/)):
+
+```js
+var Message = Class.create({
+    constructor: function (msg) {
+        this.message = msg;
+    },
+    
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    },
+    
+    createElement: function () {
+        return $('<div></div>').text(this.message);        
+    }
+});
+```
+
+Note that `ColoredMessage` doesn't define any constructor, **by default the super-class constructor is used** ([run on jsfiddle](http://jsfiddle.net/LynWL/6/)):
+
+```js
+new ColoredMessage("My Message").appendTo($('#container'));
+```
+
+`_callSuper` can be used also to call the super-class constructor ([run on jsfiddle](http://jsfiddle.net/LynWL/7/)):
+
+```js
+var ColoredMessage = Message.extend({
+    color: 'red',
+    
+    constructor: function (msg, color) {
+        this._callSuper('constructor', msg);
+        this.color = color;
+    },
+    
+    createElement: function () {
+        return this._callSuper('createElement').css('color', this.color);
+    }
+});
+                                    
+new ColoredMessage("My Message", 'blue').appendTo($('#container'));
+```
+
+Now we are going to refactor our example using [traits]:
+
+* `AppendableElement`: defines the behavior of `appendTo`.
+* `TemplateBased`: defines the behavior of `createElement` based on a template.
+
+```js
+var AppendableElement = {
+    createElement: required,    
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    }        
+};
+var TemplateBased = {
+    template: required,
+    renderTemplate: function () {
+        var templateData = this;
+        return this.template.replace(/{([^{}]+)}/g, function(m, key) {
+            return templateData[key];
+        });
+    },
+    createElement: function () {
+        return $(this.renderTemplate());    
     }
 };
 ```
 
-
-### Traits can be composed
-
-```js
-var MyView = View.extend(
-    include(templateRenderingTrait, compositeViewTrait)
-);
-```
-
-
-### Conflicting methods will throw an exception when composed
+Using **include** we can mix `AppendableElement` and `TemplateBased` into the `Message` class ([run on jsfiddle](http://jsfiddle.net/LynWL/8/)):
 
 ```js
-var templateViewTrait = {render: function () { return 'template'; } },
-    compositeViewTrait = {render: function() { return 'composite'; } };
-
-var MyView = View.extend(
-    include(templateRenderingTrait, compositeViewTrait)
-); // throws an exception: render is defined by templateRenderingTrait and compositeViewTrait
-```
-
-
-### Conflicts can be resolved by setting which implementation to use
-
-```js
-var MyView = View.extend(
-    include(templateRenderingTrait, compositeViewTrait), {
+var Message = Class.create( include(TemplateBased, AppendableElement), {      
+    template: '<div>{message}</div>',
     
-    // aliases to trait methods    
-    compositeRender: compositeViewTrait.render,
-    templateRender: templateRenderingTrait.render,
-    
-    // re-defines the conflicting render method    
-    render: function () {
-        this.templateRender();
-        this.compositeRender();
+    constructor: function (msg) {
+        this.message = msg;
     }
+}); 
+```
 
+If there is a **conflict**, _Barman_ will throw an exception ([run on jsfiddle](http://jsfiddle.net/LynWL/9/)):
+
+```js
+var CompositeElement = {
+    createContainer: required,
+    childs: required,
+    createElement: function () {
+        return this.createContainer().append(
+                this.childs.map(function (child) {
+                    return child.createElement();
+                }));
+    }
+};
+// ...
+// This throws an exception both CompositeElement and TemplateBased defines createElement
+var MessageComposite = Class.create(
+    include(AppendableElement, CompositeElement, TemplateBased), {
+     
+    template: '<div></div>',
+         
+    constructor: function () {
+        this.childs = Array.prototype.slice.call(arguments, 0);  
+    },
+         
+    createContainer: function () {
+        return $('<div></div>');
+    }
 });
+
+```
+
+To **resolve a conflict just set the proper implementation** ([run on jsfiddle](http://jsfiddle.net/LynWL/10/)):
+
+```js
+var MessageComposite = Class.create(
+    include(AppendableElement, CompositeElement, TemplateBased), {
+     
+    template: '<div></div>',
+         
+    constructor: function () {
+        this.childs = Array.prototype.slice.call(arguments, 0);  
+    },
+         
+    createElement: CompositeElement.createElement,
+    createContainer: TemplateBased.createElement
+});
+
 ```
 
 ### CoffeeScript compatibility
@@ -277,7 +295,7 @@ Change log
 
 * 0.2.1
 
-  * `include` composition changed to throw an exception early.
+  * `include` composition changed to throw exceptions when a conflict is found.
 
 
 * 0.2.0
@@ -311,7 +329,7 @@ License
 
 Released under [MIT license]
 
-
+[cdnjs]: http://cdnjs.com/
 [design notes]: https://github.com/dfernandez79/barman/blob/master/docs/notes.md
 
 [MIT license]: http://opensource.org/licenses/mit-license.php
@@ -326,3 +344,4 @@ Released under [MIT license]
 [Grunt]: http://gruntjs.com/
 [PhantomJS]: http://phantomjs.org/
 [Python]: http://www.python.org/
+[Twitter Bower]: http://bower.io/
