@@ -66,6 +66,41 @@
 
                 });
 
+                it('does not generate conflicts with Object built-in methods', function () {
+                    
+                    var result = merge({ toString: function () { return 'hello'; } }, { other: true });
+
+                    expect(result.toString()).to.equal('hello');
+
+                });
+
+
+                it('generates conflicts if an Object built-in has been already defined', function () {
+                    
+                    var result = merge(
+                        { toString: function () { return 'hello'; } }, 
+                        { toString: function () { return 'hello'; } }
+                    );
+
+                    expect(result.toString).to.throwError();
+
+                });                
+
+
+                it('accepts a redefinition of constructor', function () {
+                    
+                    var Some = merge(
+                        { constructor: function () { this.x = 10; } }, 
+                        { toString: function () { return 'hello'; } }
+                    );
+
+                    var result = new Some.constructor();
+
+                    expect(result.x).to.equal(10);
+                    expect(Some.toString()).to.equal('hello');
+
+                }); 
+
             });
 
             describe('conflict', function () {

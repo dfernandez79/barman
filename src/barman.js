@@ -221,10 +221,11 @@
 
             // The `this` context is set to the merge destination object, while
             // the arguments `value` and `prop` contains the property-value pair to merge.
-            var thisValue = this[prop];
+            var thisValue = has(this, prop) ? this[prop] : undefined;
 
             if ( isUndefined(thisValue) || thisValue === value || thisValue === required ) {
-                // If the property is not defined in the target object,
+                // If the property is not defined directly in the target object (note the target object always starts
+                // as {} so if is not defined there directly is an property defined by Object.prototype),
                 // or both values are the same,
                 // or the target value is the `required` marker; use the given `value`.
 
