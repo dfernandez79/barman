@@ -293,9 +293,11 @@ Be sure to run the HTTP server from the project root since html pages will try t
 Change log
 ----------
 
-* 0.2.1
+* 0.2.4 - Fixed a bug in `merge` that incorrectly marked a conflict when trying to define an `Object.prototype` function.
+  
+* 0.2.1/0.2.3 - `include` composition changed to throw exceptions when a conflict is found.
 
-  * `include` composition changed to throw exceptions when a conflict is found.
+  >**Note:** some _patch_ versions were increased due to fixes in comments and Bower tagging. There is no functionality difference between 0.2.1 and 0.2.3.
 
 
 * 0.2.0
