@@ -29,6 +29,10 @@
     });
 
     require(['barmanSpec', 'coffeeCompatibilitySpec'], function () {
+        // workaround for IE, see: https://github.com/visionmedia/mocha/issues/502
+        beforeEach(function(done){
+            setTimeout(done, 0);
+        });
         mocha.run();
     });
 </script>

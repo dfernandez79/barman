@@ -269,7 +269,10 @@ the source code and design of the library.
 Change log
 ----------
 
-* 0.2.4 - Fixed a bug in `merge` that incorrectly marked a conflict when trying to define an `Object.prototype` function.
+* 0.2.4
+  * Fixed a bug in `merge` that incorrectly marked a conflict when trying to define an `Object.prototype` function.
+  
+  * A workaround was added into integration tests to make them run in IE (see this [mocha issue](https://github.com/visionmedia/mocha/issues/502))
   
 * 0.2.1/0.2.3 - `include` composition changed to throw exceptions when a conflict is found.
 

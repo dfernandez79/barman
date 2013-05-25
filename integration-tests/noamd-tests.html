@@ -19,6 +19,10 @@
 
 <script type="text/javascript" charset="utf-8">
     if ( navigator.userAgent.indexOf('PhantomJS') < 0 ) {
+    	// workaround for IE, see: https://github.com/visionmedia/mocha/issues/502
+    	beforeEach(function(done){
+    		setTimeout(done, 0);
+  		});
         mocha.run();
     }
 </script>
