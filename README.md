@@ -221,7 +221,8 @@ var MessageComposite = Class.create(
 
 ### CoffeeScript compatibility
 
-#### CoffeeScript classes can extend Barman classes
+CoffeeScript classes can extend Barman classes ([run on jsfiddle](http://jsfiddle.net/u8VEF/)):
+
 ```coffee
 SomeBarmanClass = Class.create
     hello: -> 'Hello World'
@@ -236,7 +237,8 @@ anInstance.hello() # returns "Hello world from super"
 anInstance.other() # returns "Other called with _callSuper"
 ```
 
-#### The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_
+The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_ ([run on jsfiddle](http://jsfiddle.net/LFZnK/1/)):
+
 ```coffee
 class MyCoffeeClass
     hello: -> 'Hello from Coffee'
@@ -252,41 +254,15 @@ anInstance = new MyBarmanClass()
 anInstance.other # returns "This comes from a trait"
 ```
 
-
 ----------------------------------------------------------------
 Development
 -----------
 
-If you are going to fork this project, you'll need these tools:
+For development you'll need [Nodejs], [Grunt]. 
+Before contributing execute `grunt dist` to run the linter and unit tests.
 
-* [Nodejs]
-* [Grunt]
-
-Before contributing with a _pull request_ do a `grunt dist` to run the linter and unit tests.
-
-A good starting point to understand the source code and design of the library are the [design notes].
-
-
-### Running _integration tests_
-
-The intention of _integration tests_ is to test barman in a browser environment.
-When you execute `grunt integration-test` tests are run using [PhantomJS].
-
-You can also run the integration tests directly from your browser:
-
-1. If you made changes, run `grunt uglify` to generate the minimized files in `dist`.
-2. Open the html files inside `integration-tests`.
-
-If opening the html files directly doesn't work because of security restrictions to the `file:///` protocol, you can use a small static web server.
-[Python] provides a simple HTTP server that you can use in any platform by running:
-
-```shell
-python -m SimpleHTTPServer port
-```
-
-Where _port_ is the port to listen for incoming connections.
-
-Be sure to run the HTTP server from the project root since html pages will try to use `../dist` and `../specs`.
+The [design notes] are a good starting point to understand 
+the source code and design of the library. 
 
 
 ----------------------------------------------------------------
