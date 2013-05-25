@@ -53,7 +53,7 @@ But this approach has some problems:
 
 * **What happens if `addMoreMethods` and `addSomeMethods` tries to write the same property?**. It depends on how the functions are implemented.
 
-* **What if you want to override a method?** Some people use [function wrappers] to do that. But they are very confusing, for example: what means _before_ or _after_? Is before _my_ function or before the mixin function?
+* **What if you want to override a method?** Some people use `before` and `after` [function wrappers] to do that. But that is confusing: what means _before_ or _after_? Is before _my_ function or before the mixin function?
 You don't know, again it depends on the implementation details of each function.
 
 The main point here is that you have a lot of freedom on how to extend objects, but that freedom adds more uncertainty that makes maintainability and program understanding hard.
@@ -168,9 +168,9 @@ The mentioned [traits paper] also specifies the following requirement for traits
 
 Most of the reasons for this restriction comes from the [Smalltalk] implementation in which the paper is based:
 
-* [Smalltalk] is not statically typed and all the instance variables are _nil_ until you initialize them in a method. It means that you cannot tell if two traits are going to use a _compatible_ initial variable value, and you cannot ensure that initialization only happens once.
+* [Smalltalk] -like JavaScript- is not statically typed and all the instance variables are _nil_ until you initialize them in a method. It means that you cannot tell if two traits are going to use a _compatible_ initial variable value, and you cannot ensure that initialization only happens once.
 
-* In [Smalltalk] instance variables determines the _class shape_: how the class is represented in memory.
+* In [Smalltalk] -unlike JavaScript- instance variables determines the _class shape_: how the class is represented in memory.
 
   And since compiled methods are not designed to be shared between classes, they are tightly coupled with the _class shape_: bytecode references instance variables by index.
 
