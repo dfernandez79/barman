@@ -25,7 +25,7 @@ _Barman_ doesn't have any external dependency, you can load it directly or with 
 * **dist/barman.min.js**: minimized with a [source map] link for easy debugging.
 * **src/barman.js**: full source including comments.
 
-It's also available on [cdnjs], and as [Twitter Bower] package:
+_Barman_ is also available on [cdnjs], and as [Twitter Bower] package:
 
 ```shell
 bower install barman
