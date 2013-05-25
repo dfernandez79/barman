@@ -113,7 +113,7 @@ Note that `ColoredMessage` doesn't define any constructor, **by default the supe
 new ColoredMessage("My Message").appendTo($('#container'));
 ```
 
-`_callSuper` can be used also to call the super-class constructor ([run on jsfiddle](http://jsfiddle.net/LynWL/7/)):
+`_callSuper` can be used also to **call** the **super-class constructor** ([run on jsfiddle](http://jsfiddle.net/LynWL/7/)):
 
 ```js
 var ColoredMessage = Message.extend({
@@ -132,7 +132,7 @@ var ColoredMessage = Message.extend({
 new ColoredMessage("My Message", 'blue').appendTo($('#container'));
 ```
 
-Now we are going to refactor our example using [traits]:
+Now we are going to **refactor** our example **using [traits]**:
 
 * `AppendableElement`: defines the behavior of `appendTo`.
 * `TemplateBased`: defines the behavior of `createElement` based on a template.
@@ -158,7 +158,7 @@ var TemplateBased = {
 };
 ```
 
-Using **include** we can mix `AppendableElement` and `TemplateBased` into the `Message` class ([run on jsfiddle](http://jsfiddle.net/LynWL/8/)):
+Using **include** we can **mix** `AppendableElement` and `TemplateBased` into the `Message` class ([run on jsfiddle](http://jsfiddle.net/LynWL/8/)):
 
 ```js
 var Message = Class.create( include(TemplateBased, AppendableElement), {      
@@ -170,7 +170,7 @@ var Message = Class.create( include(TemplateBased, AppendableElement), {
 }); 
 ```
 
-If there is a **conflict**, _Barman_ will throw an exception ([run on jsfiddle](http://jsfiddle.net/LynWL/9/)):
+If there is a **conflict**, _Barman_ will throw an **exception** ([run on jsfiddle](http://jsfiddle.net/LynWL/9/)):
 
 ```js
 var CompositeElement = {
@@ -258,7 +258,7 @@ anInstance.other # returns "This comes from a trait"
 Development
 -----------
 
-For development you'll need [Nodejs], [Grunt]. 
+For development you'll need [Nodejs], and [Grunt]. 
 Before contributing execute `grunt dist` to run the linter and unit tests.
 
 The [design notes] are a good starting point to understand 
@@ -320,6 +320,4 @@ Released under [MIT license]
 [AMD]: http://requirejs.org/docs/whyamd.html#amd
 [Nodejs]: http://nodejs.org/
 [Grunt]: http://gruntjs.com/
-[PhantomJS]: http://phantomjs.org/
-[Python]: http://www.python.org/
 [Twitter Bower]: http://bower.io/
