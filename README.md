@@ -61,6 +61,10 @@ var Message = Class.create({
 // Append "Hello Barman!" to #container
 new Message().appendTo($('#container'));
 ```
+>**Ey! JavaScript doesn't have classes!** That's true, see the [design notes] for an explanation why I choose this name. 
+To summarize: JavaScript allows [single-inheritance] (with prototype delegation) and a good way to understand mixins 
+and traits is as a complement of [single-inheritance]. I could come up with a new term, but I hope that `Class.create` is
+more _friendly_.
 
 To **create a sub-class**, use `extend` ([run on jsfiddle](http://jsfiddle.net/LynWL/)):
 
