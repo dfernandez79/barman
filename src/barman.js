@@ -97,10 +97,8 @@
             var i, len, jscriptNonEnumCalled = false;
 
             for ( var key in obj ) {
-                if ( has(obj, key) ) {
-                    func.call(context, obj[key], key, obj);
-                    jscriptNonEnumCalled = jscriptNonEnumCalled || indexOf.call(JSCRIPT_NON_ENUMERABLE, key) !== -1;
-                }
+                func.call(context, obj[key], key, obj);
+                jscriptNonEnumCalled = jscriptNonEnumCalled || indexOf.call(JSCRIPT_NON_ENUMERABLE, key) !== -1;
             }
 
             if ( !jscriptNonEnumCalled ) {
@@ -113,9 +111,7 @@
 
         } : function ( obj, func, context ) {
             for ( var key in obj ) {
-                if ( has(obj, key) ) {
-                    func.call(context, obj[key], key, obj);
-                }
+                func.call(context, obj[key], key, obj);
             }
         };
 
@@ -154,6 +150,18 @@
             });
             return obj;
         }
+
+        // #### clone(_obj_)
+        //
+        // Makes a shallow clone on an object. If the JavaScript engine implements `Object.create` we use it. If not
+        // we fallback to the usual "clone by using new" approach.
+        //
+        var clone = has(Object, 'create') ? Object.create : function ( proto ) {
+            function Empty() {}
+
+            Empty.prototype = proto;
+            return new Empty();
+        };
 
 
         // Merge
@@ -338,18 +346,6 @@
             return isObject(obj) && obj[CLASS_FACTORY_ATTRIBUTE] === true;
         }
 
-        // #### clone(_obj_)
-        //
-        // Makes a shallow clone on an object. If the JavaScript engine implements `Object.create` we use it. If not
-        // we fallback to the usual "clone by using new" approach.
-        //
-        var clone = has(Object, 'create') ? Object.create : function ( proto ) {
-            function Empty() {}
-
-            Empty.prototype = proto;
-            return new Empty();
-        };
-
         // ### defaultClassFactory object
         //
         // It's the default implementation of a _ClassFactory_, and one of the _core_ functions of *barman*.
@@ -492,6 +488,7 @@
         // ---------------------------
 
         return {
+            clone: clone,
             extend: extend,
             merge: merge,
             conflict: conflict,

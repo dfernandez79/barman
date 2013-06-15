@@ -6,7 +6,8 @@
 
         describe('Barman', function () {
 
-            var extend = barman.extend,
+            var clone = barman.clone,
+                extend = barman.extend,
                 merge = barman.merge,
                 conflict = barman.conflict,
                 required = barman.required,
@@ -22,6 +23,20 @@
                     expect(e).to.be.a(exceptionCtor);
                 };
             }
+
+            describe('extend', function () {
+
+                it('copies not owned properties', function () {
+
+                    var proto = {value: 'hello'}, obj = clone(proto), extended = extend({}, obj);
+
+                    expect(obj.hasOwnProperty('value')).to.be(false);
+                    expect(extended.hasOwnProperty('value')).to.be(true);
+                    expect(extended.value).to.be('hello');
+
+                });
+
+            });
 
             describe('merge', function () {
 
@@ -66,8 +81,9 @@
 
                 });
 
+
                 it('does not generate conflicts with Object built-in methods', function () {
-                    
+
                     var result = merge({ toString: function () { return 'hello'; } }, { other: true });
 
                     expect(result.toString()).to.equal('hello');
@@ -76,21 +92,21 @@
 
 
                 it('generates conflicts if an Object built-in has been already defined', function () {
-                    
+
                     var result = merge(
-                        { toString: function () { return 'hello'; } }, 
+                        { toString: function () { return 'hello'; } },
                         { toString: function () { return 'hello'; } }
                     );
 
                     expect(result.toString).to.throwError();
 
-                });                
+                });
 
 
                 it('accepts a redefinition of constructor', function () {
-                    
+
                     var Some = merge(
-                        { constructor: function () { this.x = 10; } }, 
+                        { constructor: function () { this.x = 10; } },
                         { toString: function () { return 'hello'; } }
                     );
 
@@ -99,7 +115,32 @@
                     expect(result.x).to.equal(10);
                     expect(Some.toString()).to.equal('hello');
 
-                }); 
+                });
+
+
+                it('merges non-owned properties', function () {
+
+                    var proto = {value: 'hello'}, other = clone(proto), merged = merge({one: 1}, other);
+
+                    expect(other.hasOwnProperty('value')).to.be(false);
+                    expect(merged.hasOwnProperty('one')).to.be(true);
+                    expect(merged.hasOwnProperty('value')).to.be(true);
+                    expect(merged.value).to.be('hello');
+
+                });
+
+
+                it.skip('can merge non-enumerable properties', function () {
+
+                    var obj = {};
+                    Object.defineProperty(obj, 'x', {enumerable: false, value: 10});
+
+                    var result = merge(obj, {});
+
+                    expect(result.x).to.be(10);
+                    expect(Object.getOwnPropertyDescriptor(result, 'x').enumerable).to.be(false);
+
+                });
 
             });
 
