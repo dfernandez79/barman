@@ -130,6 +130,19 @@
                 });
 
 
+                it('flattens methods from prototype', function () {
+
+                    var proto = {value: 'hello'},
+                        one = extend(clone(proto), {one: 1}),
+                        two = extend(clone(proto), {two: 2}),
+                        merged = merge(one, two);
+
+                    expect(merged.hasOwnProperty('value'));
+                    expect(merged.value).to.be('hello');
+
+                });
+
+
                 it.skip('can merge non-enumerable properties', function () {
 
                     var obj = {};
