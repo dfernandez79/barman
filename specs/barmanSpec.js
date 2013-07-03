@@ -16,6 +16,7 @@
                 AbstractClassFactory = barman.AbstractClassFactory,
                 isClassFactory = barman.isClassFactory,
                 include = barman.include,
+                subclassOf = barman.subclassOf,
                 ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip;
 
             function ofType( exceptionCtor ) {
@@ -700,6 +701,38 @@
                     expect(aView.render()).to.equal('template composite');
 
                 });
+            });
+
+            describe('Special cases', function () {
+
+                var ifNodeIt = ( typeof module !== 'undefined' && module.exports ) ? it : it.skip;
+
+
+                ifNodeIt('can subclass EventEmitter using subclassOf', function () {
+
+                    var constructorCalled = false,
+
+                        EventEmitter = require('events').EventEmitter,
+
+                        EmitterSubclass = subclassOf(EventEmitter, {
+                            constructor: function () {
+                                this._callSuper('constructor');
+                                constructorCalled = true;
+                            }
+                        });
+
+                    var instance = new EmitterSubclass(),
+                        called = false;
+
+
+                    instance.on('test', function () { called = true; });
+                    instance.emit('test');
+
+                    expect(constructorCalled).to.equal(true);
+                    expect(called).to.equal(true);
+
+                });
+
             });
         });
 
