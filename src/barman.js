@@ -258,6 +258,8 @@
         // Nil
         // ---
 
+        var CALL_SUPER_TEMP_ATTRIBUTE = '*_callSuper_tmp*';
+
         // `Nil` is the root of the *barman* _class hierarchy_.
         function Nil() { }
 
@@ -276,23 +278,30 @@
         //
         Nil.prototype._applySuper = function ( methodName, args ) {
 
-            var superPrototype = this.constructor.__super__,
-                superProp = superPrototype[methodName];
+            var superPrototype = has(this, CALL_SUPER_TEMP_ATTRIBUTE) ?
+                    this[CALL_SUPER_TEMP_ATTRIBUTE] : this.constructor.__super__,
+                superProp = superPrototype[methodName],
+                result;
 
+            delete this[CALL_SUPER_TEMP_ATTRIBUTE];
             if ( !methodName ) {
                 throw new Error('The name of the method to call is required');
             }
 
             if ( isUndefined(superProp) ) {
-                throw new ReferenceError("__super__ doesn't define a method named " + name);
+                throw new ReferenceError("__super__ doesn't define a method named " + methodName);
             }
 
-            // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
-            // undefined arguments throws an exception.
-            if ( isUndefined(args) ) {
-                return superProp.apply(this);
-            } else {
-                return superProp.apply(this, args);
+            try {
+                this[CALL_SUPER_TEMP_ATTRIBUTE] = superPrototype.constructor.__super__;
+
+                // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
+                // undefined arguments throws an exception.
+                result = isUndefined(args) ? superProp.apply(this) : superProp.apply(this, args);
+
+                return result;
+            } finally {
+                delete this[CALL_SUPER_TEMP_ATTRIBUTE];
             }
         };
 
@@ -363,7 +372,7 @@
                 if ( isUndefined(proto._callSuper) ) { proto._callSuper = Nil.prototype._callSuper; }
                 if ( isUndefined(proto._applySuper) ) { proto._applySuper = Nil.prototype._applySuper; }
 
-                // * Finally ensure that the costructor has the right prototype and `extend` function. Note that
+                // * Finally ensure that the constructor has the right prototype and `extend` function. Note that
                 // you can't redefine `extend` with the `staticMethods`, if you want to customize `extend` use a
                 // _ClassFactory_.
                 ctor.prototype = proto;

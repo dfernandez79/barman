@@ -16,7 +16,6 @@
                 AbstractClassFactory = barman.AbstractClassFactory,
                 isClassFactory = barman.isClassFactory,
                 include = barman.include,
-                subclassOf = barman.subclassOf,
                 ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip;
 
             function ofType( exceptionCtor ) {
@@ -399,6 +398,29 @@
 
                     });
 
+
+                    it('allows calls to super constructor on explicit constructor implementations', function () {
+
+                        var Parent1 = Class.create({
+                                constructor: function () {
+                                    this.parent1ConstructorCalled = true;
+                                }
+                            }),
+                            Parent2 = Parent1.extend({
+                                constructor: function () {
+                                    this._callSuper('constructor');
+                                    this.parent2ConstructorCalled = true;
+                                }
+                            }),
+
+                            Concrete = Parent2.extend({}),
+                            anInstance = new Concrete();
+
+                        expect(anInstance.parent1ConstructorCalled).to.equal(true);
+                        expect(anInstance.parent2ConstructorCalled).to.equal(true);
+
+                    });
+
                 });
             });
 
@@ -423,6 +445,7 @@
                     }),
 
                     aWidget = new CustomWidget();
+
 
                 describe('_callSuper', function () {
 
@@ -463,6 +486,33 @@
                     it('passes arguments to the function', function () {
 
                         expect(aWidget._callSuper('show', 'hello')).to.equal('hello');
+
+                    });
+
+
+                    it('can be delegated up in the hierarchy', function () {
+
+                        var Parent1 = Class.create({
+                                method: function () {
+                                    this.parent1MethodCalled = true;
+                                }
+                            }),
+                            Parent2 = Parent1.extend({
+                                method: function () {
+                                    this._callSuper('method');
+                                    this.parent2MethodCalled = true;
+                                }
+                            }),
+                            Concrete = Parent2.extend({
+                                method: function () {
+                                    this._callSuper('method');
+                                }
+                            }),
+                            anInstance = new Concrete();
+
+                        anInstance.method();
+                        expect(anInstance.parent1MethodCalled).to.equal(true);
+                        expect(anInstance.parent2MethodCalled).to.equal(true);
 
                     });
 
@@ -703,37 +753,6 @@
                 });
             });
 
-            describe('Special cases', function () {
-
-                var ifNodeIt = ( typeof module !== 'undefined' && module.exports ) ? it : it.skip;
-
-
-                ifNodeIt('can subclass EventEmitter using subclassOf', function () {
-
-                    var constructorCalled = false,
-
-                        EventEmitter = require('events').EventEmitter,
-
-                        EmitterSubclass = subclassOf(EventEmitter, {
-                            constructor: function () {
-                                this._callSuper('constructor');
-                                constructorCalled = true;
-                            }
-                        });
-
-                    var instance = new EmitterSubclass(),
-                        called = false;
-
-
-                    instance.on('test', function () { called = true; });
-                    instance.emit('test');
-
-                    expect(constructorCalled).to.equal(true);
-                    expect(called).to.equal(true);
-
-                });
-
-            });
         });
 
     }
