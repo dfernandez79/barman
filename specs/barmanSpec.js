@@ -142,19 +142,6 @@
 
                 });
 
-
-                it.skip('can merge non-enumerable properties', function () {
-
-                    var obj = {};
-                    Object.defineProperty(obj, 'x', {enumerable: false, value: 10});
-
-                    var result = merge(obj, {});
-
-                    expect(result.x).to.be(10);
-                    expect(Object.getOwnPropertyDescriptor(result, 'x').enumerable).to.be(false);
-
-                });
-
             });
 
             describe('conflict', function () {

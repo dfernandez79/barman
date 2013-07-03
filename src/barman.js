@@ -22,16 +22,7 @@
 
         var ArrayProto = Array.prototype,
             nativeForEach = ArrayProto.forEach,
-            slice = ArrayProto.slice,
-            indexOf = ArrayProto.indexOf ? ArrayProto.indexOf : function ( value ) {
-                /*jshint validthis: true */
-                for ( var i = 0, len = this.length; i < len; i++ ) {
-                    if ( this[i] === value ) {
-                        return i;
-                    }
-                }
-                return -1;
-            };
+            slice = ArrayProto.slice;
 
         // #### isUndefined( _value_ )
         //
@@ -94,18 +85,15 @@
         //
         var eachKey = engineIgnoresObjectProps() ? function ( obj, func, context ) {
 
-            var i, len, jscriptNonEnumCalled = false;
+            var i, len;
 
             for ( var key in obj ) {
                 func.call(context, obj[key], key, obj);
-                jscriptNonEnumCalled = jscriptNonEnumCalled || indexOf.call(JSCRIPT_NON_ENUMERABLE, key) !== -1;
             }
 
-            if ( !jscriptNonEnumCalled ) {
-                for ( i = 0, len = JSCRIPT_NON_ENUMERABLE.length; i < len; i++ ) {
-                    if ( has(obj, JSCRIPT_NON_ENUMERABLE[i]) ) {
-                        func.call(context, obj[JSCRIPT_NON_ENUMERABLE[i]], JSCRIPT_NON_ENUMERABLE[i], obj);
-                    }
+            for ( i = 0, len = JSCRIPT_NON_ENUMERABLE.length; i < len; i++ ) {
+                if ( has(obj, JSCRIPT_NON_ENUMERABLE[i]) ) {
+                    func.call(context, obj[JSCRIPT_NON_ENUMERABLE[i]], JSCRIPT_NON_ENUMERABLE[i], obj);
                 }
             }
 
@@ -189,15 +177,13 @@
         //
         function mapProperties( srcObj, iterator, result ) {
 
-            if ( !result ) { result = {}; }
+            if ( !result || !srcObj ) { result = {}; }
 
-            if ( srcObj ) {
-                each(srcObj, function ( value, prop ) {
+            each(srcObj, function ( value, prop ) {
 
-                    result[prop] = iterator.call(this, value, prop);
+                result[prop] = iterator.call(this, value, prop);
 
-                }, result);
-            }
+            }, result);
 
             return result;
         }
