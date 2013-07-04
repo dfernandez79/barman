@@ -283,12 +283,12 @@
         //
         Nil.prototype._applySuper = function ( methodName, args ) {
 
-            var superPrototype = has(this, CALL_SUPER_TEMP_ATTRIBUTE) ?
-                    this[CALL_SUPER_TEMP_ATTRIBUTE] : this.constructor.__super__,
+            var superPrototype = has(this[CALL_SUPER_TEMP_ATTRIBUTE], 'proto') ?
+                    this[CALL_SUPER_TEMP_ATTRIBUTE].proto : this.constructor.__super__,
                 superProp = superPrototype[methodName],
                 result;
 
-            delete this[CALL_SUPER_TEMP_ATTRIBUTE];
+            delete this[CALL_SUPER_TEMP_ATTRIBUTE].proto;
             if ( !methodName ) {
                 throw new Error('The name of the method to call is required');
             }
@@ -298,7 +298,7 @@
             }
 
             try {
-                this[CALL_SUPER_TEMP_ATTRIBUTE] = superPrototype.constructor.__super__;
+                this[CALL_SUPER_TEMP_ATTRIBUTE].proto = superPrototype.constructor.__super__;
 
                 // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
                 // undefined arguments throws an exception.
@@ -306,7 +306,7 @@
 
                 return result;
             } finally {
-                delete this[CALL_SUPER_TEMP_ATTRIBUTE];
+                delete this[CALL_SUPER_TEMP_ATTRIBUTE].proto;
             }
         };
 
@@ -382,6 +382,8 @@
                 // _ClassFactory_.
                 ctor.prototype = proto;
                 ctor.extend = Nil.extend;
+
+                ctor.prototype[CALL_SUPER_TEMP_ATTRIBUTE] = {};
 
                 return ctor;
             }

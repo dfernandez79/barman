@@ -449,6 +449,8 @@
 
                 describe('_callSuper', function () {
 
+                    var ifFreezeIsSupportedIt = Object.freeze ? it : it.skip;
+
                     it('throws an error when no argument is given', function () {
 
                         expect(function () {
@@ -513,6 +515,35 @@
                         anInstance.method();
                         expect(anInstance.parent1MethodCalled).to.equal(true);
                         expect(anInstance.parent2MethodCalled).to.equal(true);
+
+                    });
+
+
+                    ifFreezeIsSupportedIt('works with frozen objects', function () {
+
+                        var parent1Called = false, parent2Called = false, subClassCalled = false,
+                            Parent1 = Class.create({
+                                method: function () { parent1Called = true; }
+                            }),
+                            Parent2 = Parent1.extend({
+                                method: function () {
+                                    parent2Called = true;
+                                    this._callSuper('method');
+                                }
+                            }),
+                            SubClass = Parent2.extend({
+                                method: function () {
+                                    subClassCalled = true;
+                                    this._callSuper('method');
+                                }
+                            }),
+                            anInstance = new SubClass();
+
+                        Object.freeze(anInstance);
+                        anInstance.method();
+                        expect(parent1Called).to.equal(true);
+                        expect(parent2Called).to.equal(true);
+                        expect(subClassCalled).to.equal(true);
 
                     });
 
