@@ -16,7 +16,9 @@
                 AbstractClassFactory = barman.AbstractClassFactory,
                 isClassFactory = barman.isClassFactory,
                 include = barman.include,
-                ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip;
+
+                ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip,
+                ifNonEnumerablePropertiesAreSupportedIt = Object.getOwnPropertyNames ? it : it.skip;
 
             function ofType( exceptionCtor ) {
                 return function ( e ) {
@@ -547,6 +549,19 @@
 
                     });
 
+
+                    ifNonEnumerablePropertiesAreSupportedIt('is not enumerable', function () {
+
+                        var callSuperWasEnumerated;
+
+                        for (var key in aWidget) {
+                            callSuperWasEnumerated = key === '_callSuper';
+                        }
+
+                        expect(callSuperWasEnumerated).to.equal(false);
+
+                    });
+
                 });
 
 
@@ -589,6 +604,18 @@
                     it('passes arguments to the function', function () {
 
                         expect(aWidget._applySuper('show', ['hello', ' world'])).to.equal('hello world');
+
+                    });
+
+                    ifNonEnumerablePropertiesAreSupportedIt('is not enumerable', function () {
+
+                        var applySuperWasEnumerated;
+
+                        for (var key in aWidget) {
+                            applySuperWasEnumerated = key === '_applySuper';
+                        }
+
+                        expect(applySuperWasEnumerated).to.equal(false);
 
                     });
 

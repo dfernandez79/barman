@@ -53,10 +53,10 @@ But this approach has some problems:
 
 * **What happens if `addMoreMethods` and `addSomeMethods` tries to write the same property?**. It depends on how the functions are implemented.
 
-* **What if you want to override a method?** Some people use `before` and `after` [function wrappers] to do that. But that is confusing: what means _before_ or _after_? Is before _my_ function or before the mixin function?
+* **What is the correct way to override a method?** Some people use [function wrappers] (`before` and `after`) to override methods. That is very flexible an similar to aspect oriented programming. But is very confusing to read and follow: what means _before_ or _after_? Is before _my_ function or before the mixin function?
 You don't know, again it depends on the implementation details of each function.
 
-The main point here is that you have a lot of freedom on how to extend objects, but that freedom adds more uncertainty that makes maintainability and program understanding hard.
+The main point is that you have a lot of freedom on how to extend objects, but that freedom adds uncertainty making maintainability and program understanding hard.
 
 Another way of doing mixins in JavaScript is by using objects. That's the approach used  by a lot of frameworks:
 
@@ -64,11 +64,11 @@ Another way of doing mixins in JavaScript is by using objects. That's the approa
 extend(dest, mixin1, mixin2)
 ```
 
-The application order is still an issue, and you can't use [function wrappers] in this way; but is easy to understand and straight forward to implement.
+The application order is still an issue; but is easy to understand and straight forward to implement.
 
-At the beginning I wanted to support functional mixins, because is a common JavaScript technique, and that support can help in the migration of existing code to use barman.
+Even if functional mixins are problematic to understand, I wanted to support them because is a common JavaScript technique. One idea was to convert functional mixins to object based mixins. In that way you loose the flexibility of functional mixins, but you gain an easy migration path to barman.
 
-From that requirement came the idea of having _class factories_, so the strategy used by `Class.create` can be switched, from mixins:
+From that requirement came the idea of having _class factories_, so the strategy used by `Class.create` can be switched, from functional mixins:
 
 ```js
 Class.create(
@@ -88,7 +88,7 @@ Class.create(
 
 But this approach forces the user to make some decisions before hand: _Should I use traits or mixins? What's the difference?_.
 
-In the end the problems surpasses the benefits, so I decided to remove support for functional mixins: if you use [function wrappers], your code can be made easy to understand by using aliases or `_super`.
+In the end the problems surpasses the benefits, so I decided to remove support for functional mixins: if you use [function wrappers], your code can be made easy to understand by using aliases or `_callSuper`.
 
 But the _class factory_ idea was keep because it makes easy to extend the framework.
 
@@ -190,6 +190,54 @@ In this context what barman gives you is a way of merging properties for your pr
 It finds conflicts using strict equality `===`, and applies that strategy for all the object _slots_.
 
 If you want to be picky about traits definition, barman doesn't implement _true traits_, neither does [traitsjs]. But I keep using the name _traits_ to make a distinction from the _last-one-wins_ strategy of mixins.
+
+### \_callSuper / \_applySuper details
+
+My first implementation of super method delegation was very naive:
+
+* Get the super implementation by using `this.constructor.__super__`
+* Call the super implementation using `superImpl.apply(this, args)`
+
+Do you see any problem with this implementation? 
+
+At first sight I didn't see any problem. Because it works for simple cases.
+
+The main issue with this implementation is that `this.constructor.__super__` returns only one _level_ up in the hierarchy. So if the parent implementation also does `_callSuper` you enter in a loop.
+
+Sadly there is no clean way to resolve that. I wanted to have `_callSuper` because is shorter and more convenient. But I needed a way to keep track of who is the super implementation.
+
+The solution is a little bit against the design principle of "avoid special method signatures or attributes", but I couldn't come up with a better one:
+
+* JavaScript is single threaded, it guarantees that if you add a property at the beginning of `_callSuper` and then you remove it. That change is going to be controlled: you can ensure some invariant over that property. For example doing that on Java is a bad idea, because you cannot guarantee that during the execution of `_callSuper` no other thread touches `this`.
+
+* Based on that _feature_, when a `_callSuper` is done the current super prototype is saved in a special attribute. If the super implementation does `_callSuper` again, the super implementation is obtained based on that special attribute. 
+The invariant is this: `specialAttribute === undefined || specialAttribute === superClassPrototype`.
+
+For example if you have something like this (declaration details omitted):
+
+```js
+// Child extends Parents which extends Root
+Root.method = function () {};
+Parent.method = function () { this._callSuper('method'); }
+Child.method = function () { this._callSuper('method'); }
+
+aChild.method();
+```
+
+The execution will be:
+
+1. **superMethod = this.constructor.\_\_super\_\_.method** which is **Parent.method**.
+2. Set **this.specialAttr = Parent.prototype**
+3. **superMethod.apply(this)**
+4. Call super is called again, but now: **superMethod = this.specialAttr.\_\_super\_\_** which is **Root.method**
+5. Set **this.specialAttr = Root.prototype**
+6. **superMethod.apply(this)** … and so on
+
+The good thing is that it works. The bad thing is that depends on a special attribute for each object instance. 
+
+The implementation is done in a way that if the engine supports special properties, the special attribute is not enumerable (so you don't get it in `for` loops). And it also works with _frozen_ objects (I never saw an implementation that depends on  `Object.freeze`, but just in case).
+
+
 
 [single-inheritance]: http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)
 [traits]: http://en.wikipedia.org/wiki/Trait_(computer_programming)

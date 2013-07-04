@@ -69,44 +69,42 @@
         var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
                                        'toLocaleString', 'toString', 'valueOf' ];
 
-        // #### engineIgnoresObjectProps()
-        //
-        // `each` uses `eachKey` internally to iterate over object properties. We use `engineIgnoresObjectProps` to
-        // determine which implementation of `eachKey` to use.
-        //
-        function engineIgnoresObjectProps() {
-            var obj = {constructor: 1};
-            for ( var key in obj ) {
-                if ( has(obj, key) ) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         // #### eachKey( _obj_, _func_, _context_ )
         //
         // The special case for JScript is handled by different implementations of the `eachKey` internal function.
         //
-        var eachKey = engineIgnoresObjectProps() ? function ( obj, func, context ) {
 
-            var i, len;
-
+        //
+        // **eachKeyStd** is the _standard_ implementation of _eachKey_.
+        //
+        function eachKeyStd( obj, func, context ) {
             for ( var key in obj ) {
                 func.call(context, obj[key], key, obj);
             }
+        }
+
+        //
+        // **eachKeyFix** is an implementation of _eachKey_ that uses a workaround for JScript buggy enumeration.
+        //
+        function eachKeyFix( obj, func, context ) {
+            var i, len;
+
+            eachKeyStd(obj, func, context);
 
             for ( i = 0, len = JSCRIPT_NON_ENUMERABLE.length; i < len; i++ ) {
                 if ( has(obj, JSCRIPT_NON_ENUMERABLE[i]) ) {
                     func.call(context, obj[JSCRIPT_NON_ENUMERABLE[i]], JSCRIPT_NON_ENUMERABLE[i], obj);
                 }
             }
+        }
 
-        } : function ( obj, func, context ) {
-            for ( var key in obj ) {
-                func.call(context, obj[key], key, obj);
-            }
-        };
+        // The proper `eachKey` implementation is defined according to `enumObjectOverrides`.
+        var enumObjectOverrides = (function () {
+                var obj = {constructor: 1};
+                for ( var key in obj ) { if ( has(obj, key) ) { return true; } }
+                return false;
+            })(),
+            eachKey = enumObjectOverrides ? eachKeyStd : eachKeyFix;
 
         // #### each( _obj_, _func_, _context_ )
         //
@@ -155,6 +153,26 @@
             Empty.prototype = proto;
             return new Empty();
         };
+
+        // #### defineSpecialProperty( _obj_, _name_, _value_ )
+        //
+        // Defines a property that will be used internally by the framework.
+        // The property will be non-enumerable and non-configurable.
+        //
+
+        function defineSpecialPropertyStd( obj, name, value ) {
+            Object.defineProperty(obj, name, {value: value, writable: true, enumerable: false, configurable: false});
+            return obj;
+        }
+
+        function defineSpecialPropertyFix( obj, name, value ) {
+            obj[name] = value;
+            return obj;
+        }
+
+        // The proper `defineSpecialProperty` implementation is if the engine supports non-enumerable properties
+        var defineSpecialProperty = (typeof Object.getOwnPropertyNames === 'function') ?
+            defineSpecialPropertyStd : defineSpecialPropertyFix;
 
 
         // Merge
@@ -263,14 +281,23 @@
         // Nil
         // ---
 
-        var CALL_SUPER_TEMP_ATTRIBUTE = '*_callSuper_tmp*';
-
         // `Nil` is the root of the *barman* _class hierarchy_.
         function Nil() { }
 
         // Every *barman* _class_ has a `__super__` property that returns the parent prototype.
         // The parent of `Nil` is `Nil`. This is for compatibility with other frameworks (ie. CoffeeScript, Backbone).
         Nil.__super__ = Nil.prototype;
+
+
+        //
+        // To implement `_callSuper`/`_applySuper` we need to keep track of the current _class_ used to determine the
+        // method implementation. That is done by this special attribute which is added to every object instance.
+        //
+        // When an instance is created this attribute is initialized with an empty object.
+        // That empty object is filled during an `_applySuper` call, and made empty afterwards. This allows to use
+        // super calls even on frozen objects.
+        //
+        var CALL_SUPER_TEMP_ATTRIBUTE = '*_callSuper*';
 
         // #### \_applySuper(_methodName_, _\[ arguments \]_)
         //
@@ -281,14 +308,18 @@
         //
         // Note that this function only works if the `__super__` attribute wasn't removed from the constructor.
         //
-        Nil.prototype._applySuper = function ( methodName, args ) {
+        // Also it internally uses the `CALL_SUPER_TEMP_ATTRIBUTE` to keep track of the correct super implementation
+        // to use.
+        //
+        defineSpecialProperty(Nil.prototype, '_applySuper', function ( methodName, args ) {
 
-            var superPrototype = has(this[CALL_SUPER_TEMP_ATTRIBUTE], 'proto') ?
-                    this[CALL_SUPER_TEMP_ATTRIBUTE].proto : this.constructor.__super__,
+            var superTempAttr = this[CALL_SUPER_TEMP_ATTRIBUTE],
+                superPrototype = has(superTempAttr, 'p') ? superTempAttr.p : this.constructor.__super__,
                 superProp = superPrototype[methodName],
                 result;
 
-            delete this[CALL_SUPER_TEMP_ATTRIBUTE].proto;
+            delete superTempAttr.p;
+
             if ( !methodName ) {
                 throw new Error('The name of the method to call is required');
             }
@@ -298,25 +329,27 @@
             }
 
             try {
-                this[CALL_SUPER_TEMP_ATTRIBUTE].proto = superPrototype.constructor.__super__;
+
+                superTempAttr.p = superPrototype.constructor.__super__;
 
                 // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
                 // undefined arguments throws an exception.
                 result = isUndefined(args) ? superProp.apply(this) : superProp.apply(this, args);
 
                 return result;
+
             } finally {
-                delete this[CALL_SUPER_TEMP_ATTRIBUTE].proto;
+                delete superTempAttr.p;
             }
-        };
+        });
 
         // #### \_callSuper(_methodName_, _\[ arg1, ... \]_)
         //
         // The variable arguments version of `_applySuper`.
         //
-        Nil.prototype._callSuper = function ( methodName ) {
+        defineSpecialProperty(Nil.prototype, '_callSuper', function ( methodName ) {
             return this._applySuper(methodName, slice.call(arguments, 1));
-        };
+        });
 
 
         // Default class factory
@@ -324,18 +357,17 @@
 
         // Extension and creation of _classes_ is delegated to _ClassFactory_ objects.
         //
-        // Those objects are marked with the special attribute _CLASS\_FACTORY\_ATTRIBUTE_, so they can be distinguished
+        // Those objects are marked with the special attribute `CLASS_FACTORY_ATTRIBUTE`, so they can be distinguished
         // by _Class.create_ and _Nil.extend_.
         //
         var CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
 
         // #### markAsClassFactory(_obj_)
         //
-        // Adds the _CLASS\_FACTORY\_ATTRIBUTE_ to an object.
+        // Adds the `CLASS_FACTORY_ATTRIBUTE` to an object.
         //
         function markAsClassFactory( obj ) {
-            obj[CLASS_FACTORY_ATTRIBUTE] = true;
-            return obj;
+            return defineSpecialProperty(obj, CLASS_FACTORY_ATTRIBUTE, true);
         }
 
         // #### isClassFactory(_obj_)
@@ -377,13 +409,14 @@
                 if ( isUndefined(proto._callSuper) ) { proto._callSuper = Nil.prototype._callSuper; }
                 if ( isUndefined(proto._applySuper) ) { proto._applySuper = Nil.prototype._applySuper; }
 
+                // * Add the special `CALL_SUPER_TEMP_ATTRIBUTE` to the prototype.
+                defineSpecialProperty(proto, CALL_SUPER_TEMP_ATTRIBUTE, {});
+
                 // * Finally ensure that the constructor has the right prototype and `extend` function. Note that
                 // you can't redefine `extend` with the `staticMethods`, if you want to customize `extend` use a
                 // _ClassFactory_.
                 ctor.prototype = proto;
                 ctor.extend = Nil.extend;
-
-                ctor.prototype[CALL_SUPER_TEMP_ATTRIBUTE] = {};
 
                 return ctor;
             }
@@ -448,7 +481,7 @@
         // ------------------
         //
         // A _ClassFactory_ that composes objects using _traits_.
-        // For more information about _traits_ see the _Design Notes_ on the [README](../README.md).
+        // For more information about _traits_ see the [Design Notes](../docs/notes.md).
         //
         var TraitsClassFactory = AbstractClassFactory.extend({
 
