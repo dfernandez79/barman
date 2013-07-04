@@ -8,10 +8,13 @@
     'use strict';
 
     function factory() {
+        var ArrayProto = Array.prototype,
+            nativeForEach = ArrayProto.forEach,
+            slice = ArrayProto.slice;
+
         //
         // Common helper functions
         // -----------------------
-
         // These common helper functions are based on _underscore_ and _lodash_ implementations.
         //
         // Why these are included inline? Why not having a dependency to some _underscore_ compatible library?
@@ -19,10 +22,6 @@
         // Because *barman* uses only a few functions, and the additional dependency made the setup hard.
         // So after evaluating the trade-offs, they were included here.
         //
-
-        var ArrayProto = Array.prototype,
-            nativeForEach = ArrayProto.forEach,
-            slice = ArrayProto.slice;
 
         // #### isUndefined( _value_ )
         //
@@ -57,7 +56,7 @@
         }
 
 
-        // #### `each` helper functions
+        // ### Each helper functions
         //
         // Of all the common helper functions `each` is the only one that differs from _underscore_ or
         // _lodash_. The main difference is that it ensures to iterate over the JScript (IE < 9) hidden
@@ -70,6 +69,11 @@
         var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
                                        'toLocaleString', 'toString', 'valueOf' ];
 
+        // #### engineIgnoresObjectProps()
+        //
+        // `each` uses `eachKey` internally to iterate over object properties. We use `engineIgnoresObjectProps` to
+        // determine which implementation of `eachKey` to use.
+        //
         function engineIgnoresObjectProps() {
             var obj = {constructor: 1};
             for ( var key in obj ) {
@@ -80,6 +84,7 @@
             return true;
         }
 
+        // #### eachKey( _obj_, _func_, _context_ )
         //
         // The special case for JScript is handled by different implementations of the `eachKey` internal function.
         //
@@ -139,7 +144,7 @@
             return obj;
         }
 
-        // #### clone(_obj_)
+        // #### clone( _obj_ )
         //
         // Makes a shallow clone on an object. If the JavaScript engine implements `Object.create` we use it. If not
         // we fallback to the usual "clone by using new" approach.
@@ -264,7 +269,7 @@
         function Nil() { }
 
         // Every *barman* _class_ has a `__super__` property that returns the parent prototype.
-        // The parent of `Nil` is `Nil`.
+        // The parent of `Nil` is `Nil`. This is for compatibility with other frameworks (ie. CoffeeScript, Backbone).
         Nil.__super__ = Nil.prototype;
 
         // #### \_applySuper(_methodName_, _\[ arguments \]_)
