@@ -210,7 +210,7 @@ At first, I've tried a solution that is a little bit against the design principl
 
 * JavaScript is single threaded, it guarantees that if you add a property at the beginning of `_callSuper` and then you remove it. That change is going to be controlled: you can ensure some invariant over that property. For example doing that on Java is a bad idea, because you cannot guarantee that during the execution of `_callSuper` no other thread touches `this`.
 
-* Based on that _feature_, when a `_callSuper` is done the current super prototype is saved in a special attribute. If the super implementation does `_callSuper` again, the super implementation is obtained based on that special attribute. 
+* Based on that _feature_, when `_callSuper` is executed  the current super prototype is saved in a special attribute. If the super implementation does `_callSuper` again, the super implementation is obtained based on that special attribute.
 The invariant is this: `specialAttribute === undefined || specialAttribute === superClassPrototype`.
 
 For example if you have something like this (declaration details omitted):
@@ -235,7 +235,7 @@ The execution will be:
 
 The good thing is that it works for more than one level of super calls. The bad thing that it doesn't work for this case:
 
-``js
+```js
 Parent1.method2 = function () { log('P1.m2'); };
 Parent2.method = function () { log('P2.m'); this.method2(); };
 Parent2.method2 = function () { log('P2.m2'); this._callSuper('m2'); };
@@ -245,7 +245,7 @@ Child.method2 = function () { log('C.m2'); this._callSuper('method2'); }
 aChild.method();
 // expected log: C.m, P2.m, C.m2, P2.m2, P1.m2
 // obtained log: C.m, P2.m, C.m2, P1.m2  
-``
+```
 
 What happens? When the call to _method2_ is done in _Parent2_, we need to reset the  current parent. But that is not possible, since calls are an internal part of JavaScript.
 
