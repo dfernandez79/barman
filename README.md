@@ -81,14 +81,15 @@ var ColoredMessage = Message.extend({
 new ColoredMessage().appendTo($('#container'));
 ```
 
-We have some code duplication here. Let's **use `_callSuper` to call the super-class implementation** ([run on jsfiddle](http://jsfiddle.net/LynWL/5/)):
+We have some code duplication here. Let's **use the super-class implementation** ([run on jsfiddle](http://jsfiddle.net/LynWL/11/)):
 
 ```js
 var ColoredMessage = Message.extend({
     color: 'red',
     
     createElement: function () {
-        return this._callSuper('createElement').css('color', this.color);
+        var superCreateElem = ColoredMessage.__super__.createElement;
+        return superCreateElem.call(this).css('color', this.color)
     }
 });
 ```    
@@ -115,25 +116,6 @@ Note that `ColoredMessage` doesn't define any constructor, **by default the supe
 
 ```js
 new ColoredMessage("My Message").appendTo($('#container'));
-```
-
-`_callSuper` can be used also to **call** the **super-class constructor** ([run on jsfiddle](http://jsfiddle.net/LynWL/7/)):
-
-```js
-var ColoredMessage = Message.extend({
-    color: 'red',
-    
-    constructor: function (msg, color) {
-        this._callSuper('constructor', msg);
-        this.color = color;
-    },
-    
-    createElement: function () {
-        return this._callSuper('createElement').css('color', this.color);
-    }
-});
-                                    
-new ColoredMessage("My Message", 'blue').appendTo($('#container'));
 ```
 
 Now we are going to **refactor** our example **using [traits]**:
@@ -225,23 +207,20 @@ var MessageComposite = Class.create(
 
 ### CoffeeScript compatibility
 
-CoffeeScript classes can extend Barman classes ([run on jsfiddle](http://jsfiddle.net/u8VEF/)):
+CoffeeScript classes can extend Barman classes ([run on jsfiddle](http://jsfiddle.net/u8VEF/1/)):
 
 ```coffee
 SomeBarmanClass = Class.create
     hello: -> 'Hello World'
-    other: -> 'Other'
 
 class MyCoffeeClass extends SomeBarmanClass
     hello: -> super + ' from super'
-    other: -> "#{@_callSuper 'other'} called with _callSuper"
 
 anInstance = new MyCoffeeClass()
 anInstance.hello() # returns "Hello world from super"
-anInstance.other() # returns "Other called with _callSuper"
 ```
 
-The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_ ([run on jsfiddle](http://jsfiddle.net/LFZnK/1/)):
+The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_ ([run on jsfiddle](http://jsfiddle.net/LFZnK/2/)):
 
 ```coffee
 class MyCoffeeClass
@@ -249,13 +228,12 @@ class MyCoffeeClass
 
 otherTrait = other: 'This comes from a trait'
 
-MyBarmanClass = subclassOf MyCoffeeClass,
-    include otherTrait,
-    hello: -> "#{@_callSuper 'hello'} worked!"
+MyBarmanClass = subclassOf MyCoffeeClass, include otherTrait
 
 anInstance = new MyBarmanClass()
 
 anInstance.other # returns "This comes from a trait"
+anInstance.hello # returns "Hello from Coffee"
 ```
 
 ----------------------------------------------------------------
@@ -272,6 +250,10 @@ the source code and design of the library.
 ----------------------------------------------------------------
 Change log
 ----------
+* 0.3.0
+  * **Breaking change**: `_callSuper` and `_applySuper` were removed. See the [design notes] to understand why.
+    You can replace `_callSuper` with the longer `MyClass.__super__.method.call(this, args)` (yes it's ugly but
+    `_callSuper` didn't worked as expected in some cases)
 
 * 0.2.4
   * Fixed a bug in `merge` that incorrectly marked a conflict when trying to define an `Object.prototype` function.
