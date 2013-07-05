@@ -245,7 +245,7 @@ Child.method2 = function () { log('C.m2'); this._callSuper('method2'); }
 aChild.method();
 // expected log: C.m, P2.m, C.m2, P2.m2, P1.m2
 // obtained log: C.m, P2.m, C.m2, P1.m2  
-```
+``
 
 What happens? When the call to _method2_ is done in _Parent2_, we need to reset the  current parent. But that is not possible, since calls are an internal part of JavaScript.
 
@@ -262,9 +262,11 @@ I've evaluated some possible solutions:
 3. Create a shortcut of `MyClass.__super__`, something like: `sup(MyClass).method.call(this, args)`
 4. Change `_callSuper`to receive the current class as an argument: `this._callSuper(MyClass, 'method', args)`
 
-The first and third option are not shorter than: `MyClass.__super__.method.call(this, args)`.
+The first and fourth option are not shorter than: `MyClass.__super__.method.call(this, args)`.
 The second option looks nice, but adds a lot of corner cases: what happens if you do a super alias also in the super class?
 The fourth seems to be a nice way of migrating exiting barman code, but is kind of confusing: you have to remember to add the current class as first parameter.
+And about the third option, you can easily add the `sup` shortcut if you have lots of super calls (which is very rare).
+
 
 Finally, I choose the simplest solution: remove `_callSuper`/`_applySuper` and depend only on `MyClass.__super__`.
 
