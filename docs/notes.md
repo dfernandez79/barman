@@ -245,7 +245,7 @@ Child.method2 = function () { log('C.m2'); this._callSuper('method2'); }
 aChild.method();
 // expected log: C.m, P2.m, C.m2, P2.m2, P1.m2
 // obtained log: C.m, P2.m, C.m2, P1.m2  
-``
+```
 
 What happens? When the call to _method2_ is done in _Parent2_, we need to reset the  current parent. But that is not possible, since calls are an internal part of JavaScript.
 
