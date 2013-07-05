@@ -1,4 +1,4 @@
-//     barman 0.2.5
+//     barman 0.3.0
 //     https://github.com/dfernandez79/barman
 //     Copyright (c) 2013 Diego Fernandez
 //     Barman may be freely distributed under the MIT license.
@@ -157,11 +157,12 @@
         // #### defineSpecialProperty( _obj_, _name_, _value_ )
         //
         // Defines a property that will be used internally by the framework.
-        // The property will be non-enumerable and non-configurable.
+        // The property will be non-enumerable, non-writable and non-configurable
+        // (if the JS engine supports property descriptors).
         //
 
         function defineSpecialPropertyStd( obj, name, value ) {
-            Object.defineProperty(obj, name, {value: value, writable: true, enumerable: false, configurable: false});
+            Object.defineProperty(obj, name, {value: value, writable: false, enumerable: false, configurable: false});
             return obj;
         }
 
@@ -286,70 +287,7 @@
 
         // Every *barman* _class_ has a `__super__` property that returns the parent prototype.
         // The parent of `Nil` is `Nil`. This is for compatibility with other frameworks (ie. CoffeeScript, Backbone).
-        Nil.__super__ = Nil.prototype;
-
-
-        //
-        // To implement `_callSuper`/`_applySuper` we need to keep track of the current _class_ used to determine the
-        // method implementation. That is done by this special attribute which is added to every object instance.
-        //
-        // When an instance is created this attribute is initialized with an empty object.
-        // That empty object is filled during an `_applySuper` call, and made empty afterwards. This allows to use
-        // super calls even on frozen objects.
-        //
-        var CALL_SUPER_TEMP_ATTRIBUTE = '*_callSuper*';
-
-        // #### \_applySuper(_methodName_, _\[ arguments \]_)
-        //
-        // Allows to call the `__super__` implementation of a method.
-        // It's similar to `Function.apply` but it always uses `this` as context.
-        //
-        // The _methodName_ argument is required, and an error is thrown if it's omitted.
-        //
-        // Note that this function only works if the `__super__` attribute wasn't removed from the constructor.
-        //
-        // Also it internally uses the `CALL_SUPER_TEMP_ATTRIBUTE` to keep track of the correct super implementation
-        // to use.
-        //
-        defineSpecialProperty(Nil.prototype, '_applySuper', function ( methodName, args ) {
-
-            var superTempAttr = this[CALL_SUPER_TEMP_ATTRIBUTE],
-                superPrototype = has(superTempAttr, 'p') ? superTempAttr.p : this.constructor.__super__,
-                superProp = superPrototype[methodName],
-                result;
-
-            delete superTempAttr.p;
-
-            if ( !methodName ) {
-                throw new Error('The name of the method to call is required');
-            }
-
-            if ( isUndefined(superProp) ) {
-                throw new ReferenceError("__super__ doesn't define a method named " + methodName);
-            }
-
-            try {
-
-                superTempAttr.p = superPrototype.constructor.__super__;
-
-                // When no arguments is given `apply` is called as a special case, because on IE8 calling `apply` with
-                // undefined arguments throws an exception.
-                result = isUndefined(args) ? superProp.apply(this) : superProp.apply(this, args);
-
-                return result;
-
-            } finally {
-                delete superTempAttr.p;
-            }
-        });
-
-        // #### \_callSuper(_methodName_, _\[ arg1, ... \]_)
-        //
-        // The variable arguments version of `_applySuper`.
-        //
-        defineSpecialProperty(Nil.prototype, '_callSuper', function ( methodName ) {
-            return this._applySuper(methodName, slice.call(arguments, 1));
-        });
+        defineSpecialProperty(Nil, '__super__', Nil.prototype);
 
 
         // Default class factory
@@ -402,15 +340,11 @@
 
                 }
 
-                // * Extend the constructor function with the `staticMethods.
-                var ctor = extend(proto.constructor, staticMethods, {__super__: Parent.prototype });
+                // * Extend the constructor function with the `staticMethods`.
+                var ctor = extend(proto.constructor, staticMethods);
 
-                // * Ensure that `_callSuper` and `_applySuper` are defined.
-                if ( isUndefined(proto._callSuper) ) { proto._callSuper = Nil.prototype._callSuper; }
-                if ( isUndefined(proto._applySuper) ) { proto._applySuper = Nil.prototype._applySuper; }
-
-                // * Add the special `CALL_SUPER_TEMP_ATTRIBUTE` to the prototype.
-                defineSpecialProperty(proto, CALL_SUPER_TEMP_ATTRIBUTE, {});
+                // * Add the `__super__` property to the constructor
+                defineSpecialProperty(ctor, '__super__', Parent.prototype);
 
                 // * Finally ensure that the constructor has the right prototype and `extend` function. Note that
                 // you can't redefine `extend` with the `staticMethods`, if you want to customize `extend` use a

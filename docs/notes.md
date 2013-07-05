@@ -88,7 +88,7 @@ Class.create(
 
 But this approach forces the user to make some decisions before hand: _Should I use traits or mixins? What's the difference?_.
 
-In the end the problems surpasses the benefits, so I decided to remove support for functional mixins: if you use [function wrappers], your code can be made easy to understand by using aliases or `_callSuper`.
+In the end the problems surpasses the benefits, so I decided to remove support for functional mixins: if you use [function wrappers], your code can be made easy to understand by using aliases to super implementations (see the notes about `_callSuper`).
 
 But the _class factory_ idea was keep because it makes easy to extend the framework.
 
@@ -191,22 +191,22 @@ It finds conflicts using strict equality `===`, and applies that strategy for al
 
 If you want to be picky about traits definition, barman doesn't implement _true traits_, neither does [traitsjs]. But I keep using the name _traits_ to make a distinction from the _last-one-wins_ strategy of mixins.
 
-### \_callSuper / \_applySuper details
+### \_callSuper / \_applySuper problems
 
-My first implementation of super method delegation was very naive:
+My first implementation of super method delegation was very naive. In any method you could do `this._callSuper` or `this._applySuper`, the steps done by those methods were:
 
-* Get the super implementation by using `this.constructor.__super__`
-* Call the super implementation using `superImpl.apply(this, args)`
+* Get the super implementation: `superImpl = this.constructor.__super__.method`
+* Call the super implementation: `superImpl.apply(this, args)`
 
 Do you see any problem with this implementation? 
 
-At first sight I didn't see any problem. Because it works for simple cases.
-
-The main issue with this implementation is that `this.constructor.__super__` returns only one _level_ up in the hierarchy. So if the parent implementation also does `_callSuper` you enter in a loop.
+At first sight I didn't see any, because it works for simple cases. The main issue with this implementation is that `this.constructor.__super__` returns only one _level_ up in the hierarchy. So if the parent implementation also does `_callSuper` you enter in a loop.
 
 Sadly there is no clean way to resolve that. I wanted to have `_callSuper` because is shorter and more convenient. But I needed a way to keep track of who is the super implementation.
 
-The solution is a little bit against the design principle of "avoid special method signatures or attributes", but I couldn't come up with a better one:
+#### First attempt to resolve the super delegation issue
+
+At first, I've tried a solution that is a little bit against the design principle of "avoid special method signatures or attributes":
 
 * JavaScript is single threaded, it guarantees that if you add a property at the beginning of `_callSuper` and then you remove it. That change is going to be controlled: you can ensure some invariant over that property. For example doing that on Java is a bad idea, because you cannot guarantee that during the execution of `_callSuper` no other thread touches `this`.
 
@@ -233,10 +233,46 @@ The execution will be:
 5. Set **this.specialAttr = Root.prototype**
 6. **superMethod.apply(this)** … and so on
 
-The good thing is that it works. The bad thing is that depends on a special attribute for each object instance. 
+The good thing is that it works for more than one level of super calls. The bad thing that it doesn't work for this case:
 
-The implementation is done in a way that if the engine supports special properties, the special attribute is not enumerable (so you don't get it in `for` loops). And it also works with _frozen_ objects (I never saw an implementation that depends on  `Object.freeze`, but just in case).
+``js
+Parent1.method2 = function () { log('P1.m2'); };
+Parent2.method = function () { log('P2.m'); this.method2(); };
+Parent2.method2 = function () { log('P2.m2'); this._callSuper('m2'); };
+Child.method = function () { log('C.m'); this._callSuper('method'); }
+Child.method2 = function () { log('C.m2'); this._callSuper('method2'); }
 
+aChild.method();
+// expected log: C.m, P2.m, C.m2, P2.m2, P1.m2
+// obtained log: C.m, P2.m, C.m2, P1.m2  
+``
+
+What happens? When the call to _method2_ is done in _Parent2_, we need to reset the  current parent. But that is not possible, since calls are an internal part of JavaScript.
+
+#### Conclusions about \_callSuper, \_applySuper
+
+In class based programming languages `super` is a keyword, because it changes the normal method lookup to start from the parent class. Is not possible to implement a simple `this._callSuper` without doing strange things (like looking at the function source).
+
+So going back to the design principles: _I don't want to reinvent JavaScript_.
+
+I've evaluated some possible solutions:
+
+1. Move _callSuper_ as a _class_ method: `MyClass.callSuper(this, 'method', args)`
+2. Add a special method to define aliases of super implementations: `SuperClass.extend({superMethod: superClassImplementation, method: function () { superMethod(); }})`
+3. Create a shortcut of `MyClass.__super__`, something like: `sup(MyClass).method.call(this, args)`
+4. Change `_callSuper`to receive the current class as an argument: `this._callSuper(MyClass, 'method', args)`
+
+The first and third option are not shorter than: `MyClass.__super__.method.call(this, args)`.
+The second option looks nice, but adds a lot of corner cases: what happens if you do a super alias also in the super class?
+The fourth seems to be a nice way of migrating exiting barman code, but is kind of confusing: you have to remember to add the current class as first parameter.
+
+Finally, I choose the simplest solution: remove `_callSuper`/`_applySuper` and depend only on `MyClass.__super__`.
+
+That is longer to write but has some advantages:
+
+* It doesn't requires more special instance methods.
+* It's compatible with CoffeeScript.
+* It's straight forward to understand.
 
 
 [single-inheritance]: http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)
