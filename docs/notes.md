@@ -51,9 +51,9 @@ addMoreMethods(addSomeMethods(MyConstructor.prototype))
 
 But this approach has some problems:
 
-* **What happens if `addMoreMethods` and `addSomeMethods` tries to write the same property?**. It depends on how the functions are implemented.
+* **What happens if `addMoreMethods` and `addSomeMethods` tries to write the same property?** It depends on how the functions are implemented.
 
-* **What is the correct way to override a method?** Some people use [function wrappers] (`before` and `after`) to override methods. That is very flexible an similar to aspect oriented programming. But is very confusing to read and follow: what means _before_ or _after_? Is before _my_ function or before the mixin function?
+* **What is the correct way to override a method?** Some people use [function wrappers] (`before` and `after`) to override methods. That's very flexible and similar to aspect oriented programming. But at the same time it makes the code hard to understand: what means _before_ or _after_? Is before _my_ function or before the mixin function?
 You don't know, again it depends on the implementation details of each function.
 
 The main point is that you have a lot of freedom on how to extend objects, but that freedom adds uncertainty making maintainability and program understanding hard.
