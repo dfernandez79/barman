@@ -5,7 +5,8 @@ integration-tests
 specs
 tasks
 Gruntfile.js
-component.json
+bower.json
 .travis.yml
 .gitignore
 .idea
+.jshintrc

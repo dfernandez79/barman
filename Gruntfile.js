@@ -12,26 +12,7 @@ module.exports = function ( grunt ) {
         },
 
         jshint: {
-            options: {
-                browser: true,
-                node: true,
-                esnext: false,
-                evil: false,
-                couch: false,
-                devel: false,
-                dojo: false,
-                jquery: false,
-                mootools: false,
-                nonstandard: false,
-                prototypejs: false,
-                rhino: false,
-                worker: false,
-                wsh: false,
-                yui: false,
-                nomen: false,
-                white: false,
-                unused: true
-            },
+            options: {jshintrc: '.jshintrc'},
 
             buildScripts: ['Gruntfile.js', 'tasks/**/*.js' ],
 
@@ -45,7 +26,6 @@ module.exports = function ( grunt ) {
             specs: {
                 files: {src: ['<%=meta.specs%>', '!specs/coffeeCompatibilitySpec.js']},
                 options: {
-                    es5: true,
                     expr: true,
                     globals: {describe: true, it: true, expect: true, define: true, beforeEach: true, afterEach: true}
                 }

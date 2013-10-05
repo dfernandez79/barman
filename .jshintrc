@@ -1,0 +1,15 @@
+{
+    "indent": 4,
+    "undef": true,
+    "strict": true,
+    "unused": true,
+    "devel": false,
+    "node": false,
+    "globalstrict": true,
+    "eqeqeq": true,
+    "latedef": true,
+    "nonew": true,
+    "quotmark": "single",
+    "newcap": true,
+    "globals": {"require": true, "module": true}
+}
