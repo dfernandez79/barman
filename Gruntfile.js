@@ -14,7 +14,8 @@ module.exports = function ( grunt ) {
             src: 'lib/**/*.js',
             test: 'test/**/*Test.js',
             testSrc: ['<%=meta.test%>', '!test/coffeeCompatibilityTest.js'],
-            buildScripts: ['Gruntfile.js', 'tasks/**/*.js']
+            buildScripts: ['Gruntfile.js', 'tasks/**/*.js'],
+            testAppPort: 9001
         },
 
         jshint: {
@@ -43,12 +44,49 @@ module.exports = function ( grunt ) {
 
         mocha: {
             noamd: {
-                src: [ 'integration/noamd-tests.html'],
-                options: { run: true }
+                options: {
+                    run: true,
+                    urls: ['http://localhost:<%=meta.testAppPort%>/noamd-tests.html']
+                }
             },
             amd: {
-                src: [ 'integration/amd-tests.html'],
-                options: { run: false }
+                options: {
+                    run: false,
+                    urls: ['http://localhost:<%=meta.testAppPort%>/amd-tests.html']
+                }
+            }
+        },
+
+        copy: {
+            test: {
+                expand: true,
+                src: [
+                    'dist/barman.js',
+                    'test/integration/noamd-tests.html',
+                    'test/integration/amd-tests.html',
+                    'bower_components/requirejs/require.js',
+                    'bower_components/mocha/mocha.js',
+                    'bower_components/mocha/mocha.css',
+                    'bower_components/chai/chai.js'
+                ],
+                dest: '.tmp/',
+                flatten: true
+            }
+        },
+
+        connect: {
+            test: {
+                options: {
+                    port: '<%=meta.testAppPort%>',
+                    base: '.tmp'
+                }
+            }
+        },
+
+        watch: {
+            test: {
+                files: ['<%=meta.src%>', '<%=meta.testSrc%>', 'test/integration/*.html'],
+                tasks: ['jshint', 'process-sources']
             }
         },
 
@@ -75,7 +113,7 @@ module.exports = function ( grunt ) {
             }
         },
 
-        docco: {
+        /*docco: {
             file: {
                 src: '<%=meta.src%>',
                 dest: 'docs/',
@@ -83,37 +121,46 @@ module.exports = function ( grunt ) {
                     css: 'docs/annotated-source.css'
                 }
             }
-        },
+        },*/
 
-        clean: ['test/coffeeCompatibilityTest.js'],
+        clean: ['.tmp', 'test/coffeeCompatibilityTest.js'],
 
         browserify: {
             lib: {
                 src: ['lib/barman.js'],
-                dest: 'dist/barman.js'
+                dest: 'dist/barman.js',
+                options: {
+                    standalone: 'barman'
+                }
             },
-            options: {
-                standalone: 'barman'
+
+            test: {
+                src: ['<%=meta.testSrc%>'],
+                dest: '.tmp/allTests.js',
+                options: {
+                    external: ['../lib']
+                }
             }
         }
 
     });
 
-    grunt.loadTasks('tasks');
-
+    grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-coffee');
+    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-coffee');
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-simple-mocha');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-mocha');
-    grunt.loadNpmTasks('grunt-docco');
-    grunt.loadNpmTasks('grunt-browserify');
-
-    grunt.registerTask('test', ['coffee:tests', 'simplemocha']);
-    grunt.registerTask('integration-test', ['coffee:tests', 'uglify', 'mocha']);
+    grunt.loadNpmTasks('grunt-simple-mocha');
 
     grunt.registerTask('default', ['jshint', 'test']);
-    grunt.registerTask('dist', ['default', 'integration-test', 'docco']);
+    grunt.registerTask('test', ['coffee', 'simplemocha']);
+    grunt.registerTask('process-sources', ['coffee', 'browserify', 'copy']);
+    grunt.registerTask('integration-test', ['process-sources', 'connect', 'mocha']);
+    grunt.registerTask('dist', ['clean', 'default', 'integration-test', 'uglify']);
+    grunt.registerTask('dev', ['process-sources', 'connect', 'watch']);
 
 };

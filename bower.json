@@ -1,16 +1,21 @@
 {
-    "name": "barman",
-    "description": "A small library to brew JavaScript objects.",
-    "version": "0.3.0",
-    "main": "dist/barman.min.js",
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "components",
-        "git-hooks",
-        "test",
-        "docs",
-        "tasks",
-        "Gruntfile.js"
-    ]
+  "name": "barman",
+  "description": "A small library to brew JavaScript objects.",
+  "version": "0.3.0",
+  "main": "dist/barman.min.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components",
+    "git-hooks",
+    "test",
+    "docs",
+    "tasks",
+    "Gruntfile.js"
+  ],
+  "devDependencies": {
+    "mocha": "~1.13.0",
+    "chai": "~1.8.1",
+    "requirejs": "~2.1.9"
+  }
 }

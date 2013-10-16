@@ -22,7 +22,7 @@ var ArrayProto = Array.prototype,
 // A shortcut for `typeof`.
 //
 function isUndefined( value ) {
-    return typeof value == 'undefined';
+    return typeof value === 'undefined';
 }
 
 // #### isFunction( _value_ )

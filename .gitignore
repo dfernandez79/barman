@@ -1,5 +1,7 @@
-.idea
-npm-debug.log
-node_modules
 .DS_Store
+.idea
+.tmp
+bower_components
+node_modules
+npm-debug.log
 test/coffeeCompatibilityTest.js
