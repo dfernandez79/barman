@@ -3,40 +3,48 @@ Design notes
 
 ### Why another?
 
-Creating and manipulating objects in JavaScript is very easy: if you need [single-inheritance], then set the [prototype chain]; if you need to share methods between objects, then [modify the prototype] directly.
+Creating and manipulating objects in JavaScript is easy: if you need [single-inheritance], then set the [prototype chain];
+if you need to share methods between objects, [add them to the prototype].
 
-But those operations are low level, which means code duplication and more chances to make mistakes. That's why most frameworks provides their own abstractions.
+But the JavaScript built-in operations are a kind of low level, which means code duplication and more chances to 
+make mistakes. That's why most JavaScript frameworks provides their own abstractions to deal with object definitions.
 
-For example [Backbone], [Closure], [YUI], [Dojo], [Prototype], and [ExtJS], have functions to simplify [single-inheritance] and mixins; but with them you also get a full UI or application framework.
+For example [Backbone], [Closure], [YUI], [Dojo], [Prototype], and [ExtJS], have functions to simplify 
+[single-inheritance] and mixins; but with them you also get a full UI or application framework.
 
-I wanted something small, that only provides abstractions to define objects. So I've evaluated different options:
+I wanted something small, so I've evaluated different options:
 
 * [traitsjs]
 * [compose]
 * [chains]
 * [dejavu] - actually it was released when I was already working on barman
 
-All of these libraries had similarities and differences, with more or less features.
-
-But they were not exactly what I wanted. It doesn't means that barman is _better_, it's matter of personal needs and preference, so I encourage you to take a look into those libraries too.
+But they were not exactly what I wanted. It doesn't means that barman is _better_, it's matter of personal needs 
+and preferences, so I encourage you to take a look into those libraries too.
 
 The _guiding design principles_ of barman are:
 
-* **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript, but it's common for programmers that comes from class based programming languages. So `Class.create` was preferred over introducing a new term.
+* **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript, but it's 
+common for programmers that comes from class based programming languages. So `Class.create` was preferred over 
+introducing a new term.
 
-* **Play nice with _standard_ JavaScript**. It means to avoid special method signatures or attributes.
+* **Play nice with _standard_ JavaScript**. It means to avoid special method signatures or attributes as much as possible.
 
-* **Don't re-invent JavaScript**. JavaScript has no type checking, and limited encapsulation. If you want those features you'll probably need some external tool, and special attributes/methods to support them.
-I didn't wanted to add those features to barman. If you really need them, you can consider other options like: [dejavu] which provides some limited constraint checking; or a different programing language for the web like [Dart] or [Typescript].
+* **Don't re-invent JavaScript**. JavaScript has no type checking, and limited encapsulation. If you want those features 
+you'll probably need some external compiler.
+I didn't wanted to add those features to barman. If you really need them, you can consider other options like: 
+[dejavu] which provides some limited constraint checking; or a different programing language like [CoffeeScript],
+[Dart] or [Typescript].
 
 ### Mixins and traits
 
-The work on barman, was based in two papers:
+The work on barman, is based on two papers:
 
 * The [mixins paper] from Gilad Bracha and William Cook.
 * The [traits paper] from Nathanael Scharli, Stephane Ducasse, Oscar Nierstrasz, and Andrew P. Black
 
-Reading the last one is recommend if you want to understand what means _trait_ in the context of barman. But if you are lazy about reading, here is a small summary about _mixins_ and _traits_:
+Reading the last one is recommend if you want to understand what means _trait_ in the context of barman. But if you 
+are lazy about reading here is a summary:
 
 * **Mixins**: Is a way of sharing implementation by adding a set of methods to a _class_. In JavaScript, the concept is simple because there isn't _classes_ and there isn't _type annotations_, two concepts that overlap in most class based languages. So what means a mixin in JavaScript terms? Just sharing a bunch of methods by adding them to an object.
 * **Traits**: Has the same goal as mixins, but adds some rules on how the methods are added to avoid mistakes. Note that barman uses the term _trait_ as in the mentioned traits paper. Some programming languages uses the same term with other meanings: [Scala] uses trait to mean mixin, [Self] uses trait to mean an object prototype.
@@ -49,11 +57,11 @@ Doing _mixins_ in JavaScript is easy. Just create functions that adds properties
 addMoreMethods(addSomeMethods(MyConstructor.prototype))
 ```
 
-But this approach has some problems:
+But this approach has some issues:
 
 * **What happens if `addMoreMethods` and `addSomeMethods` tries to write the same property?** It depends on how the functions are implemented.
 
-* **What is the correct way to override a method?** Some people use [function wrappers] (`before` and `after`) to override methods. That's very flexible and similar to aspect oriented programming. But at the same time it makes the code hard to understand: what means _before_ or _after_? Is before _my_ function or before the mixin function?
+* **What is the correct way to override a method?** Some people use [function wrappers] (`before` and `after`) to override methods. That's flexible and similar to aspect oriented programming, but makes the code hard to understand: what means _before_ or _after_? Is before _my_ function or before the mixin function?
 You don't know, again it depends on the implementation details of each function.
 
 The main point is that you have a lot of freedom on how to extend objects, but that freedom adds uncertainty making maintainability and program understanding hard.
@@ -162,7 +170,7 @@ With this implementation you don't have a proper _Trait class_, but it works and
 
 ### Limitations of the traits implementation
 
-The mentioned [traits paper] also specifies the following requirement for traits:
+The mentioned [traits paper] specifies the following requirement for traits:
 
 > "Traits do not specify any state variables, and the methods provided by traits never access state variables directly."
 
@@ -281,12 +289,13 @@ That is longer to write but has some advantages:
 [traits]: http://en.wikipedia.org/wiki/Trait_(computer_programming)
 [mixins]: http://en.wikipedia.org/wiki/Mixins
 [prototype chain]: https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Inheritance_and_the_prototype_chain
-[modify the prototype]: https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Details_of_the_Object_Model#Adding_properties
+[add them to the prototype]: https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Details_of_the_Object_Model#Adding_properties
 [source map]: http://net.tutsplus.com/tutorials/tools-and-tips/source-maps-101/
 [mixins paper]: http://www.bracha.org/oopsla90.pdf
 [traits paper]: http://scg.unibe.ch/archive/papers/Scha03aTraits.pdf
 [function wrappers]: https://speakerdeck.com/anguscroll/how-we-learned-to-stop-worrying-and-love-javascript
 
+[CoffeeScript]: http://coffeescript.org/
 [Scala]: http://www.scala-lang.org/
 [Self]: http://en.wikipedia.org/wiki/Self_(programming_language)#Traits
 [Smalltalk]: http://en.wikipedia.org/wiki/Smalltalk
