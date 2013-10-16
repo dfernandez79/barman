@@ -2,14 +2,13 @@
     "name": "barman",
     "description": "A small library to brew JavaScript objects.",
     "version": "0.3.0",
-    "main": "./dist/barman.min.js",
+    "main": "dist/barman.min.js",
     "ignore": [
         "**/.*",
         "node_modules",
         "components",
         "git-hooks",
-        "specs",
-        "integration-tests",
+        "test",
         "docs",
         "tasks",
         "Gruntfile.js"

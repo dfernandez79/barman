@@ -10,5 +10,12 @@
     "latedef": true,
     "nonew": true,
     "quotmark": "single",
-    "newcap": true
+    "newcap": true,
+    "globals": {
+        "describe": true,
+        "it": true,
+        "define": true,
+        "beforeEach": true,
+        "afterEach": true
+    }
 }

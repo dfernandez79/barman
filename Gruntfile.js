@@ -1,40 +1,37 @@
-module.exports = function ( grunt ) {
+'use strict';
 
-    'use strict';
+module.exports = function ( grunt ) {
 
     grunt.initConfig({
 
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: {
+            name: 'barman',
+            description: 'A small library to brew JavaScript objects.',
+            version: '0.3.0'
+        },
 
         meta: {
-            src: 'src/**/*.js',
-            specs: 'specs/**/*Spec.js'
+            src: 'lib/**/*.js',
+            test: 'test/**/*Test.js',
+            testSrc: ['<%=meta.test%>', '!test/coffeeCompatibilityTest.js'],
+            buildScripts: ['Gruntfile.js', 'tasks/**/*.js']
         },
 
         jshint: {
-            options: {jshintrc: '.jshintrc'},
-
-            buildScripts: ['Gruntfile.js', 'tasks/**/*.js' ],
-
             src: {
-                files: {src: '<%=meta.src%>'},
-                options: {
-                    globals: {define: true}
-                }
+                files: {src: ['<%=meta.src%>', '<%=meta.buildScripts%>']},
+                options: {jshintrc: '.jshintrc'}
             },
 
-            specs: {
-                files: {src: ['<%=meta.specs%>', '!specs/coffeeCompatibilitySpec.js']},
-                options: {
-                    expr: true,
-                    globals: {describe: true, it: true, expect: true, define: true, beforeEach: true, afterEach: true}
-                }
+            tests: {
+                files: {src: ['<%=meta.testSrc%>']},
+                options: {jshintrc: 'test/.jshintrc'}
             }
         },
 
         simplemocha: {
             all: {
-                src: '<%=meta.specs%>',
+                src: '<%=meta.test%>',
                 options: {
                     timeout: 3000,
                     ignoreLeaks: false,
@@ -46,11 +43,11 @@ module.exports = function ( grunt ) {
 
         mocha: {
             noamd: {
-                src: [ 'integration-tests/noamd-tests.html'],
+                src: [ 'integration/noamd-tests.html'],
                 options: { run: true }
             },
             amd: {
-                src: [ 'integration-tests/amd-tests.html'],
+                src: [ 'integration/amd-tests.html'],
                 options: { run: false }
             }
         },
@@ -58,7 +55,7 @@ module.exports = function ( grunt ) {
         coffee: {
             tests: {
                 files: {
-                    'specs/coffeeCompatibilitySpec.js': 'specs/coffeeCompatibilitySpec.coffee'
+                    'test/coffeeCompatibilityTest.js': 'test/coffeeCompatibilityTest.coffee'
                 }
             }
         },
@@ -67,13 +64,13 @@ module.exports = function ( grunt ) {
             dist: {
                 options: {
                     sourceMap: 'dist/barman.min.js.map',
-                    sourceMapPrefix: 'dist',
+                    sourceMapPrefix: 1,
                     sourceMappingURL: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>/dist/barman.min.js.map',
                     sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>',
                     preserveComments: function ( node, comment ) { return comment.line < 4; }
                 },
                 files: {
-                    'dist/barman.min.js': ['src/barman.js']
+                    'dist/barman.min.js': ['dist/barman.js']
                 }
             }
         },
@@ -88,7 +85,17 @@ module.exports = function ( grunt ) {
             }
         },
 
-        clean: ['specs/coffeeCompatibilitySpec.js']
+        clean: ['test/coffeeCompatibilityTest.js'],
+
+        browserify: {
+            lib: {
+                src: ['lib/barman.js'],
+                dest: 'dist/barman.js'
+            },
+            options: {
+                standalone: 'barman'
+            }
+        }
 
     });
 
@@ -101,7 +108,7 @@ module.exports = function ( grunt ) {
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-mocha');
     grunt.loadNpmTasks('grunt-docco');
-
+    grunt.loadNpmTasks('grunt-browserify');
 
     grunt.registerTask('test', ['coffee:tests', 'simplemocha']);
     grunt.registerTask('integration-test', ['coffee:tests', 'uglify', 'mocha']);

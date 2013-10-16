@@ -1,7 +1,6 @@
+'use strict';
+
 module.exports = function ( grunt ) {
-
-    'use strict';
-
     var path = require('path'),
         fs = require('fs'),
 
@@ -10,7 +9,6 @@ module.exports = function ( grunt ) {
 
 
     grunt.registerTask('githooks', 'Installs or removes git pre-commit hooks', function ( action ) {
-
         if ( !action || action === 'install' ) {
 
             installGitHooks();
@@ -22,13 +20,12 @@ module.exports = function ( grunt ) {
         } else {
 
             grunt.log.error('The action "' + action +
-                            '" is not recognized by githooks, use "githooks:install" or "githooks:uninstall" instead.');
+                '" is not recognized by githooks, use "githooks:install" or "githooks:uninstall" instead.');
             return false;
         }
     });
 
     function installGitHooks() {
-
         var src = path.resolve(LOCAL_PRE_COMMIT_SCRIPT),
             link = path.resolve(GITDIR_PRE_COMMIT_SCRIPT);
 
@@ -49,7 +46,6 @@ module.exports = function ( grunt ) {
     }
 
     function uninstallGitHooks() {
-
         var link = path.resolve(GITDIR_PRE_COMMIT_SCRIPT);
 
         try {
