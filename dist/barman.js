@@ -23,11 +23,16 @@ function include() {
     return new TraitsClassFactory(slice.call(arguments));
 }
 
+function createClass() {
+    return Class.create.apply(Class, arguments);
+}
+
 
 module.exports = {
     Class: Class,
     subclassOf: subclassOf,
-    include: include
+    include: include,
+    createClass: createClass
 };
 
 
@@ -208,7 +213,8 @@ module.exports = {
 
     Class: convenience.Class,
     subclassOf: convenience.subclassOf,
-    include: convenience.include
+    include: convenience.include,
+    createClass: convenience.createClass
 };
 
 },{"./convenience":1,"./core":2,"./factories":5,"./merge":7,"./util":8}],7:[function(require,module,exports){

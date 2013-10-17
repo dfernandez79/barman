@@ -569,4 +569,23 @@ describe('Barman', function () {
         });
     });
 
+    describe('createClass', function () {
+
+        it('is a shortcut for Class.create', function () {
+
+            var SomeClass = barman.createClass({
+                    constructor: function ( message ) {
+                        this.message = message;
+                    },
+                    hello: function () {
+                        return this.message;
+                    }
+                }),
+                anInstance = new SomeClass('a message');
+
+            expect(anInstance.hello()).to.equal('a message');
+        });
+
+    });
+
 });
