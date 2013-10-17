@@ -7,7 +7,15 @@ module.exports = function ( grunt ) {
         pkg: {
             name: 'barman',
             description: 'A small library to brew JavaScript objects.',
-            version: '0.3.0'
+            version: '0.4.0',
+            homepage: 'https://github.com/dfernandez79/barman',
+            keywords: [
+                'traits',
+                'oop',
+                'classes',
+                'objects',
+                'object composition'
+            ]
         },
 
         meta: {
@@ -105,23 +113,16 @@ module.exports = function ( grunt ) {
                     sourceMapPrefix: 1,
                     sourceMappingURL: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>/dist/barman.min.js.map',
                     sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>',
-                    preserveComments: function ( node, comment ) { return comment.line < 4; }
+                    banner: '// barman <%=pkg.version%>\n' +
+                        '// <%=pkg.homepage%>\n' +
+                        '// Copyright (c) 2013 Diego Fernandez\n' +
+                        '// Barman may be freely distributed under the MIT license.\n'
                 },
                 files: {
                     'dist/barman.min.js': ['dist/barman.js']
                 }
             }
         },
-
-        /*docco: {
-            file: {
-                src: '<%=meta.src%>',
-                dest: 'docs/',
-                options: {
-                    css: 'docs/annotated-source.css'
-                }
-            }
-        },*/
 
         clean: ['.tmp', 'test/coffeeCompatibilityTest.js'],
 
@@ -160,7 +161,28 @@ module.exports = function ( grunt ) {
     grunt.registerTask('test', ['coffee', 'simplemocha']);
     grunt.registerTask('process-sources', ['coffee', 'browserify', 'copy']);
     grunt.registerTask('integration-test', ['process-sources', 'connect', 'mocha']);
-    grunt.registerTask('dist', ['clean', 'default', 'integration-test', 'uglify']);
+    grunt.registerTask('dist', ['clean', 'default', 'integration-test', 'update-package', 'uglify']);
     grunt.registerTask('dev', ['process-sources', 'connect', 'watch']);
+
+    grunt.registerTask('update-package', function () {
+        var nodePackage = grunt.file.readJSON('package.json'),
+            bowerPackage = grunt.file.readJSON('bower.json'),
+            pkg = grunt.config.get('pkg');
+
+        nodePackage.name = pkg.name;
+        nodePackage.description = pkg.description;
+        nodePackage.version = pkg.version;
+        nodePackage.keywords = pkg.keywords;
+        nodePackage.homepage = pkg.homepage;
+
+        bowerPackage.name = pkg.name;
+        bowerPackage.description = pkg.description;
+        bowerPackage.version = pkg.version;
+        bowerPackage.keywords = pkg.keywords;
+        bowerPackage.homepage = pkg.homepage;
+
+        grunt.file.write('package.json', JSON.stringify(nodePackage, null, 4));
+        grunt.file.write('bower.json', JSON.stringify(bowerPackage, null, 4));
+    });
 
 };
