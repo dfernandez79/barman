@@ -23,7 +23,7 @@ npm install barman --save
 _Barman_ doesn't have any external dependency, you can load it directly or with [AMD]:
  
 * **dist/barman.min.js**: minimized with a [source map] link for easy debugging.
-* **src/barman.js**: full source including comments.
+* **dist/barman.js**: full source.
 
 _Barman_ is also available on [cdnjs], and as [Twitter Bower] package:
 
@@ -36,35 +36,23 @@ bower install barman
 Feature walkthrough
 -------------------
 
-First **define some convenient variables**:
+To **define a _class_**, use `createClass` ([run on jsfiddle](http://jsfiddle.net/XHT4K/1/)): 
 
 ```js
-var barman = require('barman'),
-    Class = barman.Class,
-    required = barman.required,
-    include = barman.include;
-```
-
-To **define a _class_**, use `Class.create` ([run on jsfiddle](http://jsfiddle.net/XHT4K/1/)): 
-
-```js
-var Message = Class.create({
-    appendTo: function (aContainer) {
-        aContainer.append(this.createElement());
-    },
+    var Message = barman.createClass({
+        appendTo: function (aContainer) {
+            aContainer.append(this.createElement());
+        },
         
-    createElement: function () {
-        return $('<div></div>').text('Hello Barman!');        
-    }
-});    
+        createElement: function () {
+            return $('<div></div>').text('Hello Barman!');        
+        }
+    });    
         
-// Append "Hello Barman!" to #container
-new Message().appendTo($('#container'));
+    // Append "Hello Barman!" to #container
+    new Message().appendTo($('#container'));
 ```
->**Ey! JavaScript doesn't have classes!** That's true, see the [design notes] for an explanation why I choose this name. 
-To summarize: JavaScript allows [single-inheritance] (with prototype delegation) and a good way to understand mixins 
-and traits is as a complement of [single-inheritance]. I could come up with a new term, but I hope that `Class.create` is
-more _friendly_.
+>**Ey! JavaScript doesn't have classes!** That's true, see the [design notes] for an explanation why I choose that name.
 
 To **create a sub-class**, use `extend` ([run on jsfiddle](http://jsfiddle.net/LynWL/)):
 
