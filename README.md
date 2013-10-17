@@ -166,7 +166,7 @@ var CompositeElement = {
     }
 };
 // ...
-// This throws an exception both CompositeElement and TemplateBased defines createElement
+// throws an exception both CompositeElement and TemplateBased defines createElement
 var MessageComposite = barman.createClass(
      [ AppendableElement, CompositeElement, TemplateBased ],
      {
@@ -183,11 +183,11 @@ var MessageComposite = barman.createClass(
 
 ```
 
-To **resolve a conflict just set the proper implementation** ([run on jsfiddle](http://jsfiddle.net/LynWL/18/)):
+To **resolve a conflict just set the proper implementation** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/19/)):
 
 ```js
 var MessageComposite = Class.create(
-    include(AppendableElement, CompositeElement, TemplateBased), {
+    [ AppendableElement, CompositeElement, TemplateBased ], {
 
     template: '<div></div>',
 
