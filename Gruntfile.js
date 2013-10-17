@@ -86,7 +86,8 @@ module.exports = function ( grunt ) {
             test: {
                 options: {
                     port: '<%=meta.testAppPort%>',
-                    base: '.tmp'
+                    base: '.tmp',
+                    hostname: '*'
                 }
             }
         },

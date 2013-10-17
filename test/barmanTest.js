@@ -1,7 +1,7 @@
 'use strict';
 
 var barman = require('../lib/index'),
-    expect = require('chai').expect;
+    expect = require('expect.js');
 
 describe('Barman', function () {
 
@@ -90,7 +90,7 @@ describe('Barman', function () {
                 { toString: function () { return 'hello'; } }
             );
 
-            expect(result.toString).to.throw(Error);
+            expect(result.toString).to.throwError();
         });
 
 
@@ -132,7 +132,7 @@ describe('Barman', function () {
     describe('conflict', function () {
 
         it('throws an error when executed', function () {
-            expect(conflict).to.throw(Error);
+            expect(conflict).to.throwError();
         });
 
     });
@@ -140,7 +140,7 @@ describe('Barman', function () {
     describe('required', function () {
 
         it('throws an error when executed', function () {
-            expect(required).to.throw(Error);
+            expect(required).to.throwError();
         });
 
     });
@@ -245,7 +245,7 @@ describe('Barman', function () {
             it('throws an exception if the constructor is not a function', function () {
                 expect(function () {
                     Class.create({constructor: 'hello'});
-                }).to.throw(TypeError);
+                }).to.throwError();
             });
 
 
@@ -524,7 +524,7 @@ describe('Barman', function () {
                     }
                 };
 
-            expect(function () { Class.create(include(templateTrait, compositeTrait)); }).to.throw(Error);
+            expect(function () { Class.create(include(templateTrait, compositeTrait)); }).to.throwError();
         });
 
 
@@ -548,7 +548,7 @@ describe('Barman', function () {
 
             expect(function () {
                 Class.create(include(templateTrait, compositeTrait));
-            }).to.throw('There is a merge conflict for the following properties: other,render');
+            }).to.throwError('There is a merge conflict for the following properties: other,render');
         });
 
 

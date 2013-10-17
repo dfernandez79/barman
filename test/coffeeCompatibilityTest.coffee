@@ -1,5 +1,5 @@
 barman = require('../lib/index')
-expect = require('chai').expect
+expect = require('expect.js')
 
 Class = barman.Class
 subclassOf = barman.subclassOf
