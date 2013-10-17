@@ -1,6 +1,6 @@
 'use strict';
 
-var barman = require('../lib/barman'),
+var barman = require('../lib/index'),
     expect = require('chai').expect;
 
 describe('Barman', function () {

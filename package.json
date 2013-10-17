@@ -27,7 +27,7 @@
     "bugs": {
         "url": "https://github.com/dfernandez79/barman/issues"
     },
-    "main": "lib/barman.js",
+    "main": "lib/index.js",
     "scripts": {
         "test": "grunt test"
     },

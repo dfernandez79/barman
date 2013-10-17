@@ -1,4 +1,4 @@
-barman = require('../lib/barman')
+barman = require('../lib/index')
 expect = require('chai').expect
 
 Class = barman.Class

@@ -93,7 +93,7 @@ module.exports = function ( grunt ) {
 
         watch: {
             test: {
-                files: ['<%=meta.src%>', '<%=meta.testSrc%>', 'test/integration/*.html'],
+                files: ['<%=meta.src%>', '<%=meta.testSrc%>', 'test/coffeeCompatibilityTest.coffee', 'test/integration/*.html'],
                 tasks: ['jshint', 'process-sources']
             }
         },
@@ -128,7 +128,7 @@ module.exports = function ( grunt ) {
 
         browserify: {
             lib: {
-                src: ['lib/barman.js'],
+                src: ['lib/index.js'],
                 dest: 'dist/barman.js',
                 options: {
                     standalone: 'barman'
@@ -136,7 +136,7 @@ module.exports = function ( grunt ) {
             },
 
             test: {
-                src: ['<%=meta.testSrc%>'],
+                src: ['<%=meta.test%>'],
                 dest: '.tmp/allTests.js',
                 options: {
                     external: ['../lib']
