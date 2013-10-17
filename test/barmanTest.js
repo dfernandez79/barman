@@ -30,6 +30,15 @@ describe('Barman', function () {
             expect(extended.value).to.equal('hello');
         });
 
+        it('supports inclusion of traits by passing an array', function () {
+            var secure = {secure: true},
+                SomeClass = Nil.extend([secure], {value: 'Some value'}),
+                anInstance = new SomeClass();
+
+            expect(anInstance.secure).to.equal(true);
+            expect(anInstance.value).to.equal('Some value');
+        });
+
     });
 
     describe('merge', function () {
@@ -572,7 +581,6 @@ describe('Barman', function () {
     describe('createClass', function () {
 
         it('is a shortcut for Class.create', function () {
-
             var SomeClass = barman.createClass({
                     constructor: function ( message ) {
                         this.message = message;
@@ -584,6 +592,20 @@ describe('Barman', function () {
                 anInstance = new SomeClass('a message');
 
             expect(anInstance.hello()).to.equal('a message');
+        });
+
+        it('supports the inclusion of traits by passing an array', function () {
+            var SomeClass = barman.createClass([
+                    {secure: true},
+                    {someProp: 'test'}
+                ], {
+                    value: 'hello'
+                }),
+                anInstance = new SomeClass();
+
+            expect(anInstance.secure).to.equal(true);
+            expect(anInstance.someProp).to.equal('test');
+            expect(anInstance.value).to.equal('hello');
         });
 
     });

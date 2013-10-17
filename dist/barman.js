@@ -2,10 +2,11 @@
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var Nil = require('./core').Nil,
-    factories = require('./factories'),
+var core = require('./core'),
 
-    TraitsClassFactory = factories.TraitsClassFactory,
+    Nil = core.Nil,
+    TraitsClassFactory = core.TraitsClassFactory,
+
     slice = Array.prototype.slice;
 
 
@@ -37,15 +38,21 @@ module.exports = {
 
 
 
-},{"./core":2,"./factories":5}],2:[function(require,module,exports){
+},{"./core":2}],2:[function(require,module,exports){
 'use strict';
 
 var util = require('./util'),
+    merge = require('./merge'),
+
+    required = merge.required,
+    conflict = merge.conflict,
 
     clone = util.clone,
     defineSpecialProperty = util.defineSpecialProperty,
+    each = util.each,
     extend = util.extend,
     has = util.has,
+    isArray = util.isArray,
     isFunction = util.isFunction,
     isObject = util.isObject,
 
@@ -96,34 +103,7 @@ var defaultClassFactory = markAsClassFactory({
 });
 
 
-Nil.extend = function () {
-    var args = slice.call(arguments),
-        classFactory = (isClassFactory(args[0])) ? args.shift() : defaultClassFactory;
-
-    args.unshift(this);
-
-    return classFactory.createClass.apply(classFactory, args);
-};
-
-
-module.exports = {
-    Nil: Nil,
-    defaultClassFactory: defaultClassFactory,
-    markAsClassFactory: markAsClassFactory,
-    isClassFactory: isClassFactory
-};
-},{"./util":8}],3:[function(require,module,exports){
-'use strict';
-
-var required = require('../merge').required,
-
-    core = require('../core'),
-    Nil = core.Nil,
-    defaultClassFactory = core.defaultClassFactory,
-    markAsClassFactory = core.markAsClassFactory;
-
-
-var AbstractClassFactory = Nil.extend({
+var AbstractClassFactory = defaultClassFactory.createClass(Nil, {
 
     defaultCreateClass: function () {
         return defaultClassFactory.createClass.apply(defaultClassFactory, arguments);
@@ -135,21 +115,7 @@ var AbstractClassFactory = Nil.extend({
 markAsClassFactory(AbstractClassFactory.prototype);
 
 
-module.exports = AbstractClassFactory;
-},{"../core":2,"../merge":7}],4:[function(require,module,exports){
-'use strict';
-
-var merge = require('../merge'),
-    conflict = merge.conflict,
-
-    util = require('../util'),
-    each = util.each,
-    extend = util.extend,
-
-    AbstractClassFactory = require('./AbstractClassFactory');
-
-
-var TraitsClassFactory = AbstractClassFactory.extend({
+var TraitsClassFactory = defaultClassFactory.createClass(AbstractClassFactory, {
 
     constructor: function ( traits ) {
         this.traits = traits;
@@ -177,21 +143,37 @@ var TraitsClassFactory = AbstractClassFactory.extend({
     }
 });
 
+Nil.extend = function () {
+    var args = slice.call(arguments), classFactory = defaultClassFactory;
 
-module.exports = TraitsClassFactory;
-},{"../merge":7,"../util":8,"./AbstractClassFactory":3}],5:[function(require,module,exports){
-'use strict';
+    if (isClassFactory(args[0])) {
+        classFactory = args.shift();
+    } else if (isArray(args[0])) {
+        classFactory = new TraitsClassFactory(args.shift());
+    }
+
+    args.unshift(this);
+
+    return classFactory.createClass.apply(classFactory, args);
+};
+AbstractClassFactory.extend = Nil.extend;
+TraitsClassFactory.extend = Nil.extend;
+
 
 module.exports = {
-    AbstractClassFactory: require('./AbstractClassFactory'),
-    TraitsClassFactory: require('./TraitsClassFactory')
+    Nil: Nil,
+    defaultClassFactory: defaultClassFactory,
+    markAsClassFactory: markAsClassFactory,
+    isClassFactory: isClassFactory,
+
+    AbstractClassFactory: AbstractClassFactory,
+    TraitsClassFactory: TraitsClassFactory
 };
-},{"./AbstractClassFactory":3,"./TraitsClassFactory":4}],6:[function(require,module,exports){
+},{"./merge":4,"./util":5}],3:[function(require,module,exports){
 'use strict';
 
 var convenience = require('./convenience'),
     core = require('./core'),
-    factories = require('./factories'),
     merge = require('./merge'),
     util = require('./util');
 
@@ -201,6 +183,7 @@ module.exports = {
     markAsClassFactory: core.markAsClassFactory,
     isClassFactory: core.isClassFactory,
     defaultClassFactory: core.defaultClassFactory,
+    AbstractClassFactory: core.AbstractClassFactory,
 
     clone: util.clone,
     extend: util.extend,
@@ -209,15 +192,13 @@ module.exports = {
     conflict: merge.conflict,
     required: merge.required,
 
-    AbstractClassFactory: factories.AbstractClassFactory,
-
     Class: convenience.Class,
     subclassOf: convenience.subclassOf,
     include: convenience.include,
     createClass: convenience.createClass
 };
 
-},{"./convenience":1,"./core":2,"./factories":5,"./merge":7,"./util":8}],7:[function(require,module,exports){
+},{"./convenience":1,"./core":2,"./merge":4,"./util":5}],4:[function(require,module,exports){
 'use strict';
 
 var util = require('./util'),
@@ -280,7 +261,7 @@ merge.conflict = conflict;
 
 
 module.exports = merge;
-},{"./util":8}],8:[function(require,module,exports){
+},{"./util":5}],5:[function(require,module,exports){
 'use strict';
 
 var ArrayProto = Array.prototype,
@@ -382,8 +363,14 @@ function defineSpecialPropertyFix( obj, name, value ) {
 var defineSpecialProperty = isFunction(Object.getOwnPropertyNames) ?
     defineSpecialPropertyStd : defineSpecialPropertyFix;
 
+var isArray = isFunction(Array.isArray) ? Array.isArray : function ( value ) {
+    var toString = Object.prototype.toString;
+    return toString.call(value) === '[object Array]';
+};
+
 
 module.exports = {
+    isArray: isArray,
     isUndefined: isUndefined,
     isFunction: isFunction,
     has: has,
@@ -393,7 +380,7 @@ module.exports = {
     clone: clone,
     defineSpecialProperty: defineSpecialProperty
 };
-},{}]},{},[6])
-(6)
+},{}]},{},[3])
+(3)
 });
 ;
