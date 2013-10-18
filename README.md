@@ -1,5 +1,6 @@
-Barman [![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman) [![NPM version](https://badge.fury.io/js/barman.png)](http://badge.fury.io/js/barman)
+Barman 
 ======
+[![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman) [![NPM version](https://badge.fury.io/js/barman.png)](http://badge.fury.io/js/barman) [![Dependencies](https://david-dm.org/dfernandez79/barman.png)](https://david-dm.org/dfernandez79/barman)
 
 _Barman_ is a small library to _brew_ JavaScript objects.
 
@@ -20,7 +21,7 @@ npm install barman --save
 
 ### Browser
 
-_Barman_ doesn't have any external dependency, you can load it directly or with [AMD]:
+_Barman_ doesn't have any dependency to be used, you can load it directly or using [AMD]:
 
 * **dist/barman.min.js**: minimized with a [source map] link for easy debugging.
 * **dist/barman.js**: full source.
@@ -36,8 +37,7 @@ bower install barman
 Feature walkthrough
 -------------------
 
-To **define a _class_**, use `createClass` ([run on jsfiddle](http://jsfiddle.net/diegof79/XHT4K/2/)):
-
+**Define a _class_**, using `createClass` ([run on jsfiddle](http://jsfiddle.net/diegof79/XHT4K/2/)):
 ```js
 var Message = barman.createClass({
     appendTo: function (aContainer) {
@@ -53,8 +53,7 @@ var Message = barman.createClass({
 new Message().appendTo($('#container'));
 ```
 
-To **create a sub-class**, use `extend` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/12/)):
-
+**Create a sub-class**, using `ExistingClass.extend` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/12/)):
 ```js
 var ColoredMessage = Message.extend({
     color: 'red',
@@ -70,9 +69,7 @@ var ColoredMessage = Message.extend({
 new ColoredMessage().appendTo($('#container'));
 ```
 
-We have some code duplication here. Let's **use the super-class implementation**
-([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/13/)):
-
+**Access to the super-class implementation** using `ThisClass.__super__` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/13/)):
 ```js
 var ColoredMessage = Message.extend({
     color: 'red',
@@ -84,63 +81,74 @@ var ColoredMessage = Message.extend({
 });
 ```
 
-Saying always _"Hello Barman!"_ is boring, a `Message` **constructor** in  will help
-([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/14/)):
-
+**Constructors are automatically inherited** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/14/)):
 ```js
-var Message = Class.create({
+var Message = barman.createClass({
+    // A constructor is added to the super class
     constructor: function (msg) {
         this.message = msg;
     },
-
     appendTo: function (aContainer) {
         aContainer.append(this.createElement());
     },
-
     createElement: function () {
-        return $('<div></div>').text(this.message);
+        return $('<div></div>').text(this.message);        
     }
 });
-```
 
-Note that `ColoredMessage` doesn't define any constructor, **by default the super-class constructor is used**
-([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/14/)):
-
-```js
+// ColoredMessage(msg) is available by default (you can avoid it by defining your own constructor)
 new ColoredMessage("My Message").appendTo($('#container'));
 ```
 
-Now we are going to **refactor** our example **using [traits]**:
-
-* `AppendableElement`: defines the behavior of `appendTo`.
-* `TemplateBased`: defines the behavior of `createElement` based on a template.
-
+**Mixins** can be added to a class definition:
 ```js
+// Defines the behavior of appendTo, requires createElemn
+var AppendableElement = {
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    }
+};
+var Message = barman.createClass(
+    [ AppendableElement ],
+    {
+       // appendTo is now provided by AppendableElement
+       // it requires createElement to be defined
+    });
+```
+
+Mixins and classes can indicate **required fields** using `required`:
+```js
+// Defines the behavior of appendTo, requires createElemn
 var AppendableElement = {
     createElement: barman.required,
     appendTo: function (aContainer) {
         aContainer.append(this.createElement());
     }
 };
+var Message = barman.createClass(
+    [ AppendableElement ],
+    {
+       // appendTo is now provided by AppendableElement
+       // it requires createElement to be defined:
+       createElement: function () { /*...*/ }
+    });
+```
+
+**Mixins can be composed in any order** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/15/)):
+```js
+// TemplateBased provides an implementation for createElement
 var TemplateBased = {
     template: barman.required,
     renderTemplate: function () {
-        var templateData = this;
-        return this.template.replace(/{([^{}]+)}/g, function(m, key) {
-            return templateData[key];
-        });
+        // omited for brevity, see the example on jsfiddle
     },
     createElement: function () {
-        return $(this.renderTemplate());
+        return $(this.renderTemplate());    
     }
 };
-```
 
-Using **include** we can **mix** `AppendableElement` and `TemplateBased` into the `Message` class
-([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/15/)):
-
-```js
 var Message = barman.createClass(
+    // using [AppendableElement, TemplateBased] will give the same result
     [ TemplateBased, AppendableElement ],
     {
         template: '<div>{message}</div>',
@@ -151,39 +159,25 @@ var Message = barman.createClass(
     });
 ```
 
-If there is a **conflict**, _Barman_ will throw an **exception**
+Composition **conflict** throws an **exception**
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/17/)):
 
 ```js
 var CompositeElement = {
     createContainer: required,
     childs: required,
-    createElement: function () {
-        return this.createContainer().append(
-                this.childs.map(function (child) {
-                    return child.createElement();
-                }));
-    }
+    createElement: function () { /* ... */ }
 };
 // ...
 // throws an exception both CompositeElement and TemplateBased defines createElement
 var MessageComposite = barman.createClass(
      [ AppendableElement, CompositeElement, TemplateBased ],
      {
-         template: '<div></div>',
-
-         constructor: function () {
-             this.childs = Array.prototype.slice.call(arguments, 0);
-         },
-
-         createContainer: function () {
-             return $('<div></div>');
-         }
-    });
-
+        /* ... */
+     });
 ```
 
-To **resolve a conflict just set the proper implementation** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/19/)):
+**Conflicts can be resolved** by setting which implementation to use ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/19/)):
 
 ```js
 var MessageComposite = Class.create(
@@ -200,6 +194,13 @@ var MessageComposite = Class.create(
 });
 
 ```
+The previous mixin examples follows the rules described in this [paper], and those mixin objects are usually called [traits].
+
+The good things about [traits] composition are:
+* The order doesn't matter, you get always the same result
+* A trait can include other traits
+* Required fields can be specified, and are taken into account for the composition
+* Conflicts fail early an are easy to detect
 
 ### CoffeeScript compatibility
 
