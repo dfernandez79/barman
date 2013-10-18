@@ -1,6 +1,6 @@
 Barman 
 ======
-[![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman) [![NPM version](https://badge.fury.io/js/barman.png)](http://badge.fury.io/js/barman) [![Dependencies](https://david-dm.org/dfernandez79/barman.png)](https://david-dm.org/dfernandez79/barman)
+[![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman) [![NPM version](https://badge.fury.io/js/barman.png)](http://badge.fury.io/js/barman) [![devDependency Status](https://david-dm.org/dfernandez79/barman/dev-status.png)](https://david-dm.org/dfernandez79/barman#info=devDependencies)
 
 _Barman_ is a small library to _brew_ JavaScript objects.
 
