@@ -159,9 +159,7 @@ var Message = barman.createClass(
     });
 ```
 
-Composition **conflict** throws an **exception**
-([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/17/)):
-
+Composition **conflict** throws an **exception** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/17/)):
 ```js
 var CompositeElement = {
     createContainer: required,
@@ -178,34 +176,28 @@ var MessageComposite = barman.createClass(
 ```
 
 **Conflicts can be resolved** by setting which implementation to use ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/19/)):
-
 ```js
 var MessageComposite = Class.create(
     [ AppendableElement, CompositeElement, TemplateBased ], {
 
-    template: '<div></div>',
-
-    constructor: function () {
-        this.childs = Array.prototype.slice.call(arguments, 0);
-    },
+    /* ... */
 
     createElement: CompositeElement.createElement,
     createContainer: TemplateBased.createElement
 });
-
 ```
-The previous mixin examples follows the rules described in this [paper], and those mixin objects are usually called [traits].
+The previous mixin examples follows the rules described in this [paper].
+Which uses the term [traits] for this kind of mixin objects.
 
 The good things about [traits] composition are:
-* The order doesn't matter, you get always the same result
-* A trait can include other traits
-* Required fields can be specified, and are taken into account for the composition
-* Conflicts fail early an are easy to detect
+* The order doesn't matter, you get always the same result.
+* A trait can include other traits. Traits are flattened into the final class definition.
+* Required fields can be specified, and are taken into account for the composition.
+* Conflicts fail early and are easy to detect.
 
 ### CoffeeScript compatibility
 
 CoffeeScript classes can extend Barman classes ([run on jsfiddle](http://jsfiddle.net/diegof79/u8VEF/2/)):
-
 ```coffee
 SomeBarmanClass = barman.createClass
     hello: -> 'Hello World'
@@ -219,7 +211,6 @@ anInstance.hello() # returns "Hello world from super"
 
 The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LFZnK/4/)):
-
 ```coffee
 class MyCoffeeClass
     hello: -> 'Hello from Coffee'
@@ -238,7 +229,7 @@ anInstance.hello # returns "Hello from Coffee"
 Development
 -----------
 
-For development you'll need [Nodejs], [Grunt], [Bower].
+For development you'll need [Nodejs], [Grunt], and [Bower].
 Before contributing execute `grunt dist` to run the linter and unit tests.
 
 The [design notes] are a good starting point to understand
@@ -300,6 +291,7 @@ Released under [MIT license]
 
 [cdnjs]: http://cdnjs.com/
 [design notes]: https://github.com/dfernandez79/barman/blob/master/docs/notes.md
+[paper]: http://scg.unibe.ch/archive/papers/Scha03aTraits.pdf
 
 [MIT license]: http://opensource.org/licenses/mit-license.php
 
