@@ -1,188 +1,117 @@
-#### Class.create( _\[classFactory\]_, _args_ )
+Barman API
+==========
 
-It's a shortcut to `Nil.extend`.
+Argument naming conventions:
 
-// #### subclassOf( _Parent_, _args_ )
-//
-// A shortcut to `Nil.extend`, that makes easy to sub-class non-barman classes.
-//
+* `<arg>` means that the argument `arg` is optional
+* `[description]` means that the argument is an Array
+* `a | b` means that you can use `a` or `b` as an argument. If the argument is optional but you can use two different kind of values `<a | b >` is used.
 
-// #### include( _trait_, ... )
-//
-// A nice way to create a `TraitsClassFactory` instance.
-//
+----
 
+Core concepts
+-------------
 
-// Default class factory
-// ---------------------
+Probably you'll not use the following objects and methods everyday, but once that you understand them you'll get how the library works.
 
-// Extension and creation of _classes_ is delegated to _ClassFactory_ objects.
-//
-// Those objects are marked with the special attribute `CLASS_FACTORY_ATTRIBUTE`, so they can be distinguished
-// by _Class.create_ and _Nil.extend_.
-//
+### Nil
 
+It's the _root_ of all the _classes_ defined in barman:
 
-// #### markAsClassFactory(_obj_)
-//
-// Adds the `CLASS_FACTORY_ATTRIBUTE` to an object.
-//
-
-// #### isClassFactory(_obj_)
-//
-// Returns true if the object is marked as a class factory.
-//
-
-// ### defaultClassFactory object
-//
-// It's the default implementation of a _ClassFactory_, and one of the _core_ functions of *barman*.
-//
-// #### createClass( _Parent_, _instanceMethods_, _staticMethods_ )
-//
-
-// * Clone the `Parent.prototype` and extend it with the sub-class methods.
-// * Check if we define a _constructor_, if not define one that calls the parent constructor.
-// * Extend the constructor function with the `staticMethods`.
-// * Add the `__super__` property to the constructor
-// * Finally ensure that the constructor has the right prototype and `extend` function. Note that
-// you can't redefine `extend` with the `staticMethods`, if you want to customize `extend` use a
-// _ClassFactory_.
-
-// #### Nil.extend( _\[classFactory\]_, _args_ )
-//
-// If no `classFactory` is given it uses `defaultClassFactory`. The interpretation of the rest arguments depends
-// on the _ClassFactory_, see `defaultClassFactory.createClass`.
-//
-// AbstractClassFactory
-// --------------------
-
-// Base class for custom class factories. It defines the class factory marker attribute, and provides
-// a convenience method to call the `defaultClassFactory`.
-//
-
-// Nil
-// ---
-
-// `Nil` is the root of the *barman* _class hierarchy_.
-// Every *barman* _class_ has a `__super__` property that returns the parent prototype.
-// The parent of `Nil` is `Nil`. This is for compatibility with other frameworks (ie. CoffeeScript, Backbone).
-
-// Merge
-// -----
-
-// `merge` is one of the main functions of *barman*.
-//
-// It's similar to the commonly used `extend({}, o1,...,oN)`, but it uses the following strategy
-// for overwriting properties:
-//
-// * if values are different, the destination property is marked as `conflict`
-// * if one of the values is marked as `required`, the destination property uses the value not marked as
-//   required
+	var SomeClass = createClass({}); 
+	SomeClass.__super__ === Nil.prototype  // true
+    
+#### Nil.extend / _SomeClass_.extend
 
 
-// ### Merge helper functions
+	Nil.extend(<factory | [traits]>, <spec>)
 
-// #### mapProperties(_srcObj_, _iterator_, _result_)
-//
-// Returns a new object where each property is the result of applying the `iterator` function over `srcObj`:
-//
-//     result.prop = iterator(srcObj.prop, 'prop');
-//
-// _result_ is optional, and an empty object will be used if it's omitted.
-//
+Creates a sub-class of the receiver. 
 
-// #### conflict()
-//
-// Throws an error. Used to indicate _merge conflicts_.
-//
+* `factory`: it's a class factory (`isClassFactory(factory) == true`), that takes care of creating a _class_ based on `spec`. If no factory is specified `defaultClassFactory` is used.
+* `[traits]`: an array of objects is given as first argument, it's a shortcut for `include(traits)` which uses a class factory that does the trait composition of the given objects.
+* `spec`: the interpretation of `spec` depends on the class factory implementation (see `defaultClassFactory` which is the common case).
 
+Every _class_ created in barman has an `extend` method, which is the same as `Nil.extend`: `AnyBarmanClass.extend === Nil.extend`
 
-// #### required()
-//
-// Throws an error. Used to indicate that an implementation is required.
-//
+Methods like `createClass`, `Class.create` or `subclassOf` are just shortcuts to `Nil.extend`.
 
+Internally it does the following:
 
-// #### mergeProperty(_value_, _prop_)
-//
-// Used by `merge` to map each property.
-//
+* If no `factory` is given as the first argument, use `defaultClassFactory`
+* Then call `factory.createClass(Receiver, spec)`
 
-// #### merge(_object_,...)
-//
-// Returns a new object, that is the result of merging the properties of each one of the given objects.
-//
-        // If the property is not defined directly in the target object (note the target object always starts
-        // as {} so if is not defined there directly is an property defined by Object.prototype),
-        // or both values are the same,
-        // or the target value is the `required` marker; use the given `value`.
+### defaultClassFactory
 
-        // If the given `value` is the `required` marker, use the existing property value.
+It's the *core* of barman. It takes care of creating _classes_.
 
-        // If both values are different, but not undefined or required, return the `conflict` marker.
+Any other method used to create classes ends doing a call to `defaultClassFactory.createClass`.
 
+#### defaultClassFactory.createClass
+
+	createClass( Parent, <instance methods>, <function methods> )
+
+* `Parent`: the parent class.
+* `instance methods`: an object that specifies the prototype fields/methods.
+* `function methods`: an object that specifies fields/methods to be added into the returned function.
+
+Example:
+
+	var SomeClass = defaultClassFactory.createClass(
+		Nil, {hello: 'an instance field'}, {other: 'a function field'});
+
+	SomeClass.other // is 'a function field'
+	
+	var anInstance = new SomeClass();
+	anInstance.hello // is 'an instance field'
+	
+### AbstractClassFactory
+
+Base class to implement your own class factories. It provides you with two things:
+
+1. `defaultCreateClass`: a method that calls `defaultClassFactory.createClass` for you
+2. It marks the instances with a special field. That special field is used by `isClassFactory` to determine if an object is a class factory or not.
+
+### merge
+
+----
+
+Traits
+------
+
+### TraitsClassFactory
+
+----
+
+Shortcuts
 ---------
-// #### isUndefined( _value_ )
-//
-// A shortcut for `typeof`.
-//
-// #### isFunction( _value_ )
-//
-// A shortcut for `typeof`.
-//
-// #### has( _object_, _property_ )
-//
-// A _safe_ version of `hasOwnProperty`.
-//
-// #### isObject( _value_ )
-//
-// Check if _value_ it's an object. It handles the _null_ corner case better than `typeof`.
-//
-// ### Each helper functions
-//
-// Of all the common helper functions `each` is the only one that differs from _underscore_ or
-// _lodash_. The main difference is that it ensures to iterate over the JScript (IE < 9) hidden
-// object properties.
-//
-// JScript has a known bug in `for.. in` loops that ignores some redefined `Object` properties. The
-// `JSCRIPT_NON_ENUMERABLE` array contains those ignored properties, so we iterate over them in the `each`
-// function.
-//
-// #### eachKey( _obj_, _func_, _context_ )
-//
-// The special case for JScript is handled by different implementations of the `eachKey` internal function.
-//
 
-//
-// **eachKeyStd** is the _standard_ implementation of _eachKey_.
-//
-//
-// **eachKeyFix** is an implementation of _eachKey_ that uses a workaround for JScript buggy enumeration.
-//
-// The proper `eachKey` implementation is defined according to `enumObjectOverrides`.
-// #### each( _obj_, _func_, _context_ )
-//
-// Same as <http://underscorejs.org/#each> but takes account of the special JScript case.
-//
-// #### extend( _obj_, ... )
-//
-// Same as <http://underscorejs.org/#extend> but uses `each` to iterate, so we handle the JScript special case
-// properly.
-//
-// #### clone( _obj_ )
-//
-// Makes a shallow clone on an object. If the JavaScript engine implements `Object.create` we use it. If not
-// we fallback to the usual "clone by using new" approach.
-//
-// #### defineSpecialProperty( _obj_, _name_, _value_ )
-//
-// Defines a property that will be used internally by the framework.
-// The property will be non-enumerable, non-writable and non-configurable
-// (if the JS engine supports property descriptors).
-//
+### Class.create
 
-// The proper `defineSpecialProperty` implementation is if the engine supports non-enumerable properties
+### createClass
 
+### subclassOf
+
+### include
+
+----
+
+Utilities	
+----------
+
+### clone
+
+	clone(obj)
+	
+Create a shallow copy of an object. It's the same as `Object.create` (but without the optional property attributes). 
+
+A fallback is provided for IE8.
+
+### extend
+
+	extend(target, obj, ...)
+
+Extends `target` by adding or overwriting the properties of the subsequent objects. 
 
 
 
