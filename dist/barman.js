@@ -3,11 +3,13 @@ return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requi
 'use strict';
 
 var core = require('./core'),
+    util = require('./util'),
 
     Nil = core.Nil,
     TraitsClassFactory = core.TraitsClassFactory,
 
-    slice = Array.prototype.slice;
+    toArray = util.toArray,
+    tail = util.tail;
 
 
 var Class = {
@@ -17,11 +19,11 @@ var Class = {
 };
 
 function subclassOf( Parent ) {
-    return Nil.extend.apply(Parent, slice.call(arguments, 1));
+    return Nil.extend.apply(Parent, tail(arguments));
 }
 
 function include() {
-    return new TraitsClassFactory(slice.call(arguments));
+    return new TraitsClassFactory(toArray(arguments));
 }
 
 function createClass() {
@@ -38,7 +40,7 @@ module.exports = {
 
 
 
-},{"./core":2}],2:[function(require,module,exports){
+},{"./core":2,"./util":5}],2:[function(require,module,exports){
 'use strict';
 
 var util = require('./util'),
@@ -55,8 +57,7 @@ var util = require('./util'),
     isArray = util.isArray,
     isFunction = util.isFunction,
     isObject = util.isObject,
-
-    slice = Array.prototype.slice,
+    toArray = util.toArray,
 
     CLASS_FACTORY_ATTRIBUTE = '*classFactory*';
 
@@ -144,7 +145,7 @@ var TraitsClassFactory = defaultClassFactory.createClass(AbstractClassFactory, {
 });
 
 Nil.extend = function () {
-    var args = slice.call(arguments), classFactory = defaultClassFactory;
+    var args = toArray(arguments), classFactory = defaultClassFactory;
 
     if (isClassFactory(args[0])) {
         classFactory = args.shift();
@@ -285,6 +286,14 @@ function isObject( value ) {
     return value === Object(value);
 }
 
+function toArray( value ) {
+    return slice.call(value);
+}
+
+function tail( value ) {
+    return slice.call(value, 1);
+}
+
 
 var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
                                'toLocaleString', 'toString', 'valueOf' ];
@@ -334,7 +343,7 @@ function each( obj, func, context ) {
 }
 
 function extend( obj ) {
-    each(slice.call(arguments, 1), function ( source ) {
+    each(tail(arguments), function ( source ) {
         if ( source ) {
             each(source, function ( value, prop ) { obj[prop] = value; });
         }
@@ -370,15 +379,17 @@ var isArray = isFunction(Array.isArray) ? Array.isArray : function ( value ) {
 
 
 module.exports = {
-    isArray: isArray,
-    isUndefined: isUndefined,
-    isFunction: isFunction,
-    has: has,
-    isObject: isObject,
+    clone: clone,
+    defineSpecialProperty: defineSpecialProperty,
     each: each,
     extend: extend,
-    clone: clone,
-    defineSpecialProperty: defineSpecialProperty
+    has: has,
+    isArray: isArray,
+    isFunction: isFunction,
+    isObject: isObject,
+    isUndefined: isUndefined,
+    tail: tail,
+    toArray: toArray
 };
 },{}]},{},[3])
 (3)
