@@ -623,4 +623,15 @@ describe('Barman', function () {
 
     });
 
+    describe('useInheritsAdapter', function () {
+
+        it('add the super_ property to sub-classes', function () {
+            var Parent = barman.createClass(),
+                SubClass = Parent.extend(barman.useInheritsAdapter());
+
+            expect(SubClass.super_).to.equal(Parent);
+        });
+
+    });
+
 });

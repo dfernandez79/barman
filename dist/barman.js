@@ -6,6 +6,7 @@ var core = require('./core'),
     util = require('./util'),
 
     Nil = core.Nil,
+    markAsClassFactory = core.markAsClassFactory,
     TraitsClassFactory = core.TraitsClassFactory,
 
     toArray = util.toArray,
@@ -30,12 +31,24 @@ function createClass() {
     return Class.create.apply(Class, arguments);
 }
 
+var inheritsAdapterClassFactory = markAsClassFactory({
+    createClass: function ( Parent ) {
+        var NewClass = subclassOf.apply(null, arguments);
+        NewClass.super_ = Parent;
+        return NewClass;
+    }
+});
+
+function useInheritsAdapter() {
+    return inheritsAdapterClassFactory;
+}
 
 module.exports = {
     Class: Class,
-    subclassOf: subclassOf,
+    createClass: createClass,
     include: include,
-    createClass: createClass
+    subclassOf: subclassOf,
+    useInheritsAdapter: useInheritsAdapter
 };
 
 
@@ -194,9 +207,10 @@ module.exports = {
     required: merge.required,
 
     Class: convenience.Class,
-    subclassOf: convenience.subclassOf,
+    createClass: convenience.createClass,
     include: convenience.include,
-    createClass: convenience.createClass
+    subclassOf: convenience.subclassOf,
+    useInheritsAdapter: convenience.useInheritsAdapter
 };
 
 },{"./convenience":1,"./core":2,"./merge":4,"./util":5}],4:[function(require,module,exports){

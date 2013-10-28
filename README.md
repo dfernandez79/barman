@@ -1,4 +1,4 @@
-Barman 
+Barman
 ======
 [![Build Status](https://travis-ci.org/dfernandez79/barman.png)](https://travis-ci.org/dfernandez79/barman) [![NPM version](https://badge.fury.io/js/barman.png)](http://badge.fury.io/js/barman) [![devDependency Status](https://david-dm.org/dfernandez79/barman/dev-status.png)](https://david-dm.org/dfernandez79/barman#info=devDependencies)
 
@@ -92,7 +92,7 @@ var Message = barman.createClass({
         aContainer.append(this.createElement());
     },
     createElement: function () {
-        return $('<div></div>').text(this.message);        
+        return $('<div></div>').text(this.message);
     }
 });
 
@@ -143,7 +143,7 @@ var TemplateBased = {
         // omited for brevity, see the example on jsfiddle
     },
     createElement: function () {
-        return $(this.renderTemplate());    
+        return $(this.renderTemplate());
     }
 };
 
@@ -193,7 +193,7 @@ The good things about [traits] composition are:
 * The order doesn't matter, you get always the same result.
 * A trait can include other traits. Traits are flattened into the final class definition.
 * Required fields can be specified, and are taken into account for the composition.
-* Conflicts fail early and are easy to detect.
+* Conflicts fail early.
 
 ### CoffeeScript compatibility
 
@@ -230,7 +230,7 @@ Development
 -----------
 
 For development you'll need [Nodejs], [Grunt], and [Bower].
-Before contributing execute `grunt dist` to run the linter and unit tests.
+Before contributing execute `grunt dist` to run the jshint and unit tests.
 
 The [design notes] are a good starting point to understand
 the source code and design of the library.
