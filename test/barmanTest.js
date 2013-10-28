@@ -127,6 +127,19 @@ describe('Barman', function () {
             expect(merged.value).to.equal('hello');
         });
 
+        it('ignores undefined objects', function () {
+            var merged = merge({hello: 'world'}, undefined);
+
+            expect(merged).to.eql({hello: 'world'});
+        });
+
+
+        it('ignores a required property that has been set', function () {
+            var result = merge({ prop: 'value' }, { prop: required });
+
+            expect(result.prop).to.equal('value');
+        });
+
     });
 
     describe('conflict', function () {

@@ -125,7 +125,7 @@ module.exports = function ( grunt ) {
             }
         },
 
-        clean: ['.tmp', 'test/coffeeCompatibilityTest.js'],
+        clean: ['.tmp', 'test/coffeeCompatibilityTest.js', 'coverage'],
 
         browserify: {
             lib: {
