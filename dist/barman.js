@@ -210,8 +210,6 @@ var util = require('./util'),
 
 
 function mapProperties( srcObj, iterator, result ) {
-    if ( !result || !srcObj ) { result = {}; }
-
     each(srcObj, function ( value, prop ) {
         result[prop] = iterator.call(this, value, prop);
     }, result);
@@ -327,7 +325,7 @@ var enumObjectOverrides = (function () {
 function each( obj, func, context ) {
     var i, len;
 
-    if ( obj === null ) {
+    if ( isUndefined(obj) || obj === null ) {
         return;
     }
 
