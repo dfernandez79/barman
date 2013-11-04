@@ -1,12 +1,12 @@
 barman = require('../lib/index')
 expect = require('expect.js')
 
-Class = barman.Class
+createClass = barman.createClass
 subclassOf = barman.subclassOf
 include = barman.include
 
 describe 'Barman CoffeeScript Compatibility', ->
-  SomeBarmanClass = Class.create
+  SomeBarmanClass = createClass
     hello: ->
       'Hello World'
     other: ->

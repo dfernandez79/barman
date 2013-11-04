@@ -11,10 +11,8 @@ describe('Barman', function () {
         conflict = barman.conflict,
         required = barman.required,
         Nil = barman.Nil,
-        Class = barman.Class,
-        AbstractClassFactory = barman.AbstractClassFactory,
-        isClassFactory = barman.isClassFactory,
         include = barman.include,
+        createClass = barman.createClass,
 
         ifGetPrototypeOfIsSupportedIt = Object.getPrototypeOf ? it : it.skip,
         ifNonEnumerablePropertiesAreSupportedIt = Object.getOwnPropertyNames ? it : it.skip;
@@ -175,19 +173,19 @@ describe('Barman', function () {
         describe('create', function () {
 
             it('returns a constructor function', function () {
-                expect(Class.create()).to.be.a('function');
+                expect(createClass()).to.be.a('function');
             });
 
 
             it('returns a function with prototype.constructor referencing to itself', function () {
-                var NewClass = Class.create();
+                var NewClass = createClass();
 
                 expect(NewClass.prototype.constructor).to.equal(NewClass);
             });
 
 
             it('can describe object properties', function () {
-                var Point = Class.create({ x: 10 }),
+                var Point = createClass({ x: 10 }),
                     aPoint = new Point();
 
                 expect(aPoint.x).to.equal(10);
@@ -195,7 +193,7 @@ describe('Barman', function () {
 
 
             it('can specify an object constructor', function () {
-                var Point = Class.create({
+                var Point = createClass({
                         constructor: function ( x ) {
                             this.x = x;
                         }
@@ -207,7 +205,7 @@ describe('Barman', function () {
 
 
             it('returns classes that can be extended', function () {
-                var Widget = Class.create({ render: 'Widget.render' }),
+                var Widget = createClass({ render: 'Widget.render' }),
                     MyWidget = Widget.extend(),
                     aWidget = new MyWidget();
 
@@ -216,38 +214,33 @@ describe('Barman', function () {
 
 
             it('uses Nil as the parent class', function () {
-                expect(Class.create().__super__).to.equal(Nil.prototype);
+                expect(createClass().__super__).to.equal(Nil.prototype);
             });
 
 
             it('accepts the specification of "static" properties as an argument', function () {
-                var MyClass = Class.create({}, {staticProp: 'hello'});
+                var MyClass = createClass({}, {staticProp: 'hello'});
 
                 expect(MyClass.staticProp).to.equal('hello');
             });
 
 
             it('accepts a "class factory" as an argument', function () {
-                var TestFactory = AbstractClassFactory.extend({
-                        createClass: function () { return 'From ClassFactory'; }
-                    }),
 
-                    createdClass = Class.create(new TestFactory(), {hello: 'world'});
+                function testFactory() { return 'From ClassFactory'; }
+
+                var createdClass = createClass(testFactory, {hello: 'world'});
 
                 expect(createdClass).to.equal('From ClassFactory');
             });
 
 
             it('gives the proper arguments to the "class factory"', function () {
-                var TestFactory = AbstractClassFactory.extend({
+                function testFactory( Parent, instanceMethods, staticMethods ) {
+                    return {parent: Parent, instanceMethods: instanceMethods, staticMethods: staticMethods};
+                }
 
-                        createClass: function ( Parent, instanceMethods, staticMethods ) {
-                            return {parent: Parent, instanceMethods: instanceMethods, staticMethods: staticMethods};
-                        }
-
-                    }),
-
-                    createdClass = Class.create(new TestFactory(), {hello: 'world'}, {foo: 'bar'});
+                var createdClass = createClass(testFactory, {hello: 'world'}, {foo: 'bar'});
 
                 expect(createdClass.staticMethods).to.eql({foo: 'bar'});
                 expect(createdClass.instanceMethods).to.eql({hello: 'world'});
@@ -257,19 +250,17 @@ describe('Barman', function () {
 
             it('throws an exception if the constructor is not a function', function () {
                 expect(function () {
-                    Class.create({constructor: 'hello'});
+                    createClass({constructor: 'hello'});
                 }).to.throwError();
             });
 
 
             it('can pass arbitrary arguments to the class factory', function () {
-                var TestClassFactory = AbstractClassFactory.extend({
-                        createClass: function () {
-                            return arguments;
-                        }
-                    }),
-
-                    testClass = Class.create(new TestClassFactory(), 'hello', 'world', 'from', 'class factory');
+                function testClassFactory() {
+                    return arguments;
+                }
+                
+                var testClass = createClass(testClassFactory, 'hello', 'world', 'from', 'class factory');
 
 
                 expect(testClass[0]).to.equal(Nil);
@@ -285,7 +276,7 @@ describe('Barman', function () {
         describe('extend', function () {
 
             it('overrides super class properties with subclass properties', function () {
-                var Widget = Class.create({ render: 'Super RENDER'  }),
+                var Widget = createClass({ render: 'Super RENDER'  }),
                     CustomWidget = Widget.extend({ render: 'Custom RENDER'}),
 
                     aWidget = new CustomWidget();
@@ -295,7 +286,7 @@ describe('Barman', function () {
 
 
             ifGetPrototypeOfIsSupportedIt('supports getPrototypeOf to do super delegation', function () {
-                var Widget = Class.create({ render: 'SUPER' }),
+                var Widget = createClass({ render: 'SUPER' }),
 
                     CustomWidget = Widget.extend({
                         render: function () {
@@ -318,7 +309,7 @@ describe('Barman', function () {
 
 
             ifNonEnumerablePropertiesAreSupportedIt('adds a non-enumerable __super__ property', function () {
-                var Parent = Class.create({}),
+                var Parent = createClass({}),
                     MyClass = Parent.extend({});
 
                 expect(Object.getOwnPropertyDescriptor(MyClass, '__super__').enumerable).to.equal(false);
@@ -326,7 +317,7 @@ describe('Barman', function () {
 
 
             it('calls to the super constructor if the sub-class do not defines a constructor', function () {
-                var Point = Class.create({
+                var Point = createClass({
                         constructor: function ( x, y ) {
                             this.x = x;
                             this.y = y;
@@ -347,7 +338,7 @@ describe('Barman', function () {
 
 
             it('uses the constructor given by the sub-class', function () {
-                var Parent = Class.create({constructor: function () { this.x = 10; }}),
+                var Parent = createClass({constructor: function () { this.x = 10; }}),
                     Sub = Parent.extend({constructor: function () { this.x = 42; }}),
                     anInstance = new Sub();
 
@@ -356,7 +347,7 @@ describe('Barman', function () {
 
 
             it('allows calls to super constructor on explicit constructor implementations', function () {
-                var Parent1 = Class.create({
+                var Parent1 = createClass({
                         constructor: function () {
                             this.parent1ConstructorCalled = true;
                         }
@@ -381,7 +372,7 @@ describe('Barman', function () {
     describe('super class delegation', function () {
 
         var trace = [],
-            Parent = Class.create({
+            Parent = createClass({
                 value: 10,
                 method: function () { trace.push('Parent.method'); },
             });
@@ -424,7 +415,7 @@ describe('Barman', function () {
     describe('include', function () {
 
         it('returns an instance of a class factory', function () {
-            expect(isClassFactory(include())).to.equal(true);
+            expect(include()).to.be.a('function');
         });
 
 
@@ -434,7 +425,7 @@ describe('Barman', function () {
                     render: 'from trait'
                 },
 
-                View = Class.create(
+                View = createClass(
                     include(templateRendering), {
                         render: 'from subclass'
                     }),
@@ -447,7 +438,7 @@ describe('Barman', function () {
 
 
         it('gives precedence to trait properties over super class properties', function () {
-            var BaseView = Class.create({
+            var BaseView = createClass({
                     render: 'base'
                 }),
 
@@ -464,7 +455,7 @@ describe('Barman', function () {
 
 
         ifGetPrototypeOfIsSupportedIt('preserves the prototype chain', function () {
-            var BaseView = Class.create({
+            var BaseView = createClass({
                     render: 'base'
                 }),
 
@@ -494,7 +485,7 @@ describe('Barman', function () {
                         }
                     }) ,
 
-                MyView = Class.create(include(viewTrait)),
+                MyView = createClass(include(viewTrait)),
 
                 aView = new MyView();
 
@@ -514,7 +505,7 @@ describe('Barman', function () {
                     render: function () { return 'composite'; }
                 },
 
-                MyView = Class.create(
+                MyView = createClass(
                     include(templateTrait, compositeTrait), {
                         render: templateTrait.render
                     }),
@@ -537,7 +528,7 @@ describe('Barman', function () {
                     }
                 };
 
-            expect(function () { Class.create(include(templateTrait, compositeTrait)); }).to.throwError();
+            expect(function () { createClass(include(templateTrait, compositeTrait)); }).to.throwError();
         });
 
 
@@ -560,7 +551,7 @@ describe('Barman', function () {
                 };
 
             expect(function () {
-                Class.create(include(templateTrait, compositeTrait));
+                createClass(include(templateTrait, compositeTrait));
             }).to.throwError('There is a merge conflict for the following properties: other,render');
         });
 
@@ -577,7 +568,7 @@ describe('Barman', function () {
                     }
                 },
 
-                MyView = Class.create(include(templateTrait, compositeTrait), {
+                MyView = createClass(include(templateTrait, compositeTrait), {
                     templateRender: templateTrait.render,
                     compositeRender: compositeTrait.render,
                     render: function () {
@@ -619,17 +610,6 @@ describe('Barman', function () {
             expect(anInstance.secure).to.equal(true);
             expect(anInstance.someProp).to.equal('test');
             expect(anInstance.value).to.equal('hello');
-        });
-
-    });
-
-    describe('useInheritsAdapter', function () {
-
-        it('add the super_ property to sub-classes', function () {
-            var Parent = barman.createClass(),
-                SubClass = Parent.extend(barman.useInheritsAdapter());
-
-            expect(SubClass.super_).to.equal(Parent);
         });
 
     });
