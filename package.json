@@ -1,48 +1,52 @@
 {
-    "name": "barman",
-    "description": "A small library to brew JavaScript objects.",
-    "version": "0.4.0",
-    "homepage": "https://github.com/dfernandez79/barman",
-    "author": {
-        "name": "Diego Fernandez",
-        "url": "https://github.com/dfernandez79"
-    },
-    "keywords": [
-        "traits",
-        "oop",
-        "classes",
-        "objects",
-        "object composition"
-    ],
-    "licenses": [
-        {
-            "type": "MIT",
-            "url": "https://github.com/dfernandez79/barman/blob/master/LICENSE"
-        }
-    ],
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/dfernandez79/barman.git"
-    },
-    "bugs": {
-        "url": "https://github.com/dfernandez79/barman/issues"
-    },
-    "main": "lib/index.js",
-    "scripts": {
-        "test": "grunt test"
-    },
-    "devDependencies": {
-        "grunt": "~0.4.1",
-        "grunt-contrib-jshint": "~0.7.0",
-        "grunt-contrib-uglify": "~0.2.4",
-        "grunt-contrib-coffee": "~0.7.0",
-        "grunt-contrib-clean": "~0.5.0",
-        "grunt-simple-mocha": "~0.4.0",
-        "grunt-mocha": "~0.4.1",
-        "grunt-browserify": "~1.2.8",
-        "grunt-contrib-connect": "~0.5.0",
-        "grunt-contrib-watch": "~0.5.3",
-        "grunt-contrib-copy": "~0.4.1",
-        "expect.js": "~0.2.0"
+  "name": "barman",
+  "description": "A small library to brew JavaScript objects.",
+  "version": "0.4.0",
+  "homepage": "https://github.com/dfernandez79/barman",
+  "author": {
+    "name": "Diego Fernandez",
+    "url": "https://github.com/dfernandez79"
+  },
+  "keywords": [
+    "traits",
+    "oop",
+    "classes",
+    "objects",
+    "object composition"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/dfernandez79/barman/blob/master/LICENSE"
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dfernandez79/barman.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dfernandez79/barman/issues"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "grunt test",
+    "prepublish": "./node_modules/.bin/bower install"
+  },
+  "devDependencies": {
+    "bower": "~1.2.7",
+    "expect.js": "~0.2.0",
+    "grunt": "~0.4.2",
+    "grunt-browserify": "~1.2.11",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-connect": "~0.5.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-jshint": "~0.7.2",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-mocha": "~0.4.6",
+    "grunt-simple-mocha": "~0.4.0",
+    "istanbul": "~0.1.45",
+    "mocha": "~1.14.0"
+  }
 }
