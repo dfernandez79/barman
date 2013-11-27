@@ -25,16 +25,13 @@ and preferences, so I encourage you to take a look into those libraries too.
 The _guiding design principles_ of barman are:
 
 * **Keep it simple to understand**. For example the concept of _class_ doesn't apply directly to JavaScript, but it's 
-common for programmers that comes from class based programming languages. So `Class.create` was preferred over 
-introducing a new term.
+common for programmers that comes from class based programming languages. So _class_ was preferred over introducing a new term.
 
 * **Play nice with _standard_ JavaScript**. It means to avoid special method signatures or attributes as much as possible.
 
-* **Don't re-invent JavaScript**. JavaScript has no type checking, and limited encapsulation. If you want those features 
-you'll probably need some external compiler.
-I didn't wanted to add those features to barman. If you really need them, you can consider other options like: 
-[dejavu] which provides some limited constraint checking; or a different programing language like [CoffeeScript],
-[Dart] or [Typescript].
+* **Don't re-invent JavaScript**. JavaScript has no type checking, and limited encapsulation. If you want those features you'll probably need some external compiler.
+I didn't wanted to hack those features into barman. If you really need them, consider other options like: 
+[dejavu] which provides some limited constraint checking; or a different programming language like [CoffeeScript], [Dart] or [Typescript].
 
 ### Mixins and traits
 
@@ -43,77 +40,45 @@ The work on barman, is based on two papers:
 * The [mixins paper] from Gilad Bracha and William Cook.
 * The [traits paper] from Nathanael Scharli, Stephane Ducasse, Oscar Nierstrasz, and Andrew P. Black
 
-Reading the last one is recommend if you want to understand what means _trait_ in the context of barman. But if you 
-are lazy about reading here is a summary:
+Reading the last one is recommend if you want to understand what means _trait_ in the context of barman. In case that you are lazy about reading here is a summary:
 
 * **Mixins**: Is a way of sharing implementation by adding a set of methods to a _class_. In JavaScript, the concept is simple because there isn't _classes_ and there isn't _type annotations_, two concepts that overlap in most class based languages. So what means a mixin in JavaScript terms? Just sharing a bunch of methods by adding them to an object.
-* **Traits**: Has the same goal as mixins, but adds some rules on how the methods are added to avoid mistakes. Note that barman uses the term _trait_ as in the mentioned traits paper. Some programming languages uses the same term with other meanings: [Scala] uses trait to mean mixin, [Self] uses trait to mean an object prototype.
+* **Traits**: Has the same goal as mixins, but adds some rules on how the methods are added to avoid mistakes. Note that barman uses the term _trait_ as in the mentioned traits paper. Some programming languages also uses the term _trait_ with other meanings: [Scala] uses trait to mean mixin, [Self] uses trait to mean an object prototype.
 
-### Functional mixins
+### _Functional_ mixins
 
 Doing _mixins_ in JavaScript is easy. Just create functions that adds properties to an object:
 
-```js
-addMoreMethods(addSomeMethods(MyConstructor.prototype))
-```
+	addMoreMethods(addSomeMethods(MyConstructor.prototype))
 
-But this approach has some issues:
+This approach is often called _functional mixins_.
 
-* **What happens if `addMoreMethods` and `addSomeMethods` tries to write the same property?** It depends on how the functions are implemented.
+The main issue with _functional mixins_ is that they are not _functional_ but _operational_. For example `addMoreMethods` can conditionally add, remove, or decorate methods. When your functions does that kind of changes your program becomes hard to maintain.
 
-* **What is the correct way to override a method?** Some people use [function wrappers] (`before` and `after`) to override methods. That's flexible and similar to aspect oriented programming, but makes the code hard to understand: what means _before_ or _after_? Is before _my_ function or before the mixin function?
-You don't know, again it depends on the implementation details of each function.
+Another way to do mixins in JavaScript is to express them with objects and an _assign_ function (usually called `extend`):
 
-The main point is that you have a lot of freedom on how to extend objects, but that freedom adds uncertainty making maintainability and program understanding hard.
+	destination = extend(destination, mixin1, mixin2);
 
-Another way of doing mixins in JavaScript is by using objects. That's the approach used  by a lot of frameworks:
 
-```js
-extend(dest, mixin1, mixin2)
-```
+The application order is still an issue; but it's easy to understand and straight forward to implement. Because of that _barman_ implements mixins using the _extends approach_ instead of _functional mixins_.
 
-The application order is still an issue; but is easy to understand and straight forward to implement.
+### Specifying methods
 
-Even if functional mixins are problematic to understand, I wanted to support them because is a common JavaScript technique. One idea was to convert functional mixins to object based mixins. In that way you loose the flexibility of functional mixins, but you gain an easy migration path to barman.
+In all the JavaScript libraries to create _classes_ the object given _class factory_ function is a specification of what you want to create: 
 
-From that requirement came the idea of having _class factories_, so the strategy used by `Class.create` can be switched, from functional mixins:
+	var MyClass = classFactory(spec);
 
-```js
-Class.create(
-   withMixins(functionOrObject, otherFunctionOrObject),
-   { /* methods */ }
-);
-```
+The interpretation of `spec` is up to the library: it can use special values, or  keys like `_superClass` or `private`. 
 
-to traits (note `withTraits` was later renamed to `include`):
+For example [compose] uses special methods that acts like macros, and [Prototype] injects values like `super` to the functions given into the `spec`.
 
-```js
-Class.create(
-   withTraits(traitObject1, traitObject2),
-   { /* methods */ }
-);
-```
+	SuperClass.extend({
+		someMethod: injectSuper(function ($super) {
+			// here $super as a bound reference to
+    	// someMethod in SuperClass
+  		});
+	});
 
-But this approach forces the user to make some decisions before hand: _Should I use traits or mixins? What's the difference?_.
-
-In the end the problems surpasses the benefits, so I decided to remove support for functional mixins: if you use [function wrappers], your code can be made easy to understand by using aliases to super implementations (see the notes about `_callSuper`).
-
-But the _class factory_ idea was keep because it makes easy to extend the framework.
-
-### Method decorations
-
-The object that you give to the _class factory_ is an specification of the methods that you want to create. So instead of using functions you can use an object to describe some special case. That approach is used by [compose] with the name of _method decorations_, and is more or less like a macro to define methods.
-
-For example, one possible use case for _method decorations_ is to create a method that is injected with a reference to super (like in [Prototype]):
-
-```js
-SuperClass.extend({
-	someMethod: injectSuper(function ($super) {
-		// here $super as a bound reference to
-    // someMethod in SuperClass
-  });
-});
-```
 
 But the idea was discarded, because I couldn't find any good use case to apply it:
 
