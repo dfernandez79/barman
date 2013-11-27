@@ -1,12 +1,12 @@
 dist
-docs
-git-hooks
-integration-tests
-specs
+doc
+test
 tasks
+bower_components
 Gruntfile.js
 bower.json
 .travis.yml
 .gitignore
 .idea
 .jshintrc
+.tmp
