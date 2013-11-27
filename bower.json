@@ -13,8 +13,7 @@
   ],
   "devDependencies": {
     "mocha": "~1.13.0",
-    "requirejs": "~2.1.9",
-    "expect.js": "https://github.com/LearnBoost/expect.js.git#~0.2.0"
+    "requirejs": "~2.1.9"
   },
   "homepage": "https://github.com/dfernandez79/barman",
   "authors": [
