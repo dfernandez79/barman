@@ -245,7 +245,7 @@ Change log
  
   **API Changes**
 
-  * `Class.create`, `include`, `subClassOf` has been removed and replaced by `newclass`.
+  * `Class.create`, `include`, `subclassOf` has been removed and replaced by `newclass`.
   * An equivalent method to `newclass` but for object instances called `mix` has been added.
   * The previous _non-public_ implementation using _class factories_ has been removed.
 
@@ -270,17 +270,8 @@ Change log
 
   **API Changes**
 
-  * `_super` was removed, instead use `_callSuper` or `_applySuper`
-
-       Why? "super" is used for method delegation, so it makes no sense to use `_super()`.
-
-       With `_super('methodName')()` is easy to miss the extra parenthesis of the function invocation, passing parameters
-       for a variable arguments methods forces you to use the long `_super('methodName').apply(this, arguments)` syntax.
-
-       The new methods are shorter to write and read: `_callSuper('methodName')` or `_applySuper('methodName', arguments)`.
-
-  * `withTraits` was renamed to `include`, this is helpful for people that never heard about traits before.
-
+  * `_super` was removed, instead use `_callSuper` or `_applySuper`.
+  * `withTraits` was renamed to `include` (helpful for people that never heard about traits before).
   * `subclassOf` added as a convenience method to extend non-Barman classes.
 
 
