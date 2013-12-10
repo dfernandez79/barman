@@ -46,6 +46,6 @@
     "grunt-mocha": "~0.4.6",
     "grunt-simple-mocha": "~0.4.0",
     "istanbul": "~0.1.45",
-    "mocha": "~1.14.0"
+    "mocha": "~1.15.1"
   }
 }
