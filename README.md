@@ -21,7 +21,7 @@ npm install barman --save
 
 ### Browser
 
-_Barman_ doesn't have any dependency to be used, you can load it directly or using [AMD]:
+_Barman_ doesn't have any dependency to be used. It can be loaded directly or using [AMD]:
 
 * **dist/barman.min.js**: minimized with a [source map] link for easy debugging.
 * **dist/barman.js**: full source.
@@ -37,9 +37,9 @@ bower install barman
 Feature walkthrough
 -------------------
 
-**Define a _class_**, using `createClass` ([run on jsfiddle](http://jsfiddle.net/diegof79/XHT4K/2/)):
+**Define a _class_**, using `newclass` ([run on jsfiddle](http://jsfiddle.net/diegof79/XHT4K/3/)):
 ```js
-var Message = barman.createClass({
+var Message = barman.newclass({
     appendTo: function (aContainer) {
         aContainer.append(this.createElement());
     },
@@ -53,7 +53,7 @@ var Message = barman.createClass({
 new Message().appendTo($('#container'));
 ```
 
-**Create a sub-class**, using `ExistingClass.extend` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/12/)):
+**Create a sub-class**, using `ExistingClass.extend` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/20/)):
 ```js
 var ColoredMessage = Message.extend({
     color: 'red',
@@ -69,7 +69,7 @@ var ColoredMessage = Message.extend({
 new ColoredMessage().appendTo($('#container'));
 ```
 
-**Access to the super-class implementation** using `ThisClass.__super__` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/13/)):
+**Access to the super-class implementation** using `ThisClass.__super__` ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/21/)):
 ```js
 var ColoredMessage = Message.extend({
     color: 'red',
@@ -81,9 +81,9 @@ var ColoredMessage = Message.extend({
 });
 ```
 
-**Constructors are automatically inherited** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/14/)):
+**Constructors are automatically inherited** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/22/)):
 ```js
-var Message = barman.createClass({
+var Message = barman.newclass({
     // A constructor is added to the super class
     constructor: function (msg) {
         this.message = msg;
@@ -108,7 +108,7 @@ var AppendableElement = {
         aContainer.append(this.createElement());
     }
 };
-var Message = barman.createClass(
+var Message = barman.newclass(
     [ AppendableElement ],
     {
        // appendTo is now provided by AppendableElement
@@ -125,7 +125,7 @@ var AppendableElement = {
         aContainer.append(this.createElement());
     }
 };
-var Message = barman.createClass(
+var Message = barman.newclass(
     [ AppendableElement ],
     {
        // appendTo is now provided by AppendableElement
@@ -134,7 +134,7 @@ var Message = barman.createClass(
     });
 ```
 
-**Mixins can be composed in any order** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/15/)):
+**Mixins can be composed in any order** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/24/)):
 ```js
 // TemplateBased provides an implementation for createElement
 var TemplateBased = {
@@ -147,7 +147,7 @@ var TemplateBased = {
     }
 };
 
-var Message = barman.createClass(
+var Message = barman.newclass(
     // using [AppendableElement, TemplateBased] will give the same result
     [ TemplateBased, AppendableElement ],
     {
@@ -159,7 +159,7 @@ var Message = barman.createClass(
     });
 ```
 
-Composition **conflict** throws an **exception** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/17/)):
+A composition **conflict** throws an **exception** ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/25/)):
 ```js
 var CompositeElement = {
     createContainer: required,
@@ -168,16 +168,16 @@ var CompositeElement = {
 };
 // ...
 // throws an exception both CompositeElement and TemplateBased defines createElement
-var MessageComposite = barman.createClass(
+var MessageComposite = barman.newclass(
      [ AppendableElement, CompositeElement, TemplateBased ],
      {
         /* ... */
      });
 ```
 
-**Conflicts can be resolved** by setting which implementation to use ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/19/)):
+**Conflicts can be resolved** by setting which implementation to use ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/26/)):
 ```js
-var MessageComposite = Class.create(
+var MessageComposite = barman.newclass(
     [ AppendableElement, CompositeElement, TemplateBased ], {
 
     /* ... */
@@ -189,7 +189,7 @@ var MessageComposite = Class.create(
 The previous mixin examples follows the rules described in this [paper].
 Which uses the term [traits] for this kind of mixin objects.
 
-The good things about [traits] composition are:
+The benefits of this composition style are:
 * The order doesn't matter, you get always the same result.
 * A trait can include other traits. Traits are flattened into the final class definition.
 * Required fields can be specified, and are taken into account for the composition.
@@ -197,9 +197,9 @@ The good things about [traits] composition are:
 
 ### CoffeeScript compatibility
 
-CoffeeScript classes can extend Barman classes ([run on jsfiddle](http://jsfiddle.net/diegof79/u8VEF/2/)):
+CoffeeScript classes can extend Barman classes ([run on jsfiddle](http://jsfiddle.net/diegof79/u8VEF/3/)):
 ```coffee
-SomeBarmanClass = barman.createClass
+SomeBarmanClass = barman.newclass
     hello: -> 'Hello World'
 
 class MyCoffeeClass extends SomeBarmanClass
@@ -209,15 +209,15 @@ anInstance = new MyCoffeeClass()
 anInstance.hello() # returns "Hello world from super"
 ```
 
-The _subclassOf_ method can be used to extend CoffeeScript classes with _traits_
-([run on jsfiddle](http://jsfiddle.net/diegof79/LFZnK/4/)):
+_newclass_ can be used to extend CoffeeScript classes with _traits_
+([run on jsfiddle](http://jsfiddle.net/diegof79/LFZnK/5/)):
 ```coffee
 class MyCoffeeClass
     hello: -> 'Hello from Coffee'
 
 otherTrait = other: 'This comes from a trait'
 
-MyBarmanClass = subclassOf MyCoffeeClass, [otherTrait]
+MyBarmanClass = barman.newclass MyCoffeeClass, [otherTrait]
 
 anInstance = new MyBarmanClass()
 
@@ -240,13 +240,19 @@ the source code and design of the library.
 Change log
 ----------
 * 0.4.0
-  * Mayor re-organization of the source code.
-  * Shortcuts to write less code: `createClass` and the possibility to use an Array instead of a explicit call to `include`.
+  * Mayor source code re-organization.
+  * Browser bundles are generated using Browserify.
+ 
+  **API Changes**
+
+  * `Class.create`, `include`, `subClassOf` has been removed and replaced by `newclass`.
+  * An equivalent method to `newclass` but for object instances called `mix` has been added.
+  * The previous _non-public_ implementation using _class factories_ has been removed.
 
 * 0.3.0
   * **Breaking change**: `_callSuper` and `_applySuper` were removed. See the [design notes] to understand why.
     You can replace `_callSuper` with the longer `MyClass.__super__.method.call(this, args)` (yes it's ugly but
-    `_callSuper` didn't worked as expected in some cases)
+    `_callSuper` didn't worked as expected in some cases).
 
 * 0.2.4
   * Fixed a bug in `merge` that incorrectly marked a conflict when trying to define an `Object.prototype` function.
