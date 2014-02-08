@@ -1,11 +1,11 @@
-!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.barman=e():"undefined"!=typeof global?global.barman=e():"undefined"!=typeof self&&(self.barman=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.barman=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
 var
-  extend = require('./extend'),
-  mix = require('./mix'),
+  extend = _dereq_('./extend'),
+  mix = _dereq_('./mix'),
 
-  util = require('./util'),
+  util = _dereq_('./util'),
   defineSpecialProperty = util.defineSpecialProperty,
   has = util.has,
   isFunction = util.isFunction,
@@ -73,11 +73,11 @@ module.exports = {
   newclass: newclass,
   Nil: Nil
 };
-},{"./extend":3,"./mix":6,"./util":7}],2:[function(require,module,exports){
+},{"./extend":3,"./mix":6,"./util":7}],2:[function(_dereq_,module,exports){
 'use strict';
 
 var
-  util = require('./util'),
+  util = _dereq_('./util'),
   has = util.has,
   isUndefined = util.isUndefined;
 
@@ -106,11 +106,11 @@ var clone = has( Object, 'create' ) ?
 
 
 module.exports = clone;
-},{"./util":7}],3:[function(require,module,exports){
+},{"./util":7}],3:[function(_dereq_,module,exports){
 'use strict';
 
 var
-  util = require('./util'),
+  util = _dereq_('./util'),
   each = util.each,
   tail = util.tail;
 
@@ -129,12 +129,12 @@ function extend( obj ) {
 
 
 module.exports = extend;
-},{"./util":7}],4:[function(require,module,exports){
+},{"./util":7}],4:[function(_dereq_,module,exports){
 'use strict';
 
 var
-  classes = require( './classes' ),
-  merge = require( './merge' );
+  classes = _dereq_( './classes' ),
+  merge = _dereq_( './merge' );
 
 
 module.exports = {
@@ -145,15 +145,15 @@ module.exports = {
   conflict: merge.conflict,
   required: merge.required,
 
-  clone: require( './clone' ),
-  extend: require( './extend' ),
-  mix: require( './mix' )
+  clone: _dereq_( './clone' ),
+  extend: _dereq_( './extend' ),
+  mix: _dereq_( './mix' )
 };
-},{"./classes":1,"./clone":2,"./extend":3,"./merge":5,"./mix":6}],5:[function(require,module,exports){
+},{"./classes":1,"./clone":2,"./extend":3,"./merge":5,"./mix":6}],5:[function(_dereq_,module,exports){
 'use strict';
 
 var
-  util = require('./util'),
+  util = _dereq_('./util'),
   each = util.each,
   isUndefined = util.isUndefined,
   has = util.has;
@@ -225,15 +225,15 @@ merge.assertNoConflict = function ( obj ) {
 
 
 module.exports = merge;
-},{"./util":7}],6:[function(require,module,exports){
+},{"./util":7}],6:[function(_dereq_,module,exports){
 'use strict';
 
 var
-  merge = require('./merge'),
-  clone = require('./clone'),
-  extend = require('./extend'),
+  merge = _dereq_('./merge'),
+  clone = _dereq_('./clone'),
+  extend = _dereq_('./extend'),
 
-  util = require('./util'),
+  util = _dereq_('./util'),
   isArray = util.isArray,
   isObject = util.isObject,
   toArray = util.toArray;
@@ -268,7 +268,7 @@ function mix() {
 
 
 module.exports = mix;
-},{"./clone":2,"./extend":3,"./merge":5,"./util":7}],7:[function(require,module,exports){
+},{"./clone":2,"./extend":3,"./merge":5,"./util":7}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var
@@ -394,4 +394,3 @@ module.exports = {
 },{}]},{},[4])
 (4)
 });
-;
