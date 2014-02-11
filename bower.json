@@ -9,7 +9,7 @@
     "test",
     "doc",
     "Gruntfile.js",
-    "bower_components"
+    "bower_components",
     "tasks",
     "coverage",
     "package.json"
