@@ -7,9 +7,12 @@
     "**/.*",
     "node_modules",
     "test",
-    "docs",
+    "doc",
     "Gruntfile.js",
     "bower_components"
+    "tasks",
+    "coverage",
+    "package.json"
   ],
   "devDependencies": {
     "mocha": "~1.13.0",
