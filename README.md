@@ -244,7 +244,8 @@ anInstance.hello # returns "Hello from Coffee"
 Development
 -----------
 
-For development you'll need [Nodejs], [Grunt], and [Bower].
+For development you'll need [Nodejs], and [Grunt].
+
 Before contributing execute `grunt dist` to run _jshint_ and _tests_.
 
 Useful [Grunt] tasks:
