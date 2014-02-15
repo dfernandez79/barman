@@ -245,17 +245,15 @@ Development
 -----------
 
 For development you'll need [Nodejs], [Grunt], and [Bower].
-Before contributing execute `grunt dist` to run the jshint and unit tests.
+Before contributing execute `grunt dist` to run _jshint_ and _tests_.
 
-The [design notes] are a good starting point to understand
-the source code and design of the library.
-
-[Grunt] tasks:
+Useful [Grunt] tasks:
 
 * **default**: Runs jshint and test.
 * **test**: Runs tests on [Nodejs].
-* **integration-test**: Runs tests on [PhantomJS]. This task also generates files
-  to run tests on the browser (see the `.tmp` directory or run the `dev` task).
+* **integration-test**: Runs tests on [PhantomJS]. This task also generates 
+  files to run tests on the browser (see the `.tmp` directory or run the 
+  `dev` task).
 * **dist**: Runs all the tests and generates the minified files.
 * **dev**: Starts a web server for test pages (port 9001). Changes are 
   automatically updated.
@@ -330,3 +328,4 @@ Released under [MIT license]
 [Nodejs]: http://nodejs.org/
 [Grunt]: http://gruntjs.com/
 [Bower]: http://bower.io/
+[PhantomJS]: http://phantomjs.org/

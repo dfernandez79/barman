@@ -144,10 +144,12 @@ module.exports = function( grunt ) {
           external: [ 'barman' ],
           alias: [ './lib:barman' ],
 
-          // expect.js uses the Buffer if it's defined, since later versions
-          // of browserify if a common nodejs global is detected it tries to
-          // include it as a require making the test fail; this flag avoids that
-          // globals detection
+          // expect.js checks for typeof Buffer if it's defined. 
+          // New versions of browserify, tries to automatically include common
+          // NodeJS globals if they are referenced in code.
+          // For that reason allTests.js had a require('buffer') that fails
+          // even if buffer is never used. This flag avoids that globals 
+          // detection
           detectGlobals: false
         }
       }
