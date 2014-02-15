@@ -17,20 +17,25 @@ Installation
 
 ### Node.js
 
-	npm install barman --save
+```sh
+npm install barman --save
+```
 
 ### Browser
 
 _Barman_ doesn't have any dependency to be used. 
 It can be loaded directly or using [AMD]:
 
-* **dist/barman.min.js**: minimized with a [source map] link for easy 
-  debugging.
+* **dist/barman.min.js**: minimized, with a [source map] availble on 
+  **dist/barman.min.js.map**.
+
 * **dist/barman.js**: full source.
 
 _Barman_ is also available on [cdnjs], and as a [Bower] package:
 
-	bower install barman
+```sh
+bower install barman
+```
 
 
 -------------------------------------------------------------------------------
@@ -40,187 +45,200 @@ Feature walkthrough
 **Define a _class_**, using `newclass` 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/XHT4K/3/)):
 
-	var Message = barman.newclass({
-	    appendTo: function (aContainer) {
-	        aContainer.append(this.createElement());
-	    },
-	
-	    createElement: function () {
-	        return $('<div></div>').text('Hello Barman!');
-	    }
-	});
-	
-	// Append "Hello Barman!" to #container
-	new Message().appendTo($('#container'));
+```js
+var Message = barman.newclass({
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    },
 
+    createElement: function () {
+        return $('<div></div>').text('Hello Barman!');
+    }
+});
+
+// Append "Hello Barman!" to #container
+new Message().appendTo($('#container'));
+```
 
 **Create a sub-class**, using `ExistingClass.extend` 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/20/)):
 
-	var ColoredMessage = Message.extend({
-	    color: 'red',
-	
-	    createElement: function () {
-	        return $('<div></div>')
-	            .text('Hello Barman!')
-	            .css('color', this.color);
-	    }
-	});
-	
-	// Append a red "Hello Barman!" message to #container
-	new ColoredMessage().appendTo($('#container'));
+```js
+var ColoredMessage = Message.extend({
+    color: 'red',
 
+    createElement: function () {
+        return $('<div></div>')
+            .text('Hello Barman!')
+            .css('color', this.color);
+    }
+});
+
+// Append a red "Hello Barman!" message to #container
+new ColoredMessage().appendTo($('#container'));
+```
 
 **Access to the super-class implementation** using `ThisClass.__super__` 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/21/)):
 
-	var ColoredMessage = Message.extend({
-	    color: 'red',
-	
-	    createElement: function () {
-	        var superCreateElem = ColoredMessage.__super__.createElement;
-	        return superCreateElem.call(this).css('color', this.color)
-	    }
-	});
+```js
+var ColoredMessage = Message.extend({
+    color: 'red',
+
+    createElement: function () {
+        var superCreateElem = ColoredMessage.__super__.createElement;
+        return superCreateElem.call(this).css('color', this.color)
+    }
+});
+```
 
 **Constructors are automatically inherited** 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/22/)):
 
-	var Message = barman.newclass({
-	    // A constructor is added to the super class
-	    constructor: function (msg) {
-	        this.message = msg;
-	    },
-	    appendTo: function (aContainer) {
-	        aContainer.append(this.createElement());
-	    },
-	    createElement: function () {
-	        return $('<div></div>').text(this.message);
-	    }
-	});
-	
-	// ColoredMessage(msg) is available by default 
-	// (you can avoid it by defining your own constructor)
-	new ColoredMessage("My Message").appendTo($('#container'));
+```js
+var Message = barman.newclass({
+    // A constructor is added to the super class
+    constructor: function (msg) {
+        this.message = msg;
+    },
+    /* ... */
+});
+
+var ColoredMessage = Message.extend({/* ... */ });
+
+// ColoredMessage(msg) is available by default 
+// (you can avoid it by defining your own constructor)
+new ColoredMessage("My Message").appendTo($('#container'));
+```
 
 **Mixins** can be added to a class definition:
 
-	// Defines the behavior of appendTo, requires createElemn
-	var AppendableElement = {
-	    appendTo: function (aContainer) {
-	        aContainer.append(this.createElement());
-	    }
-	};
-	var Message = barman.newclass(
-	    [ AppendableElement ],
-	    {
-	       // appendTo is now provided by AppendableElement
-	       // it requires createElement to be defined
-	    });
+```js
+// Defines the behavior of appendTo, requires createElemn
+var AppendableElement = {
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    }
+};
+var Message = barman.newclass(
+    [ AppendableElement ],
+    {
+       // appendTo is now provided by AppendableElement
+       // it requires createElement to be defined
+    });
+```    
 
 Mixins and classes can indicate **required fields** using `required`:
 
-	// Defines the behavior of appendTo, requires createElemn
-	var AppendableElement = {
-	    createElement: barman.required,
-	    appendTo: function (aContainer) {
-	        aContainer.append(this.createElement());
-	    }
-	};
-	var Message = barman.newclass(
-	    [ AppendableElement ],
-	    {
-	       // appendTo is now provided by AppendableElement
-	       // it requires createElement to be defined:
-	       createElement: function () { /*...*/ }
-	    });
+```js
+// Defines the behavior of appendTo, requires createElemn
+var AppendableElement = {
+    createElement: barman.required,
+    appendTo: function (aContainer) {
+        aContainer.append(this.createElement());
+    }
+};
+var Message = barman.newclass(
+    [ AppendableElement ],
+    {
+       // appendTo is now provided by AppendableElement
+       // it requires createElement to be defined:
+       createElement: function () { /*...*/ }
+    });
+```
 
 **Mixins can be composed in any order** 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/24/)):
 
-	// TemplateBased provides an implementation for createElement
-	var TemplateBased = {
-	    template: barman.required,
-	    renderTemplate: function () {
-	        // omited for brevity, see the example on jsfiddle
-	    },
-	    createElement: function () {
-	        return $(this.renderTemplate());
-	    }
-	};
-	
-	var Message = barman.newclass(
-	    // using [AppendableElement, TemplateBased] will give the same result
-	    [ TemplateBased, AppendableElement ],
-	    {
-	        template: '<div>{message}</div>',
-	
-	        constructor: function (msg) {
-	            this.message = msg;
-	        }
-	    });
+```js
+// TemplateBased provides an implementation for createElement
+var TemplateBased = {
+    template: barman.required,
+    renderTemplate: function () {
+        // omited for brevity, see the example on jsfiddle
+    },
+    createElement: function () {
+        return $(this.renderTemplate());
+    }
+};
+
+var Message = barman.newclass(
+    // using [AppendableElement, TemplateBased] will give the same result
+    [ TemplateBased, AppendableElement ],
+    {
+        template: '<div>{message}</div>',
+
+        constructor: function (msg) {
+            this.message = msg;
+        }
+    });
+```
 
 A composition **conflict** throws an **exception** 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/25/)):
 
-	var CompositeElement = {
-	    createContainer: required,
-	    childs: required,
-	    createElement: function () { /* ... */ }
-	};
-	// ...
-	// throws an exception both CompositeElement 
-	// and TemplateBased defines createElement
-	var MessageComposite = barman.newclass(
-	     [ AppendableElement, CompositeElement, TemplateBased ],
-	     {
-	        /* ... */
-	     });
-
+```js
+var CompositeElement = {
+    createContainer: required,
+    childs: required,
+    createElement: function () { /* ... */ }
+};
+// ...
+// throws an exception both CompositeElement 
+// and TemplateBased defines createElement
+var MessageComposite = barman.newclass(
+     [ AppendableElement, CompositeElement, TemplateBased ],
+     {
+        /* ... */
+     });
+```
 
 **Conflicts can be resolved** by setting which implementation to use 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LynWL/26/)):
 
-	var MessageComposite = barman.newclass(
-	    [ AppendableElement, CompositeElement, TemplateBased ], {
-	
-	    /* ... */
-	
-	    createElement: CompositeElement.createElement,
-	    createContainer: TemplateBased.createElement
-	});
+```js
+var MessageComposite = barman.newclass(
+    [ AppendableElement, CompositeElement, TemplateBased ], {
 
+    /* ... */
+
+    createElement: CompositeElement.createElement,
+    createContainer: TemplateBased.createElement
+});
+```
 
 ### CoffeeScript compatibility
 
 CoffeeScript classes can extend Barman classes 
 ([run on jsfiddle](http://jsfiddle.net/diegof79/u8VEF/3/)):
 
-	SomeBarmanClass = barman.newclass
-	    hello: -> 'Hello World'
-	
-	class MyCoffeeClass extends SomeBarmanClass
-	    hello: -> super + ' from super'
-	
-	anInstance = new MyCoffeeClass()
-	anInstance.hello() # returns "Hello world from super"
+```coffee
+SomeBarmanClass = barman.newclass
+    hello: -> 'Hello World'
 
+class MyCoffeeClass extends SomeBarmanClass
+    hello: -> super + ' from super'
+
+anInstance = new MyCoffeeClass()
+anInstance.hello() # returns "Hello world from super"
+```
 
 _newclass_ can be used to extend CoffeeScript classes with _traits_
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LFZnK/5/)):
 
-	class MyCoffeeClass
-	    hello: -> 'Hello from Coffee'
-	
-	otherTrait = other: 'This comes from a trait'
-	
-	MyBarmanClass = barman.newclass MyCoffeeClass, [otherTrait]
-	
-	anInstance = new MyBarmanClass()
-	
-	anInstance.other # returns "This comes from a trait"
-	anInstance.hello # returns "Hello from Coffee"
+```coffee
+class MyCoffeeClass
+    hello: -> 'Hello from Coffee'
 
+otherTrait = other: 'This comes from a trait'
+
+MyBarmanClass = barman.newclass MyCoffeeClass, [otherTrait]
+
+anInstance = new MyBarmanClass()
+
+anInstance.other # returns "This comes from a trait"
+anInstance.hello # returns "Hello from Coffee"
+```
 
 -------------------------------------------------------------------------------
 Development
@@ -231,6 +249,16 @@ Before contributing execute `grunt dist` to run the jshint and unit tests.
 
 The [design notes] are a good starting point to understand
 the source code and design of the library.
+
+[Grunt] tasks:
+
+* **default**: Runs jshint and test.
+* **test**: Runs tests on [Nodejs].
+* **integration-test**: Runs tests on [PhantomJS]. This task also generates files
+  to run tests on the browser (see the `.tmp` directory or run the `dev` task).
+* **dist**: Runs all the tests and generates the minified files.
+* **dev**: Starts a web server for test pages (port 9001). Changes are 
+  automatically updated.
 
 
 -------------------------------------------------------------------------------
