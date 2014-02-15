@@ -101,20 +101,23 @@ module.exports = function( grunt ) {
     watch: {
       test: {
         files: [ '<%=meta.src%>', '<%=meta.testSrc%>', 'test/integration/*.html' ],
-        tasks: [ 'jshint', 'process-sources' ]
+        tasks: [ 'jshint', 'process-sources' ],
+        options: {
+          livereload: true
+        }
       }
     },
 
     uglify: {
       dist: {
         options: {
-          sourceMap: 'dist/barman.min.js.map',
-          sourceMapPrefix: 1,
-          sourceMappingURL: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>/dist/barman.min.js.map',
-          sourceMapRoot: 'https://raw.github.com/dfernandez79/barman/v<%=pkg.version%>',
+          report: 'gzip',
+          sourceMap: true,
+          sourceMapIncludeSources: true,
+          sourceMapName: 'dist/barman.min.js.map',
           banner: '// barman <%=pkg.version%>\n' +
             '// <%=pkg.homepage%>\n' +
-            '// Copyright (c) 2013 Diego Fernandez\n' +
+            '// Copyright (c) 2014 Diego Fernandez\n' +
             '// Barman may be freely distributed under the MIT license.\n'
         },
         files: {
