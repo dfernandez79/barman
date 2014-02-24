@@ -6,10 +6,10 @@ Barman
 
 _Barman_ is a small library to _brew_ JavaScript objects.
 
-It simplifies the definition of objects using [single-inheritance] and [traits like][traits] composition.
+It simplifies the definition of objects using [single-inheritance] and 
+[traits like][traits] composition.
 
 It works with [Nodejs] and all mayor browsers, including IE 8.
-
 
 -------------------------------------------------------------------------------
 Installation
@@ -36,7 +36,6 @@ _Barman_ is also available on [cdnjs], and as a [Bower] package:
 ```sh
 bower install barman
 ```
-
 
 -------------------------------------------------------------------------------
 Feature walkthrough
@@ -241,6 +240,67 @@ anInstance.hello # returns "Hello from Coffee"
 ```
 
 -------------------------------------------------------------------------------
+Reference
+---------
+
+## newclass(_Parent_, _traits_, _spec_, _classMethods_)
+
+> **NOTE:** The term _class_ it's a simplification, since JavaScript 
+  doesn't have native classes but constructor functions that clone its 
+  associated prototype object.
+
+* _Parent_ (optional): a parent _class_ to extend, note that ``Parent.extend()``
+  it's an alias for ``newclass(Parent)``.
+
+* _traits_ (optional): an array of objects to merge into _spec_.
+
+* _spec_ (optional): specification of the class properties.
+
+* _classMethods_ (optional): properties that will be part of the 
+  _class_ instead of the prototype.
+
+
+## mix(_obj_, _traits_, _spec_)
+
+Creates a clone of _obj_ and mixes all the _traits_ into it. The _spec_ can be 
+used to specify additional properties or to resolve conflicts.
+
+This function is almost equivalent to: `extend(clone(obj), merge(traits),spec)`.
+But it also throws an exception if there is an unresolved merge conflict.
+
+* _obj_ (optional): if omitted an empty new object is used.
+
+* _traits_ (optional): an array of objects to merge.
+
+* _spec_ (optional): additional properties to add or override.
+
+
+## merge(_obj1_, _obj2_, ...) or merge([_obj1_, ...])
+
+Creates a new object by merging the properties from the given objects.
+
+When two objects defines the same property with different values, the property
+value is replaced with `merge.conflict`.
+
+If a property has `merge.required` as a value, it's replaced when that property
+is defined by another object.
+
+The function can be invoked with variable arguments, or with an array of 
+objects:
+
+```js
+merge([obj1, [obj2]]) == merge([obj1, obj2]) == merge(obj1, obj2)
+```
+
+## merge.conflict
+
+## merge.required
+
+## clone
+
+## extend
+
+-------------------------------------------------------------------------------
 Development
 -----------
 
@@ -259,10 +319,14 @@ Useful [Grunt] tasks:
 * **dev**: Starts a web server for test pages (port 9001). Changes are 
   automatically updated.
 
-
 -------------------------------------------------------------------------------
 Change log
 ----------
+
+* 0.4.1
+  * `merge` now accepts arrays of objects.
+  * Documentation improvements.
+
 * 0.4.0
   * Mayor source code re-organization.
   * Browser bundles are generated using Browserify.
@@ -279,17 +343,22 @@ Change log
 * 0.3.0
   * **Breaking change**: `_callSuper` and `_applySuper` were removed. 
     See the [design notes] to understand why.
-    You can replace `_callSuper` with the longer `MyClass.__super__.method.call(this, args)` (yes it's ugly but
+    You can replace `_callSuper` with the longer 
+    `MyClass.__super__.method.call(this, args)` (yes it's ugly but
     `_callSuper` didn't worked as expected in some cases).
 
 * 0.2.4
-  * Fixed a bug in `merge` that incorrectly marked a conflict when trying to define an `Object.prototype` function.
+  * Fixed a bug in `merge` that incorrectly marked a conflict when trying to 
+  define an `Object.prototype` function.
 
-  * A workaround was added into integration tests to make them run in IE (see this [mocha issue](https://github.com/visionmedia/mocha/issues/502))
+  * A workaround was added into integration tests to make them run in IE (see 
+  this [mocha issue](https://github.com/visionmedia/mocha/issues/502))
 
-* 0.2.1/0.2.3 - `include` composition changed to throw exceptions when a conflict is found.
+* 0.2.1/0.2.3 - `include` composition changed to throw exceptions when a 
+  conflict is found.
 
-  >**Note:** some _patch_ versions were increased due to fixes in comments and Bower tagging. There is no functionality difference between 0.2.1 and 0.2.3.
+  >**Note:** some _patch_ versions were increased due to fixes in comments and 
+  Bower tagging. There is no functionality difference between 0.2.1 and 0.2.3.
 
 
 * 0.2.0
@@ -299,16 +368,18 @@ Change log
   **API Changes**
 
   * `_super` was removed, instead use `_callSuper` or `_applySuper`.
-  * `withTraits` was renamed to `include` (helpful for people that never heard about traits before).
+  * `withTraits` was renamed to `include` (helpful for people that never heard 
+    about traits before).
   * `subclassOf` added as a convenience method to extend non-Barman classes.
 
 
-* 0.1.1 - Removal of `underscore` dependency. Better documentation (both source and readme). Source code refactoring.
+* 0.1.1 - Removal of `underscore` dependency. Better documentation (both 
+  source and readme). Source code refactoring.
 
 
 * 0.1.0 - Initial release, it had a dependency with `underscore`.
 
-----------------------------------------------------------------
+-------------------------------------------------------------------------------
 License
 -------
 
