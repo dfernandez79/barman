@@ -274,6 +274,7 @@ describe('newclass', function() {
       expect( Object.getPrototypeOf( View.prototype ) ).to.equal( BaseView.prototype );
     });
 
+
     it( 'allows a trait to include another trait', function() {
       var
         helloTrait = {
@@ -343,6 +344,7 @@ describe('newclass', function() {
       }).to.throwError();
     });
 
+
     it('gives a description of the conflicting methods when a conflict exception is thrown', function() {
       var
         templateTrait = {
@@ -366,6 +368,7 @@ describe('newclass', function() {
         newclass( [ templateTrait, compositeTrait ] );
       } ).to.throwError( 'There is a merge conflict for the following properties: other,render' );
     });
+
 
     it( 'do not throws an exception when conflicts are resolved', function() {
       var
