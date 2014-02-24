@@ -9,8 +9,8 @@ var
   defineSpecialProperty = util.defineSpecialProperty,
   has = util.has,
   isFunction = util.isFunction,
-  toArray = util.toArray,
-  isArray = util.isArray;
+  isArray = util.isArray,  
+  toArray = util.toArray;
 
 
 function Nil() {}
@@ -31,11 +31,11 @@ function ensureConstructor( parent, proto ) {
   return proto;
 }
 
-function _newclass( parent, traits, spec, funcMethods ) {
+function _newclass( parent, traits, spec, classMethods ) {
   var
     proto = ensureConstructor(parent, mix( parent.prototype, traits, spec )),
 
-    ctor = extend( proto.constructor, funcMethods );
+    ctor = extend( proto.constructor, classMethods );
 
   defineSpecialProperty( ctor, '__super__', parent.prototype );
   ctor.prototype = proto;
@@ -155,8 +155,9 @@ module.exports = {
 var
   util = _dereq_('./util'),
   each = util.each,
-  isUndefined = util.isUndefined,
-  has = util.has;
+  flatten = util.flatten,
+  has = util.has,
+  isUndefined = util.isUndefined;
 
 
 function required() {
@@ -199,7 +200,7 @@ function mergeProperty( value, prop ) {
 function merge() {
   var result = {};
 
-  each( arguments, function( obj ) {
+  each( flatten( arguments ), function( obj ) {
     mapProperties( obj, mergeProperty, result );
   } );
 
@@ -241,8 +242,7 @@ var
 
 function _mix( parent, traits, spec ) {
   var
-    traitComposition = merge.apply( null, traits ),
-    result = extend( clone( parent ), traitComposition, spec );
+    result = extend( clone( parent ), merge( traits ), spec );
 
   merge.assertNoConflict( result );
 
@@ -302,8 +302,8 @@ function tail( value ) {
 }
 
 
-var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
-  'toLocaleString', 'toString', 'valueOf'];
+var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf',
+  'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
 function eachKeyStd( obj, func, context ) {
   for ( var key in obj ) {
@@ -380,9 +380,33 @@ var isArray = isFunction( Array.isArray ) ? Array.isArray : function( value ) {
   };
 
 
+function _flatten( result, array ) {
+  var
+    length = array.length,
+    value = null;
+
+  for (var i = 0; i < length; i++) {
+    value = array[i];
+
+    if ( isArray(value) ) {
+      _flatten( result, value );
+    } else {
+      result.push(value);
+    }
+  }
+
+  return result;
+}
+
+function flatten( array ) {
+  return _flatten([], array);
+}
+
+
 module.exports = {
   defineSpecialProperty: defineSpecialProperty,
   each: each,
+  flatten: flatten,
   has: has,
   isArray: isArray,
   isFunction: isFunction,

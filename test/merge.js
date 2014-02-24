@@ -158,6 +158,34 @@ describe('merge', function() {
   });
 
 
+  it('accepts an array of objects', function () {
+    var
+      one = {one: 'prop from one'},
+      two = {two: 'prop from two'},
+
+      result = merge( [one, two] );
+
+    expect( result.one ).to.equal( one.one );
+    expect( result.two ).to.equal( two.two );
+
+  });
+
+
+  it('flattens multiple arrays', function () {
+    var
+      one = {one: 'prop from one'},
+      two = {two: 'prop from two'},
+      three = {three: 'prop from three'},
+
+      result = merge( [one, [two]], [three] );
+
+    expect( result.one ).to.equal( one.one );
+    expect( result.two ).to.equal( two.two );
+    expect( result.three ).to.equal( three.three );
+
+  });
+
+
   describe('merge.conflict', function () {
 
     it('throws an error when executed', function () {
