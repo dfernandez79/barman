@@ -27,7 +27,9 @@
     "oop",
     "classes",
     "objects",
-    "object composition"
+    "object composition",
+    "inheritance",
+    "class"
   ],
   "license": "MIT"
 }

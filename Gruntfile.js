@@ -14,7 +14,9 @@ module.exports = function( grunt ) {
         'oop',
         'classes',
         'objects',
-        'object composition'
+        'object composition',
+        'inheritance',
+        'class'
       ]
     },
 
@@ -92,8 +94,7 @@ module.exports = function( grunt ) {
       test: {
         options: {
           port: '<%=meta.testAppPort%>',
-          base: '.tmp',
-          hostname: '*'
+          base: '.tmp'
         }
       }
     },
