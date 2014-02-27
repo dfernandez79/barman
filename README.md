@@ -243,7 +243,7 @@ anInstance.hello # returns "Hello from Coffee"
 Reference
 ---------
 
-## newclass(_Parent_, _traits_, _spec_, _classMethods_)
+### newclass(_Parent_, _traits_, _spec_, _classMethods_)
 
 > **NOTE:** The term _class_ it's a simplification, since JavaScript 
   doesn't have native classes but constructor functions that clone its 
@@ -260,13 +260,13 @@ Reference
   _class_ instead of the prototype.
 
 
-## mix(_obj_, _traits_, _spec_)
+### mix(_obj_, _traits_, _spec_)
 
 Creates a clone of _obj_ and mixes all the _traits_ into it. The _spec_ can be 
 used to specify additional properties or to resolve conflicts.
 
-This function is almost equivalent to: `extend(clone(obj), merge(traits),spec)`.
-But it also throws an exception if there is an unresolved merge conflict.
+This function is almost equivalent to: `extend(clone(obj), merge(traits), spec)`
+, but it also throws an exception if there is an unresolved merge conflict.
 
 * _obj_ (optional): if omitted an empty new object is used.
 
@@ -275,15 +275,15 @@ But it also throws an exception if there is an unresolved merge conflict.
 * _spec_ (optional): additional properties to add or override.
 
 
-## merge(_obj1_, _obj2_, ...) or merge([_obj1_, ...])
+### merge(_obj1_, ...) or merge([_obj_, ...])
 
 Creates a new object by merging the properties from the given objects.
 
-When two objects defines the same property with different values, the property
+When two objects define the same property with different values, the property
 value is replaced with `merge.conflict`.
 
-If a property has `merge.required` as a value, it's replaced when that property
-is defined by another object.
+If a property has `merge.required` as a value, it will be replaced when that 
+property is defined by another object.
 
 The function can be invoked with variable arguments, or with an array of 
 objects:
@@ -292,13 +292,43 @@ objects:
 merge([obj1, [obj2]]) == merge([obj1, obj2]) == merge(obj1, obj2)
 ```
 
-## merge.conflict
+`merge` is used to do the traits composition on `newclass` and `mix`, one
+important property of it is that: `merge(a, b) == merge(b, a)`, so it 
+doesn't matter in which order you apply traits the result will be equivalent.
 
-## merge.required
+#### merge.conflict
 
-## clone
+> **NOTE:** `barman.conflict === merge.conflict`
 
-## extend
+Value used to mark merge conflicts. It's a function that throws an exception
+when evaluated.
+
+#### merge.required
+
+> **NOTE:** `barman.required === merge.required`
+
+Value used to mark that a property needs to be implemented. It's a function 
+that throws an exception when evaluated.
+
+### clone(_obj_)
+
+Creates a shallow copy of _obj_. On environments that supports 
+`Object.create` it's an alias for that function, otherwise the usual
+trick of _"temporary function + prototype + new to clone"_ it's used.
+
+### extend(_target_, _obj_, ...)
+
+Adds or overwrites all the properties from _obj_ into _target_, for example:
+
+```js
+extend({c:4},{a:1,d:5},{a:2,b:3}) // returns {a:2,b:3,c:4,d:5}
+```
+
+This kind of function is usually provided by libraries like jQuery, 
+Underscore, or Lodash; since it's useful for default values and to implement 
+mixins. It's used internally but provided for convenience, if you want to 
+do mixins **mix** or **newclass** are better options.
+
 
 -------------------------------------------------------------------------------
 Development
