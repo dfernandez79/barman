@@ -245,7 +245,7 @@ Reference
 
 ### newclass(_Parent_, _traits_, _spec_, _classMethods_)
 
-> **NOTE:** The term _class_ it's a simplification, since JavaScript 
+> The term _class_ it's a simplification, since JavaScript 
   doesn't have native classes but constructor functions that clone its 
   associated prototype object.
 
@@ -298,14 +298,14 @@ doesn't matter in which order you apply traits the result will be equivalent.
 
 #### merge.conflict
 
-> **NOTE:** `barman.conflict === merge.conflict`
+> `barman.conflict === merge.conflict`
 
 Value used to mark merge conflicts. It's a function that throws an exception
 when evaluated.
 
 #### merge.required
 
-> **NOTE:** `barman.required === merge.required`
+> `barman.required === merge.required`
 
 Value used to mark that a property needs to be implemented. It's a function 
 that throws an exception when evaluated.
