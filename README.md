@@ -252,9 +252,9 @@ Reference
 * _Parent_ (optional): a parent _class_ to extend, note that ``Parent.extend()``
   it's an alias for ``newclass(Parent)``
 
-* _traits_ (optional): an array of objects to merge into _spec_.
+* _traits_ (optional): an array of objects to merge with _spec_.
 
-* _spec_ (optional): specification of the class properties.
+* _spec_ (optional): specification of the instance properties (the prototype).
 
 * _classMethods_ (optional): properties that will be part of the 
   _class_ instead of the prototype.
