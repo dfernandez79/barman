@@ -250,7 +250,7 @@ Reference
   associated prototype object.
 
 * _Parent_ (optional): a parent _class_ to extend, note that ``Parent.extend()``
-  it's an alias for ``newclass(Parent)``.
+  it's an alias for ``newclass(Parent)``
 
 * _traits_ (optional): an array of objects to merge into _spec_.
 
