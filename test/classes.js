@@ -397,6 +397,19 @@ describe('newclass', function() {
     });
   });
 
+  describe('NodeJS inherits compatibility', function () {
+    var
+      BaseClass = newclass(),
+      SubClass = BaseClass.extend();
+
+    it('exposes super_ as a class property', function () {
+      expect( SubClass ).to.have.property('super_');
+    });
+
+    it('set super_ to the super constructor', function () {
+      expect( SubClass.super_ ).to.be( BaseClass );
+    });
+  });
 });
 
 

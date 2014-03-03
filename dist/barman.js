@@ -38,6 +38,8 @@ function _newclass( parent, traits, spec, classMethods ) {
     ctor = extend( proto.constructor, classMethods );
 
   defineSpecialProperty( ctor, '__super__', parent.prototype );
+  defineSpecialProperty( ctor, 'super_', parent );
+
   ctor.prototype = proto;
   ctor.extend = Nil.extend;
 

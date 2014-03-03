@@ -7,7 +7,7 @@ module.exports = function( grunt ) {
     pkg: {
       name: 'barman',
       description: 'A small library to brew JavaScript objects.',
-      version: '0.4.1',
+      version: '0.4.2',
       homepage: 'https://github.com/dfernandez79/barman',
       keywords: [
         'traits',

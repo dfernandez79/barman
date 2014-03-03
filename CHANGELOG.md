@@ -1,3 +1,7 @@
+* 0.4.2
+  * The property `super_` is now exposed on "classes" to make migrations from
+    NodeJS inherits easy.
+
 * 0.4.1
   * `merge` now accepts arrays of objects.
   * Documentation improvements.
