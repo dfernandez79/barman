@@ -222,7 +222,7 @@ anInstance = new MyCoffeeClass()
 anInstance.hello() # returns "Hello world from super"
 ```
 
-_newclass_ can be used to extend CoffeeScript classes with _traits_
+`newclass` can be used to extend CoffeeScript classes with _traits_
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LFZnK/5/)):
 
 ```coffee
