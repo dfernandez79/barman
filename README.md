@@ -372,7 +372,6 @@ Change log
 
 * 0.3.0
   * **Breaking change**: `_callSuper` and `_applySuper` were removed. 
-    See the [design notes] to understand why.
     You can replace `_callSuper` with the longer 
     `MyClass.__super__.method.call(this, args)` (yes it's ugly but
     `_callSuper` didn't worked as expected in some cases).
@@ -416,8 +415,6 @@ License
 Released under [MIT license]
 
 [cdnjs]: http://cdnjs.com/
-[design notes]: https://github.com/dfernandez79/barman/blob/master/docs/notes.md
-[paper]: http://scg.unibe.ch/archive/papers/Scha03aTraits.pdf
 
 [MIT license]: http://opensource.org/licenses/mit-license.php
 
