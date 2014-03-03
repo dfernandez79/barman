@@ -239,6 +239,42 @@ anInstance.other # returns "This comes from a trait"
 anInstance.hello # returns "Hello from Coffee"
 ```
 
+### As replacement of NodeJS inherits
+
+Barman classes also exports a `super_` property making the switch from NodeJS
+`util.inherits` easy:
+
+Using `util.inherits`:
+```js
+var util = require("util");
+var events = require("events");
+
+function MyStream() {
+    events.EventEmitter.call(this);
+}
+
+util.inherits(MyStream, events.EventEmitter);
+
+MyStream.prototype.write = function(data) {
+    this.emit("data", data);
+}
+```
+
+Using `newclass`:
+```js
+var newclass = require('barman').newclass;
+var events = require('events');
+
+var MyStream = newclass(events.EventEmitter, {
+  // super_ points to EventEmitter, but since the super constructor is
+  // included by default, you don't need to call it
+
+  write: function (data) {
+    this.emit("data", data);
+  }
+})
+``
+
 -------------------------------------------------------------------------------
 Reference
 ---------
