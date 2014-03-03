@@ -273,7 +273,7 @@ var MyStream = newclass(events.EventEmitter, {
     this.emit("data", data);
   }
 })
-``
+```
 
 -------------------------------------------------------------------------------
 Reference
