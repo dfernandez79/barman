@@ -243,40 +243,26 @@ anInstance.hello # returns "Hello from Coffee"
 Reference
 ---------
 
-### newclass(_Parent_, _traits_, _spec_, _classMethods_)
-
-> The term _class_ it's a simplification, since JavaScript 
-  doesn't have native classes but constructor functions that clone its 
-  associated prototype object.
-
-* _Parent_ (optional): a parent _class_ to extend, note that ``Parent.extend()``
-  it's an alias for ``newclass(Parent)``
-
-* _traits_ (optional): an array of objects to merge with _spec_.
-
-* _spec_ (optional): specification of the instance properties (the prototype).
-
-* _classMethods_ (optional): properties that will be part of the 
-  _class_ instead of the prototype.
+### clone(_obj_)
+Creates a shallow copy of `obj`. On environments that supports 
+`Object.create` it's an alias for that function, otherwise the usual
+trick of _"temporary function + prototype + new to clone"_ it's used.
 
 
-### mix(_obj_, _traits_, _spec_)
+### extend(_target_, _obj_, ...)
+Adds or overwrites all the properties from `obj` into `target`, for example:
 
-Creates a clone of _obj_ and mixes all the _traits_ into it. The _spec_ can be 
-used to specify additional properties or to resolve conflicts.
+```js
+extend({c:4},{a:1,d:5},{a:2,b:3}) // returns {a:2,b:3,c:4,d:5}
+```
 
-This function is almost equivalent to: `extend(clone(obj), merge(traits), spec)`
-, but it also throws an exception if there is an unresolved merge conflict.
-
-* _obj_ (optional): if omitted an empty new object is used.
-
-* _traits_ (optional): an array of objects to merge.
-
-* _spec_ (optional): additional properties to add or override.
+This kind of function is usually provided by libraries like jQuery, 
+Underscore, or Lodash; since it's useful for default values and to implement 
+mixins. It's used internally but provided for convenience, if you want to 
+do mixins `mix` or `newclass` are better options.
 
 
 ### merge(_obj1_, ...) or merge([_obj_, ...])
-
 Creates a new object by merging the properties from the given objects.
 
 When two objects define the same property with different values, the property
@@ -296,38 +282,50 @@ merge([obj1, [obj2]]) == merge([obj1, obj2]) == merge(obj1, obj2)
 important property of it is that: `merge(a, b) == merge(b, a)`, so it 
 doesn't matter in which order you apply traits the result will be equivalent.
 
-#### merge.conflict
+#### merge.assertNoConflict(_obj_)
+Throws an exception if some of the property values of `obj` is `merge.conflict`.
 
+#### merge.conflict
 > `barman.conflict === merge.conflict`
 
 Value used to mark merge conflicts. It's a function that throws an exception
 when evaluated.
 
 #### merge.required
-
 > `barman.required === merge.required`
 
 Value used to mark that a property needs to be implemented. It's a function 
 that throws an exception when evaluated.
 
-### clone(_obj_)
 
-Creates a shallow copy of _obj_. On environments that supports 
-`Object.create` it's an alias for that function, otherwise the usual
-trick of _"temporary function + prototype + new to clone"_ it's used.
+### mix(_obj_, _traits_, _spec_)
+Creates a clone of `obj` and mixes all the `traits` into it. The `spec` can be 
+used to specify additional properties or to resolve conflicts.
 
-### extend(_target_, _obj_, ...)
+This function is almost equivalent to: `extend(clone(obj), merge(traits), spec)`
+, but it also throws an exception if there is an unresolved merge conflict.
 
-Adds or overwrites all the properties from _obj_ into _target_, for example:
+* `obj` (optional): if omitted `{}` is used.
 
-```js
-extend({c:4},{a:1,d:5},{a:2,b:3}) // returns {a:2,b:3,c:4,d:5}
-```
+* `traits` (optional): an array of objects to merge.
 
-This kind of function is usually provided by libraries like jQuery, 
-Underscore, or Lodash; since it's useful for default values and to implement 
-mixins. It's used internally but provided for convenience, if you want to 
-do mixins **mix** or **newclass** are better options.
+* `spec` (optional): additional properties to add or overwrite.
+
+
+### newclass(_Parent_, _traits_, _spec_, _classMethods_)
+> The term _class_ it's a simplification, since JavaScript 
+  doesn't have native classes but constructor functions that clone its 
+  associated prototype object.
+
+* `Parent` (optional): a parent _class_ to extend, note that `Parent.extend()`
+  it's an alias for `newclass(Parent)`
+
+* `traits` (optional): an array of objects to merge with `spec`.
+
+* `spec` (optional): specification of the instance properties (the prototype).
+
+* `classMethods` (optional): properties that will be part of the 
+  _class_ instead of the prototype.
 
 
 -------------------------------------------------------------------------------
