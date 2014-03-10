@@ -1,21 +1,21 @@
 {
-    "indent": 2,
-    "undef": true,
-    "strict": true,
-    "unused": true,
-    "devel": false,
-    "node": true,
-    "globalstrict": true,
-    "eqeqeq": true,
-    "latedef": true,
-    "nonew": true,
-    "quotmark": "single",
-    "newcap": true,
-    "globals": {
-        "describe": true,
-        "it": true,
-        "define": true,
-        "beforeEach": true,
-        "afterEach": true
-    }
+  "indent": 2,
+  "undef": true,
+  "strict": true,
+  "unused": true,
+  "devel": false,
+  "node": true,
+  "globalstrict": true,
+  "eqeqeq": true,
+  "latedef": true,
+  "nonew": true,
+  "quotmark": "single",
+  "newcap": true,
+  "globals": {
+    "describe": true,
+    "it": true,
+    "define": true,
+    "beforeEach": true,
+    "afterEach": true
+  }
 }

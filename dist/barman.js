@@ -84,27 +84,18 @@ var
   isUndefined = util.isUndefined;
 
 
-function cloneUsingObjectCreate( obj ) {
-  if ( isUndefined( obj ) ) {
-    return obj;
-  }
-  return Object.create( obj );
+var _clone = has( Object, 'create' ) ?
+  Object.create :
+  function ( obj ) {
+    function Empty() {}
+
+    Empty.prototype = obj;
+    return new Empty();
+  };
+
+function clone( obj ) {
+  return isUndefined( obj ) ? obj : _clone( obj );
 }
-
-function cloneUsingNew( obj ) {
-  if ( isUndefined( obj ) ) {
-    return obj;
-  }
-
-  function Empty() {}
-
-  Empty.prototype = obj;
-  return new Empty();
-}
-
-var clone = has( Object, 'create' ) ?
-  cloneUsingObjectCreate :
-  cloneUsingNew;
 
 
 module.exports = clone;

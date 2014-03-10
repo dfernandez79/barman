@@ -46,13 +46,13 @@ Feature walkthrough
 
 ```js
 var Message = barman.newclass({
-    appendTo: function (aContainer) {
-        aContainer.append(this.createElement());
-    },
+  appendTo: function (aContainer) {
+    aContainer.append(this.createElement());
+  },
 
-    createElement: function () {
-        return $('<div></div>').text('Hello Barman!');
-    }
+  createElement: function () {
+    return $('<div></div>').text('Hello Barman!');
+  }
 });
 
 // Append "Hello Barman!" to #container
@@ -64,13 +64,13 @@ new Message().appendTo($('#container'));
 
 ```js
 var ColoredMessage = Message.extend({
-    color: 'red',
+  color: 'red',
 
-    createElement: function () {
-        return $('<div></div>')
+  createElement: function () {
+    return $('<div></div>')
             .text('Hello Barman!')
             .css('color', this.color);
-    }
+  }
 });
 
 // Append a red "Hello Barman!" message to #container
@@ -82,12 +82,12 @@ new ColoredMessage().appendTo($('#container'));
 
 ```js
 var ColoredMessage = Message.extend({
-    color: 'red',
+  color: 'red',
 
-    createElement: function () {
-        var superCreateElem = ColoredMessage.__super__.createElement;
-        return superCreateElem.call(this).css('color', this.color)
-    }
+  createElement: function () {
+    var superCreateElem = ColoredMessage.__super__.createElement;
+    return superCreateElem.call(this).css('color', this.color)
+  }
 });
 ```
 
@@ -96,11 +96,11 @@ var ColoredMessage = Message.extend({
 
 ```js
 var Message = barman.newclass({
-    // A constructor is added to the super class
-    constructor: function (msg) {
-        this.message = msg;
-    },
-    /* ... */
+  // A constructor is added to the super class
+  constructor: function (msg) {
+    this.message = msg;
+  },
+  /* ... */
 });
 
 var ColoredMessage = Message.extend({/* ... */ });
@@ -115,16 +115,16 @@ new ColoredMessage("My Message").appendTo($('#container'));
 ```js
 // Defines the behavior of appendTo, requires createElemn
 var AppendableElement = {
-    appendTo: function (aContainer) {
-        aContainer.append(this.createElement());
-    }
+  appendTo: function (aContainer) {
+    aContainer.append(this.createElement());
+  }
 };
 var Message = barman.newclass(
-    [ AppendableElement ],
-    {
-       // appendTo is now provided by AppendableElement
-       // it requires createElement to be defined
-    });
+  [ AppendableElement ],
+  {
+    // appendTo is now provided by AppendableElement
+    // it requires createElement to be defined
+  });
 ```    
 
 Mixins and classes can indicate **required fields** using `required`:
@@ -132,18 +132,18 @@ Mixins and classes can indicate **required fields** using `required`:
 ```js
 // Defines the behavior of appendTo, requires createElemn
 var AppendableElement = {
-    createElement: barman.required,
-    appendTo: function (aContainer) {
-        aContainer.append(this.createElement());
-    }
+  createElement: barman.required,
+  appendTo: function (aContainer) {
+    aContainer.append(this.createElement());
+  }
 };
 var Message = barman.newclass(
-    [ AppendableElement ],
-    {
-       // appendTo is now provided by AppendableElement
-       // it requires createElement to be defined:
-       createElement: function () { /*...*/ }
-    });
+  [ AppendableElement ],
+  {
+    // appendTo is now provided by AppendableElement
+    // it requires createElement to be defined:
+    createElement: function () { /*...*/ }
+  });
 ```
 
 **Mixins can be composed in any order** 
@@ -152,25 +152,25 @@ var Message = barman.newclass(
 ```js
 // TemplateBased provides an implementation for createElement
 var TemplateBased = {
-    template: barman.required,
-    renderTemplate: function () {
-        // omited for brevity, see the example on jsfiddle
-    },
-    createElement: function () {
-        return $(this.renderTemplate());
-    }
+  template: barman.required,
+  renderTemplate: function () {
+      // omited for brevity, see the example on jsfiddle
+  },
+  createElement: function () {
+      return $(this.renderTemplate());
+  }
 };
 
 var Message = barman.newclass(
-    // using [AppendableElement, TemplateBased] will give the same result
-    [ TemplateBased, AppendableElement ],
-    {
-        template: '<div>{message}</div>',
+  // using [AppendableElement, TemplateBased] will give the same result
+  [ TemplateBased, AppendableElement ],
+  {
+    template: '<div>{message}</div>',
 
-        constructor: function (msg) {
-            this.message = msg;
-        }
-    });
+    constructor: function (msg) {
+        this.message = msg;
+    }
+  });
 ```
 
 A composition **conflict** throws an **exception** 
@@ -178,18 +178,18 @@ A composition **conflict** throws an **exception**
 
 ```js
 var CompositeElement = {
-    createContainer: required,
-    childs: required,
-    createElement: function () { /* ... */ }
+  createContainer: required,
+  childs: required,
+  createElement: function () { /* ... */ }
 };
 // ...
 // throws an exception both CompositeElement 
 // and TemplateBased defines createElement
 var MessageComposite = barman.newclass(
-     [ AppendableElement, CompositeElement, TemplateBased ],
-     {
+  [ AppendableElement, CompositeElement, TemplateBased ],
+  {
         /* ... */
-     });
+  });
 ```
 
 **Conflicts can be resolved** by setting which implementation to use 
@@ -197,12 +197,12 @@ var MessageComposite = barman.newclass(
 
 ```js
 var MessageComposite = barman.newclass(
-    [ AppendableElement, CompositeElement, TemplateBased ], {
+  [ AppendableElement, CompositeElement, TemplateBased ], {
 
-    /* ... */
+  /* ... */
 
-    createElement: CompositeElement.createElement,
-    createContainer: TemplateBased.createElement
+  createElement: CompositeElement.createElement,
+  createContainer: TemplateBased.createElement
 });
 ```
 
@@ -222,7 +222,7 @@ anInstance = new MyCoffeeClass()
 anInstance.hello() # returns "Hello world from super"
 ```
 
-`newclass can be used to extend CoffeeScript classes with _traits_
+`newclass` can be used to extend CoffeeScript classes with _traits_
 ([run on jsfiddle](http://jsfiddle.net/diegof79/LFZnK/5/)):
 
 ```coffee
@@ -241,8 +241,8 @@ anInstance.hello # returns "Hello from Coffee"
 
 ### As replacement of NodeJS inherits
 
-Barman classes also exports a `super_` property making the switch from NodeJS
-`util.inherits` easy:
+To make the switch from NodeJS `util.inherits` easy, barman classes 
+also exports a `super_` property, :
 
 Using `util.inherits`:
 ```js
@@ -250,13 +250,13 @@ var util = require("util");
 var events = require("events");
 
 function MyStream() {
-    events.EventEmitter.call(this);
+  MyStream.super_.call(this);
 }
 
 util.inherits(MyStream, events.EventEmitter);
 
 MyStream.prototype.write = function(data) {
-    this.emit("data", data);
+  this.emit("data", data);
 }
 ```
 
@@ -281,8 +281,11 @@ Reference
 
 ### clone(_obj_)
 Creates a shallow copy of `obj`. On environments that supports 
-`Object.create` it's an alias for that function, otherwise the usual
-trick of _"temporary function + prototype + new to clone"_ it's used.
+`Object.create` that function is used, otherwise the usual
+trick of _"temporary function + set obj as prototype + new to clone"_ is used.
+
+Note that `clone(undefined)` returns `undefined`, while 
+`Object.create(undefined)` throws an exception.
 
 
 ### extend(_target_, _obj_, ...)
@@ -388,7 +391,7 @@ Useful [Grunt] tasks:
 Release History
 ---------------
 
-See [CHANGELOG](https://github.com/dfernandez79/barman/blob/master/CHANGELOG.md).
+See [CHANGELOG].
 
 -------------------------------------------------------------------------------
 License
@@ -410,3 +413,5 @@ Released under [MIT license]
 [Grunt]: http://gruntjs.com/
 [Bower]: http://bower.io/
 [PhantomJS]: http://phantomjs.org/
+
+[CHANGELOG]: https://github.com/dfernandez79/barman/blob/master/CHANGELOG.md.
