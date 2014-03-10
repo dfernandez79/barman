@@ -48,6 +48,7 @@
     "grunt-mocha": "~0.4.6",
     "grunt-simple-mocha": "~0.4.0",
     "istanbul": "~0.2.4",
-    "mocha": "~1.17.1"
+    "mocha": "~1.17.1",
+    "load-grunt-tasks": "^0.4.0"
   }
 }
