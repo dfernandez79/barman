@@ -26,7 +26,7 @@ npm install barman --save
 _Barman_ doesn't have any dependency to be used. 
 It can be loaded directly or using [AMD]:
 
-* **dist/barman.min.js**: minimized, with a [source map] availble on 
+* **dist/barman.min.js**: minimized, with a [source map] available on 
   **dist/barman.min.js.map**.
 
 * **dist/barman.js**: full source.
@@ -154,7 +154,7 @@ var Message = barman.newclass(
 var TemplateBased = {
   template: barman.required,
   renderTemplate: function () {
-      // omited for brevity, see the example on jsfiddle
+      // omitted for brevity, see the example on jsfiddle
   },
   createElement: function () {
       return $(this.renderTemplate());
@@ -320,6 +320,9 @@ merge([obj1, [obj2]]) == merge([obj1, obj2]) == merge(obj1, obj2)
 `merge` is used to do the traits composition on `newclass` and `mix`, one
 important property of it is that: `merge(a, b) == merge(b, a)`, so it 
 doesn't matter in which order you apply traits the result will be equivalent.
+
+> **IMPORTANT:** Merge only takes into account enumerable properties. Other
+> frameworks have the same behavior (ie jQuery/Lodash `extend`).
 
 #### merge.assertNoConflict(_obj_)
 Throws an exception if some of the property values of `obj` is `merge.conflict`.
