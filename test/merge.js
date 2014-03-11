@@ -8,7 +8,10 @@ var
 
   merge = barman.merge,
   required = merge.required,
-  conflict = merge.conflict;
+  conflict = merge.conflict,
+
+  ifSettersAndGettersIsSupportedDescribe = Object.defineProperties ?
+    describe : describe.skip;
 
 
 describe('merge', function() {
@@ -185,6 +188,50 @@ describe('merge', function() {
 
   });
 
+
+  ifSettersAndGettersIsSupportedDescribe('setters and setters compatibility', function () {
+
+
+    it('only takes enumerable properties into account', function () {
+      var obj = {};
+
+      Object.defineProperty(obj, 'val', {value: 1});
+
+      expect( obj.val ).to.be(1);
+      expect( merge({}, obj) ).to.eql({});
+
+    });
+
+
+    it('merges enumerable properties with the same getter and setter functions', function () {
+      var
+        one = {},
+        two = {},
+        getValue = function () { return 1; },
+        setValue = function (v) { return v; };
+
+      Object.defineProperty(one, 'value', {
+        get: getValue, 
+        set: setValue,
+        enumerable: true
+      });
+      Object.defineProperty(two, 'value', {
+        get: getValue, 
+        set: setValue,
+        enumerable: true
+      });
+
+      var
+        result = merge( one, two ),
+        valueDescriptor = Object.getOwnPropertyDescriptor(result, 'value');
+
+      expect( result.value ).to.be(1);
+      expect( valueDescriptor.get ).to.be(getValue);
+      expect( valueDescriptor.set ).to.be(setValue);
+
+    });
+
+  });
 
   describe('merge.conflict', function () {
 

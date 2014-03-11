@@ -1,11 +1,12 @@
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.barman=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.barman=e():"undefined"!=typeof global?global.barman=e():"undefined"!=typeof self&&(self.barman=e())}(function(){var define,module,exports;
+return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 var
-  extend = _dereq_('./extend'),
-  mix = _dereq_('./mix'),
+  extend = require('./extend'),
+  mix = require('./mix'),
 
-  util = _dereq_('./util'),
+  util = require('./util'),
   defineSpecialProperty = util.defineSpecialProperty,
   has = util.has,
   isFunction = util.isFunction,
@@ -75,11 +76,11 @@ module.exports = {
   newclass: newclass,
   Nil: Nil
 };
-},{"./extend":3,"./mix":6,"./util":7}],2:[function(_dereq_,module,exports){
+},{"./extend":3,"./mix":6,"./util":7}],2:[function(require,module,exports){
 'use strict';
 
 var
-  util = _dereq_('./util'),
+  util = require('./util'),
   has = util.has,
   isUndefined = util.isUndefined;
 
@@ -99,11 +100,11 @@ function clone( obj ) {
 
 
 module.exports = clone;
-},{"./util":7}],3:[function(_dereq_,module,exports){
+},{"./util":7}],3:[function(require,module,exports){
 'use strict';
 
 var
-  util = _dereq_('./util'),
+  util = require('./util'),
   each = util.each,
   tail = util.tail;
 
@@ -122,12 +123,12 @@ function extend( obj ) {
 
 
 module.exports = extend;
-},{"./util":7}],4:[function(_dereq_,module,exports){
+},{"./util":7}],4:[function(require,module,exports){
 'use strict';
 
 var
-  classes = _dereq_( './classes' ),
-  merge = _dereq_( './merge' );
+  classes = require( './classes' ),
+  merge = require( './merge' );
 
 
 module.exports = {
@@ -138,20 +139,55 @@ module.exports = {
   conflict: merge.conflict,
   required: merge.required,
 
-  clone: _dereq_( './clone' ),
-  extend: _dereq_( './extend' ),
-  mix: _dereq_( './mix' )
+  clone: require( './clone' ),
+  extend: require( './extend' ),
+  mix: require( './mix' )
 };
-},{"./classes":1,"./clone":2,"./extend":3,"./merge":5,"./mix":6}],5:[function(_dereq_,module,exports){
+},{"./classes":1,"./clone":2,"./extend":3,"./merge":5,"./mix":6}],5:[function(require,module,exports){
 'use strict';
 
 var
-  util = _dereq_('./util'),
+  util = require('./util'),
   each = util.each,
-  flatten = util.flatten,
-  has = util.has,
-  isUndefined = util.isUndefined;
+  isUndefined = util.isUndefined,
+  flatten = util.flatten;
 
+///////////////
+function propertyDescriptor( obj, prop ) {
+  var 
+    descriptor = null,
+    target = obj,
+    objProto = Object.prototype;
+
+  do {
+    descriptor = Object.getOwnPropertyDescriptor(target, prop);
+    target = Object.getPrototypeOf(target);
+  } while (!descriptor && target !== objProto);
+
+  return descriptor;
+}
+
+function defineProperty( obj, prop, descriptor ) {
+  Object.defineProperty(obj, prop, descriptor);
+}
+
+function eachPropertyDescriptor( obj, iterator ) {
+  if ( obj ) {
+    for (var key in obj) {
+      iterator( propertyDescriptor(obj, key), key );
+    }
+  }
+}
+
+function sameDescriptor( a, b ) {
+  return a.value === b.value &&
+    a.writable === b.writable &&
+    a.get === b.get &&
+    a.set === b.set &&
+    a.configurable === b.configurable &&
+    a.enumerable === b.enumerable;
+}
+//////////////
 
 function required() {
   throw new Error('An implementation is required');
@@ -161,32 +197,34 @@ function conflict() {
   throw new Error('This property was defined by multiple merged objects, override it with the proper implementation');
 }
 
+//////
+function describesRequiredProperty( descriptor ) {
+  return isUndefined(descriptor) || descriptor.value === required;
+}
 
-function mapProperties( srcObj, iterator, result ) {
-  each( srcObj, function( value, prop ) {
-    result[ prop ] = iterator.call( this, value, prop );
-  }, result);
+//////
+
+function mergeProperty( result, prop, descriptor ) {
+  var resPropDescriptor = propertyDescriptor( result, prop );
+
+  if ( resPropDescriptor && 
+    !describesRequiredProperty( resPropDescriptor ) &&
+    !describesRequiredProperty( descriptor ) && 
+    !sameDescriptor( descriptor, resPropDescriptor) ) {
+
+    result[ prop ] = conflict;
+
+  } else if (describesRequiredProperty( resPropDescriptor )) {
+    defineProperty( result, prop, descriptor );
+  }
+}
+
+function mergeProperties( result, srcObj ) {
+  eachPropertyDescriptor( srcObj, function( descriptor, prop ) {
+    mergeProperty( result, prop, descriptor );
+  });
 
   return result;
-}
-
-function valueHasPrecedence( thisValue, value ) {
-  return isUndefined( thisValue ) || thisValue === value || thisValue === required;
-}
-
-function mergeProperty( value, prop ) {
-  /*jshint validthis:true */
-  var thisValue = has( this, prop ) ? this[ prop ] : undefined;
-
-  if ( valueHasPrecedence( thisValue, value ) ) {
-    return value;
-
-  } else if ( value === required ) {
-    return thisValue;
-
-  } else {
-    return conflict;
-  }
 }
 
 
@@ -194,7 +232,7 @@ function merge() {
   var result = {};
 
   each( flatten( arguments ), function( obj ) {
-    mapProperties( obj, mergeProperty, result );
+    mergeProperties( result, obj );
   } );
 
   return result;
@@ -219,15 +257,15 @@ merge.assertNoConflict = function ( obj ) {
 
 
 module.exports = merge;
-},{"./util":7}],6:[function(_dereq_,module,exports){
+},{"./util":7}],6:[function(require,module,exports){
 'use strict';
 
 var
-  merge = _dereq_('./merge'),
-  clone = _dereq_('./clone'),
-  extend = _dereq_('./extend'),
+  merge = require('./merge'),
+  clone = require('./clone'),
+  extend = require('./extend'),
 
-  util = _dereq_('./util'),
+  util = require('./util'),
   isArray = util.isArray,
   isObject = util.isObject,
   toArray = util.toArray;
@@ -261,7 +299,7 @@ function mix() {
 
 
 module.exports = mix;
-},{"./clone":2,"./extend":3,"./merge":5,"./util":7}],7:[function(_dereq_,module,exports){
+},{"./clone":2,"./extend":3,"./merge":5,"./util":7}],7:[function(require,module,exports){
 'use strict';
 
 var
@@ -411,3 +449,4 @@ module.exports = {
 },{}]},{},[4])
 (4)
 });
+;
