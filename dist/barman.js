@@ -10,8 +10,7 @@ var
   defineSpecialProperty = util.defineSpecialProperty,
   has = util.has,
   isFunction = util.isFunction,
-  isArray = util.isArray,  
-  toArray = util.toArray;
+  isArray = util.isArray;
 
 
 function Nil() {}
@@ -49,24 +48,25 @@ function _newclass( parent, traits, spec, classMethods ) {
 
 function newclass() {
   var
-    args = toArray( arguments ),
+    argShift = 0,
     parent = Nil,
     traits = [];
 
-  if ( isFunction( args[ 0 ] ) ) {
-    parent = args.shift();
+  if ( isFunction( arguments[ argShift ] ) ) {
+    parent = arguments[ argShift++ ];
   }
 
-  if ( isArray( args[ 0 ] ) ) {
-    traits = args.shift();
+  if ( isArray( arguments[ argShift ] ) ) {
+    traits = arguments[ argShift++ ];
   }
 
-  return _newclass( parent, traits, args[ 0 ], args[ 1 ] );
+  return _newclass( parent, traits, 
+    arguments[ argShift ], arguments[ argShift + 1 ] );
 }
 
 
 Nil.extend = function() {
-  var args = toArray( arguments );
+  var args = Array.prototype.slice.call( arguments );
   args.unshift( this );
   return newclass.apply( null, args );
 };
@@ -105,18 +105,23 @@ module.exports = clone;
 
 var
   util = require('./util'),
-  each = util.each,
-  tail = util.tail;
+  eachKey = util.eachKey;
 
 
 function extend( obj ) {
-  each( tail( arguments ), function( source ) {
+  var source;
+
+  function setObjProp( value, prop ) {
+    obj[ prop ] = value;
+  }
+
+  for (var i = 1; i < arguments.length; i++) {
+    source = arguments[i];
+
     if ( source ) {
-      each( source, function( value, prop ) {
-        obj[ prop ] = value;
-      });
+      eachKey( source, setObjProp );
     }
-  });
+  }
 
   return obj;
 }
@@ -149,26 +154,30 @@ module.exports = {
 var
   util = require('./util'),
   each = util.each,
+  has = util.has,
+  eachKey = util.eachKey,
   isUndefined = util.isUndefined,
   flatten = util.flatten;
 
 ///////////////
 function propertyDescriptor( obj, prop ) {
   var 
-    descriptor = null,
     target = obj,
-    objProto = Object.prototype;
+    getproto = Object.getPrototypeOf;
 
-  do {
-    descriptor = Object.getOwnPropertyDescriptor(target, prop);
-    target = Object.getPrototypeOf(target);
-  } while (!descriptor && target !== objProto);
+  while ( target !== Object.prototype && !has( target, prop ) ) {
+    target = getproto(target);
+  }
 
-  return descriptor;
+  return target === Object.prototype ? undefined : Object.getOwnPropertyDescriptor(target, prop);
 }
 
 function defineProperty( obj, prop, descriptor ) {
-  Object.defineProperty(obj, prop, descriptor);
+  if (descriptor.writable && descriptor.enumerable && descriptor.configurable && !descriptor.get && !descriptor.set) {
+    obj[prop] = descriptor.value;
+  } else {
+    Object.defineProperty(obj, prop, descriptor);
+  }
 }
 
 function eachPropertyDescriptor( obj, iterator ) {
@@ -243,7 +252,7 @@ merge.conflict = conflict;
 merge.assertNoConflict = function ( obj ) {
   var conflicts = [];
 
-  each( obj, function( value, name ) {
+  eachKey( obj, function( value, name ) {
     if ( value === merge.conflict ) {
       conflicts.push( name );
     }
@@ -267,8 +276,7 @@ var
 
   util = require('./util'),
   isArray = util.isArray,
-  isObject = util.isObject,
-  toArray = util.toArray;
+  isObject = util.isObject;
 
 
 function _mix( parent, traits, spec ) {
@@ -282,19 +290,21 @@ function _mix( parent, traits, spec ) {
 
 function mix() {
   var
-    args = toArray( arguments ),
+    argsShift = 0,
     parent = {},
     traits = [];
 
-  if ( args.length > 1 && isObject( args[ 0 ] ) && !isArray( args[ 0 ] ) ) {
-    parent = args.shift();
+  if ( arguments.length > 1 && 
+      isObject( arguments[ argsShift ] ) && 
+      !isArray( arguments[ argsShift ] ) ) {
+    parent = arguments[ argsShift++ ];
   }
 
-  if ( isArray( args[ 0 ] ) ) {
-    traits = args.shift();
+  if ( isArray( arguments[ argsShift ] ) ) {
+    traits = arguments[ argsShift++ ];
   }
 
-  return _mix( parent, traits, args[ 0 ] );
+  return _mix( parent, traits, arguments[ argsShift ] );
 }
 
 
@@ -302,10 +312,7 @@ module.exports = mix;
 },{"./clone":2,"./extend":3,"./merge":5,"./util":7}],7:[function(require,module,exports){
 'use strict';
 
-var
-  ArrayProto = Array.prototype,
-  nativeForEach = ArrayProto.forEach,
-  slice = ArrayProto.slice;
+var nativeForEach = Array.prototype.forEach;
 
 
 function isUndefined( value ) {
@@ -324,19 +331,15 @@ function isObject( value ) {
   return value === Object( value );
 }
 
-function toArray( value ) {
-  return slice.call( value );
-}
-
-function tail( value ) {
-  return slice.call( value, 1 );
-}
-
 
 var JSCRIPT_NON_ENUMERABLE = [ 'constructor', 'hasOwnProperty', 'isPrototypeOf',
   'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
 function eachKeyStd( obj, func, context ) {
+  if ( isUndefined( obj ) || obj === null ) {
+    return;
+  }
+
   for ( var key in obj ) {
     func.call( context, obj[ key ], key, obj );
   }
@@ -437,14 +440,13 @@ function flatten( array ) {
 module.exports = {
   defineSpecialProperty: defineSpecialProperty,
   each: each,
+  eachKey: eachKey,
   flatten: flatten,
   has: has,
   isArray: isArray,
   isFunction: isFunction,
   isObject: isObject,
-  isUndefined: isUndefined,
-  tail: tail,
-  toArray: toArray
+  isUndefined: isUndefined
 };
 },{}]},{},[4])
 (4)
